@@ -1,4 +1,4 @@
-package com.fabrica.apparatus.item;
+package com.fabrica.item;
 
 public class ModItems {
 
