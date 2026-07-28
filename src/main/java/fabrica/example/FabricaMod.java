@@ -1,4 +1,4 @@
-package fabrico.example;
+package fabrica.example;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -7,7 +7,7 @@ import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExampleMod implements ModInitializer {
+public class FabricaMod implements ModInitializer {
 	public static final String MOD_ID = "fabrica_apparatus";
 
 	// This logger is used to write text to the console and the log file.

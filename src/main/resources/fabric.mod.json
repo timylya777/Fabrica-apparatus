@@ -17,10 +17,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"fabrica.example.FabricaMod"
 		],
 		"client": [
-			"com.example.client.ExampleModClient"
+			"fabrica.example.client.FabricaModClient"
 		]
 	},
 	"mixins": [
