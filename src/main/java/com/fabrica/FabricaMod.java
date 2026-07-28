@@ -1,4 +1,4 @@
-package fabrica.example;
+package com.fabrica;
 
 import net.fabricmc.api.ModInitializer;
 
