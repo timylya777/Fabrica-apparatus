@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": "fabrica_apparatus:clay_figure",
+  "result": {
+    "id": "fabrica_apparatus:terracotta_figure"
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}

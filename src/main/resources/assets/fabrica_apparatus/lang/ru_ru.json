@@ -3,6 +3,8 @@
   "item.fabrica_apparatus.copper_figure": "Медный человечек",
   "item.fabrica_apparatus.clay_figure": "Глиняный человечек",
   "item.fabrica_apparatus.brick_figure": "Кирпичный человечек",
+  "item.fabrica_apparatus.terracotta_figure": "Терракотовый человечек",
+  "item.fabrica_apparatus.terracota_figure": "Терракотовый человечек",
   "item.fabrica_apparatus.machine_casing": "Несущая металлоконструкция",
 
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",

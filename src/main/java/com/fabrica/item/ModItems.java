@@ -45,6 +45,10 @@ public class ModItems {
             Registries.ITEM,
             Identifier.fromNamespaceAndPath(MOD_ID, "brick_figure")
     );
+    public static final ResourceKey<Item> TERRACOTTA_FIGURE_KEY = ResourceKey.create(
+            Registries.ITEM,
+            Identifier.fromNamespaceAndPath(MOD_ID, "terracotta_figure")
+    );
 
     // 2. Регистрируем предметы
     public static final Item IRON_FIGURE = register(
@@ -67,6 +71,11 @@ public class ModItems {
             Item::new,
             new Item.Properties()
     );
+    public static final Item TERRACOTTA_FIGURE = register(
+            TERRACOTTA_FIGURE_KEY,
+            Item::new,
+            new Item.Properties()
+    );
 
     /**
      * Метод инициализации. 
@@ -84,6 +93,7 @@ public class ModItems {
                     output.accept(COPPER_FIGURE);
                     output.accept(CLAY_FIGURE);
                     output.accept(BRICK_FIGURE);
+                    output.accept(TERRACOTTA_FIGURE);
                 });
         
     }
