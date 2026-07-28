@@ -29,6 +29,8 @@ Fabrica Apparatus adds industrial machines, automation, logistics and advanced m
 ## Screenshots
 
 Coming soon...
+<img width="948" height="530" alt="изображение" src="https://github.com/user-attachments/assets/f76415e5-179c-4093-a7bf-a9a892cbdc21" />
+
 
 ---
 
