@@ -1,5 +1,11 @@
 # Fabrica Apparatus
 
+![Minecraft](https://img.shields.io/badge/Minecraft-26.2-green)
+![Fabric](https://img.shields.io/badge/Loader-Fabric-orange)
+![Status](https://img.shields.io/badge/Status-In_Development-blue)
+![License](https://img.shields.io/badge/License-CC0-lightgrey)
+
+
 A technology-focused Minecraft mod for the latest Fabric versions.
 
 Fabrica Apparatus adds industrial machines, automation, logistics and advanced manufacturing while keeping a vanilla-friendly style.
