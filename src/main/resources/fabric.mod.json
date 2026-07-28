@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "fabric_apparatus",
 	"version": "${version}",
-	"name": "Example Mod",
+	"name": "Fabrica apparatus",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"MrLOLchick",
