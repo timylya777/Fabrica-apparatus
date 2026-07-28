@@ -1,8 +1,3 @@
-<p align="center">
-  <a href="https://boosty.to/indidevlolchick/donate">
-    <img src="https://img.shields.io/badge/❤️_Support_the_Project_on_Boosty-FF6B00?style=for-the-badge&logo=boosty&logoColor=white" alt="Support on Boosty">
-  </a>
-</p>
 
 # Fabrica Apparatus
 
@@ -35,7 +30,7 @@ Fabrica Apparatus adds industrial machines, automation, logistics and advanced m
 ## Screenshots
 
 Coming soon...
-<img width="948" height="530" alt="изображение" src="https://github.com/user-attachments/assets/f76415e5-179c-4093-a7bf-a9a892cbdc21" />
+
 
 
 ---
