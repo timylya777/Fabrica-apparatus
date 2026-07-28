@@ -3,7 +3,7 @@
 	"id": "fabrica_apparatus",
 	"version": "${version}",
 	"name": "Fabrica apparatus",
-	"description": "This is the greatest Minecraft mod—Fabrica Apparatus—it's absolutely mind-blowing. I would like to express my profound gratitude to Katyn666 for the meticulously crafted textures (his telegram chanel https://t.me/nytak999).",
+	"description": "This is the greatest Minecraft mod—Fabrica Apparatus—it's absolutely mind-blowing. I would like to express my profound gratitude to Katyn666 for the meticulously crafted textures.",
 	"authors": [
 		"MrLOLchick",
 		"timylya777",
@@ -11,7 +11,8 @@
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/FabricMC/fabric-example-mod",
+		"Katyn666" : "https://t.me/nytak999"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/fabrica_apparatus/icon.png",
