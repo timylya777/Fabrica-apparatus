@@ -1,4 +1,4 @@
-package com.example;
+package fabrico.example;
 
 import net.fabricmc.api.ModInitializer;
 
