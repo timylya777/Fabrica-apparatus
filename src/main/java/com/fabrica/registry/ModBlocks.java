@@ -1,4 +1,6 @@
-package com.fabrica.block;
+package com.fabrica.registry;
+
+import com.fabrica.block.machine.MachineCasingBlock;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,7 +13,7 @@ public class ModBlocks {
     public static final Block MACHINE_CASING = Registry.register(
             BuiltInRegistries.BLOCK,
             ModBlockIds.MACHINE_CASING,
-            new Block(
+            new MachineCasingBlock(
                     BlockBehaviour.Properties.of()
                             .setId(ModBlockIds.MACHINE_CASING)
                             .strength(5.0F)

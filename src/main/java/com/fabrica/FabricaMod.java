@@ -1,8 +1,10 @@
 package com.fabrica;
 
-import com.fabrica.item.ModItems; // для айтемов
-import com.fabrica.block.ModBlocks; // а тут догодайся с трех раз что значит modBlocks
-import com.fabrica.block.ModBlockItems; // блок айтем что мы держим
+import com.fabrica.registry.ModItems;
+import com.fabrica.registry.ModBlocks;
+import com.fabrica.registry.ModBlockItems;
+import com.fabrica.registry.ModBlockEntities;
+import com.fabrica.registry.ModCreativeTab;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -14,19 +16,15 @@ import org.slf4j.LoggerFactory;
 public class FabricaMod implements ModInitializer {
 	public static final String MOD_ID = "fabrica_apparatus";
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-		ModItems.register(); //регистрирую мод айтемы
-		ModBlocks.register(); // омагад блоки
-		ModBlockItems.register(); // регистрирую блок айтемы
+		ModItems.register();
+		ModBlocks.register();
+		ModBlockItems.register();
+		ModBlockEntities.register();
+		ModCreativeTab.register();
 		LOGGER.info("We are alive!");
 	}
 
