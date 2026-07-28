@@ -28,17 +28,42 @@ public class ModItems {
         return item;
     }
 
-    // 1. Создаём ключ регистрации (ResourceKey) прямо здесь
+    // 1. Создаём ключи регистрации (ResourceKey)
     public static final ResourceKey<Item> IRON_FIGURE_KEY = ResourceKey.create(
             Registries.ITEM,
             Identifier.fromNamespaceAndPath(MOD_ID, "iron_figure")
-            // Примечание: если вы используете версию 1.20.5, замените строку выше на:
-            // new ResourceLocation(MOD_ID, "iron_figure")
+    );
+    public static final ResourceKey<Item> COPPER_FIGURE_KEY = ResourceKey.create(
+            Registries.ITEM,
+            Identifier.fromNamespaceAndPath(MOD_ID, "copper_figure")
+    );
+    public static final ResourceKey<Item> CLAY_FIGURE_KEY = ResourceKey.create(
+            Registries.ITEM,
+            Identifier.fromNamespaceAndPath(MOD_ID, "clay_figure")
+    );
+    public static final ResourceKey<Item> BRICK_FIGURE_KEY = ResourceKey.create(
+            Registries.ITEM,
+            Identifier.fromNamespaceAndPath(MOD_ID, "brick_figure")
     );
 
-    // 2. Регистрируем сам предмет, используя созданный ключ
+    // 2. Регистрируем предметы
     public static final Item IRON_FIGURE = register(
             IRON_FIGURE_KEY,
+            Item::new,
+            new Item.Properties()
+    );
+    public static final Item COPPER_FIGURE = register(
+            COPPER_FIGURE_KEY,
+            Item::new,
+            new Item.Properties()
+    );
+    public static final Item CLAY_FIGURE = register(
+            CLAY_FIGURE_KEY,
+            Item::new,
+            new Item.Properties()
+    );
+    public static final Item BRICK_FIGURE = register(
+            BRICK_FIGURE_KEY,
             Item::new,
             new Item.Properties()
     );
@@ -54,7 +79,12 @@ public class ModItems {
                 Identifier.withDefaultNamespace("ingredients")
         );
         CreativeModeTabEvents.modifyOutputEvent(ingredientsKey)
-                .register(output -> output.accept(IRON_FIGURE));
+                .register(output -> {
+                    output.accept(IRON_FIGURE);
+                    output.accept(COPPER_FIGURE);
+                    output.accept(CLAY_FIGURE);
+                    output.accept(BRICK_FIGURE);
+                });
         
     }
 }

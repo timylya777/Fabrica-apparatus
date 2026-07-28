@@ -1,5 +1,8 @@
 {
   "item.fabrica_apparatus.iron_figure": "Iron Figure",
+  "item.fabrica_apparatus.copper_figure": "Copper Figure",
+  "item.fabrica_apparatus.clay_figure": "Clay Figure",
+  "item.fabrica_apparatus.brick_figure": "Brick Figure",
   "item.fabrica_apparatus.machine_casing": "Structural steelwork",
 
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",
