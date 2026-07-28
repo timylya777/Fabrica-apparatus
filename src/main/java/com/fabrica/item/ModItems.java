@@ -55,5 +55,6 @@ public class ModItems {
         );
         CreativeModeTabEvents.modifyOutputEvent(ingredientsKey)
                 .register(output -> output.accept(IRON_FIGURE));
+        
     }
 }
