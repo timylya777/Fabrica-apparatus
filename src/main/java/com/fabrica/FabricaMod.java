@@ -1,6 +1,6 @@
 package com.fabrica;
 
-import com.fabrica.apparatus.item.ModItems; // для айтемов
+import com.fabrica.item.ModItems; // для айтемов
 
 import net.fabricmc.api.ModInitializer;
 
