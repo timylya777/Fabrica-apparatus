@@ -1,3 +1,9 @@
 {
-  "item.fabrica_apparatus.iron_figure": "Железный человечек"
+  "item.fabrica_apparatus.iron_figure": "Железный человечек",
+  "mod.fabrica_apparatus.name": "Fabrica Apparatus",
+  "mod.fabrica_apparatus.description": "Величайший мод для Minecraft — Fabrica Apparatus. Он невероятен, захватывает дух и до неузнаваемости меняет игру. Огромная благодарность Katyn666 за шикарные текстуры.",
+  "modmenu.nameTranslation.fabrica_apparatus": "Fabrica Apparatus",
+  "modmenu.descriptionTranslation.fabrica_apparatus": "Величайший мод для Minecraft — Fabrica Apparatus. Он невероятен, захватывает дух и до неузнаваемости меняет игру. Огромная благодарность Katyn666 за шикарные текстуры.",
+  "modmenu.github": "Github",
+	"modmenu.katyn_telegram": "Katyn666 Telegram"
 }

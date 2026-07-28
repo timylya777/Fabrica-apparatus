@@ -1,3 +1,9 @@
 {
-  "item.fabrica_apparatus.iron_figure": "Iron Figure"
+  "item.fabrica_apparatus.iron_figure": "Iron Figure",
+  "mod.fabrica_apparatus.name": "Fabrica Apparatus",
+  "mod.fabrica_apparatus.description": "The greatest Minecraft mod — Fabrica Apparatus. Absolutely mind-blowing. Huge thanks to Katyn666 for the meticulously crafted textures.",
+  "modmenu.nameTranslation.fabrica_apparatus": "Fabrica Apparatus",
+  "modmenu.descriptionTranslation.fabrica_apparatus": "The greatest Minecraft mod — Fabrica Apparatus. Absolutely mind-blowing. Huge thanks to Katyn666 for the meticulously crafted textures.",
+  "modmenu.github": "Github",
+	"modmenu.katyn_telegram": "Katyn666 Telegram"
 }
