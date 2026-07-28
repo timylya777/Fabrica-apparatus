@@ -1,9 +1,11 @@
-# Fabrica Apparatus
 <p align="center">
   <a href="https://boosty.to/indidevlolchick/donate">
     <img src="https://img.shields.io/badge/❤️_Support_the_Project_on_Boosty-FF6B00?style=for-the-badge&logo=boosty&logoColor=white" alt="Support on Boosty">
   </a>
 </p>
+
+# Fabrica Apparatus
+
 ![Minecraft](https://img.shields.io/badge/Minecraft-26.2-green)
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-blue)
