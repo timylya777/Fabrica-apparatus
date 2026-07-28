@@ -23,7 +23,7 @@ public class FabricaMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ModItems.register(); //регистрирую мод айтемы
-		LOGGER.info("Мы живы!");
+		LOGGER.info("We are alive!");
 	}
 
 	public static Identifier id(String path) {
