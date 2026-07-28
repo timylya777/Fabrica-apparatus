@@ -1,6 +1,7 @@
 package com.fabrica;
 
 import com.fabrica.item.ModItems; // для айтемов
+import com.fabrica.block.ModBlocks; // а тут догодайся с трех раз что значит modBlocks
 
 import net.fabricmc.api.ModInitializer;
 
@@ -23,6 +24,7 @@ public class FabricaMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		ModItems.register(); //регистрирую мод айтемы
+		ModBlocks.register(); // омагад блоки
 		LOGGER.info("We are alive!");
 	}
 
