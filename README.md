@@ -7,9 +7,9 @@
 ![License](https://img.shields.io/badge/License-CC0-lightgrey)
 
 
-A technology-focused Minecraft mod for the latest Fabric versions.
+~~A technology-focused Minecraft mod for the latest Fabric versions.~~ mod na glinyanih chelovechkov
 
-Fabrica Apparatus adds industrial machines, automation, logistics and advanced manufacturing while keeping a vanilla-friendly style.
+Fabrica Apparatus adds ~~industrial machines, automation, logistics and advanced manufacturing while keeping a vanilla-friendly style.~~ glinyanih chelovechkov
 
 > ⚠️ The mod is currently in active development.
 
