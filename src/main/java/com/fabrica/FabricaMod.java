@@ -1,5 +1,7 @@
 package com.fabrica;
 
+import com.fabrica.apparatus.item.ModItems; // для айтемов
+
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.Identifier;
@@ -20,8 +22,8 @@ public class FabricaMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-
-		LOGGER.info("Hello Fabric world!");
+		ModItems.register(); //регистрирую мод айтемы
+		LOGGER.info("Мы живы!");
 	}
 
 	public static Identifier id(String path) {
