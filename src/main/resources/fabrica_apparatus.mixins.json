@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "fabrica.example.mixin",
+	"package": "com.fabrica.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ExampleMixin"
+		"FabricaMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
