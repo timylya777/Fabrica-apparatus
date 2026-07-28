@@ -6,11 +6,14 @@
   "item.fabrica_apparatus.terracotta_figure": "Терракотовый человечек",
   "item.fabrica_apparatus.terracota_figure": "Терракотовый человечек",
   "item.fabrica_apparatus.machine_casing": "Несущая металлоконструкция",
+  "item.fabrica_apparatus.coal_generator": "Угольный генератор",
+  "item.fabrica_apparatus.electric_furnace": "Электрическая печь",
 
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",
   "mod.fabrica_apparatus.description": "Величайший мод для Minecraft — Fabrica Apparatus. Он невероятен, захватывает дух и до неузнаваемости меняет игру. Огромная благодарность Katyn666 за шикарные текстуры.",
   "modmenu.nameTranslation.fabrica_apparatus": "Fabrica Apparatus",
   "modmenu.descriptionTranslation.fabrica_apparatus": "Величайший мод для Minecraft — Fabrica Apparatus. Он невероятен, захватывает дух и до неузнаваемости меняет игру. Огромная благодарность Katyn666 за шикарные текстуры.",
   "modmenu.github": "Github",
-	"modmenu.katyn_telegram": "Katyn666 Telegram"
+  "modmenu.katyn_telegram": "Katyn666 Telegram",
+  "itemGroup.fabrica_apparatus.machines": "Механизмы Fabrica"
 }

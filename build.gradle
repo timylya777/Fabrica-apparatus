@@ -11,10 +11,16 @@ repositories {
 		name = "Terraformers"
 		url = "https://maven.terraformersmc.com/"
 	}
+	maven {
+		name = "Fabric"
+		url = "https://maven.fabricmc.net/"
+	}
 }
 
 loom {
 	splitEnvironmentSourceSets()
+
+	accessWidenerPath = file("src/main/resources/fabrica_apparatus.accesswidener")
 
 	mods {
 		"modid" {
@@ -32,6 +38,9 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
+	// Team Reborn Energy API (bundled in mod jar)
+	implementation "teamreborn:energy:5.0.0"
+	include "teamreborn:energy:5.0.0"
 }
 
 processResources {

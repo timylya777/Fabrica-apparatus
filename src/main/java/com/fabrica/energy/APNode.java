@@ -1,8 +1,7 @@
 package com.fabrica.energy;
 
+import team.reborn.energy.api.EnergyStorage;
+
 public interface APNode {
-    APStorage getStorage();
+    EnergyStorage getStorage();
 }
-// Маркерные интерфейсы для удобства
-public interface APProvider extends APNode {} // Генераторы
-public interface APConsumer extends APNode {} // Машины

@@ -1,23 +1,23 @@
 package com.fabrica.energy;
 
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+
 import java.util.*;
 
 public class APNetworkManager {
     private final Map<BlockPos, APNetwork> nodeToNetwork = new HashMap<>();
     private final List<APNetwork> networks = new ArrayList<>();
-    private final World world;
+    private final Level level;
 
-    public APNetworkManager(World world) { this.world = world; }
+    public APNetworkManager(Level level) { this.level = level; }
 
-    // Вызывать при размещении блока (Block.onBlockAdded или BlockEntity initialization)
     public void onBlockAdded(BlockPos pos, APNode node) {
         Set<APNetwork> adjacent = new HashSet<>();
         for (Direction dir : Direction.values()) {
-            APNetwork net = nodeToNetwork.get(pos.offset(dir));
+            APNetwork net = nodeToNetwork.get(pos.relative(dir));
             if (net != null) adjacent.add(net);
         }
 
@@ -26,12 +26,11 @@ public class APNetworkManager {
             newNetwork = new APNetwork();
             networks.add(newNetwork);
         } else {
-            // Сливаем все соседние сети в одну
             Iterator<APNetwork> it = adjacent.iterator();
             newNetwork = it.next();
             while (it.hasNext()) {
                 APNetwork toMerge = it.next();
-                newNetwork.nodes.addAll(toMerge.nodes);
+                newNetwork.getNodes().addAll(toMerge.getNodes());
                 newNetwork.providers.addAll(toMerge.providers);
                 newNetwork.consumers.addAll(toMerge.consumers);
                 networks.remove(toMerge);
@@ -42,7 +41,6 @@ public class APNetworkManager {
         nodeToNetwork.put(pos, newNetwork);
     }
 
-    // Вызывать при разрушении блока (Block.onStateReplaced)
     public void onBlockRemoved(BlockPos pos) {
         APNetwork network = nodeToNetwork.remove(pos);
         if (network != null) {
@@ -50,15 +48,12 @@ public class APNetworkManager {
         }
     }
 
-    // Вызывать один раз за тик для всего мира (через ServerTickEvents.END_TICK)
     public void tick() {
-        // 1. Пересобираем разорванные сети (только если что-то сломали)
         List<APNetwork> toRebuild = networks.stream().filter(APNetwork::isDirty).toList();
         for (APNetwork oldNetwork : toRebuild) {
             rebuildNetwork(oldNetwork);
         }
 
-        // 2. Тикаем все активные сети (мгновенное распределение без лагов)
         for (APNetwork network : networks) {
             network.tick();
         }
@@ -75,17 +70,16 @@ public class APNetworkManager {
             queue.add(start);
             remaining.remove(start);
 
-            // BFS обход для поиска всех связанных блоков
             while (!queue.isEmpty()) {
                 BlockPos current = queue.poll();
-                BlockEntity be = world.getBlockEntity(current);
-                
+                BlockEntity be = level.getBlockEntity(current);
+
                 if (be instanceof APNode node) {
                     newNetwork.addNode(current, node);
-                    nodeToNetwork.put(current, newNetwork); // Обновляем карту
+                    nodeToNetwork.put(current, newNetwork);
 
                     for (Direction dir : Direction.values()) {
-                        BlockPos neighbor = current.offset(dir);
+                        BlockPos neighbor = current.relative(dir);
                         if (remaining.contains(neighbor)) {
                             remaining.remove(neighbor);
                             queue.add(neighbor);

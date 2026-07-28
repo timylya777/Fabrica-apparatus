@@ -6,11 +6,14 @@
   "item.fabrica_apparatus.terracotta_figure": "Terracotta Figure",
   "item.fabrica_apparatus.terracota_figure": "Terracota Figure",
   "item.fabrica_apparatus.machine_casing": "Structural steelwork",
+  "item.fabrica_apparatus.coal_generator": "Coal Generator",
+  "item.fabrica_apparatus.electric_furnace": "Electric Furnace",
 
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",
   "mod.fabrica_apparatus.description": "The greatest Minecraft mod — Fabrica Apparatus. Absolutely mind-blowing. Huge thanks to Katyn666 for the meticulously crafted textures.",
   "modmenu.nameTranslation.fabrica_apparatus": "Fabrica Apparatus",
   "modmenu.descriptionTranslation.fabrica_apparatus": "The greatest Minecraft mod — Fabrica Apparatus. Absolutely mind-blowing. Huge thanks to Katyn666 for the meticulously crafted textures.",
   "modmenu.github": "Github",
-	"modmenu.katyn_telegram": "Katyn666 Telegram"
+  "modmenu.katyn_telegram": "Katyn666 Telegram",
+  "itemGroup.fabrica_apparatus.machines": "Fabrica Machines"
 }
