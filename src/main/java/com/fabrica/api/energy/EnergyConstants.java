@@ -1,4 +1,4 @@
-package com.fabrica.apparatus.api.energy;
+package com.fabrica.api.energy;
 
 /**
  * Общие константы энергосистемы Fabrica Energy.
@@ -13,7 +13,7 @@ public final class EnergyConstants {
     /**
      * Стандартная скорость передачи кабеля.
      */
-    public static final long DEFAULT_TRANSFER = 100;
+    public static final long LV_DEFAULT_TRANSFER = 100;
 
     private EnergyConstants() {
     }

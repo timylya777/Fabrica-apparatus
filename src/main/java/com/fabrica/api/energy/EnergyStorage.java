@@ -1,4 +1,4 @@
-package com.fabrica.apparatus.api.energy;
+package com.fabrica.api.energy;
 
 /**
  * Стандартная реализация энергетического хранилища.

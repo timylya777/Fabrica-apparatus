@@ -1,4 +1,4 @@
-package com.fabrica.apparatus.api.energy;
+package com.fabrica.api.energy;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;

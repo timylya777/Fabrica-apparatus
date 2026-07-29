@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-import com.fabrica.block.custom.CableBlock;
+
 
 public class ModBlocks {
 
@@ -23,7 +23,7 @@ public class ModBlocks {
         String id,
         Block block,
         ResourceKey<CreativeModeTab> creativeTab
-) {
+    )   {
 
     Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
 
@@ -59,17 +59,7 @@ public static void register() {
                 Identifier.withDefaultNamespace("ingredients")
         )
 );
+
     
-    public static final Block CABLE = register(
-        "cable",
-        new CableBlock(
-                BlockBehaviour.Properties.of()
-                        .strength(1.0F)
-                        .sound(SoundType.METAL)
-        ),
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
-);
+    
 }

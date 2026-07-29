@@ -2,6 +2,7 @@ package com.fabrica;
 
 import com.fabrica.item.ModItems; // для айтемов
 import com.fabrica.block.ModBlocks; // а тут догодайся с трех раз что значит modBlocks
+import com.fabrica.block.custom.CableBlocks;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -25,6 +26,7 @@ public class FabricaMod implements ModInitializer {
 		// Proceed with mild caution.
 		ModItems.register(); //регистрирую мод айтемы
 		ModBlocks.register(); // омагад блоки
+		CableBlocks.register();
 		LOGGER.info("We are alive!");
 	}
 
