@@ -1,9 +1,7 @@
 package com.fabrica.apparatus.api.energy;
 
 /**
- * Интерфейс потребителя энергии.
- *
- * Используется для проверки типа и удобства API.
+ * Интерфейс источника энергии.
  */
-public interface IEnergyReceiver extends IEnergyStorage {
+public interface IEnergyProvider extends IEnergyStorage {
 }
