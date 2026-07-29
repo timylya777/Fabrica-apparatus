@@ -13,7 +13,7 @@ public record ProcessingOutput(ItemStack stack, float chance) {
             Codec.FLOAT.fieldOf("chance").forGetter(ProcessingOutput::chance)
     ).apply(instance, ProcessingOutput::new));
 
-    public static final StreamCodec<net.minecraft.network.FriendlyByteBuf, ProcessingOutput> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, ProcessingOutput> STREAM_CODEC = StreamCodec.composite(
             ItemStack.STREAM_CODEC, ProcessingOutput::stack,
             ByteBufCodecs.FLOAT, ProcessingOutput::chance,
             ProcessingOutput::new

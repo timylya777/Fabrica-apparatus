@@ -1,4 +1,3 @@
-
 package com.fabrica.registry;
 
 import com.fabrica.FabricaMod;
@@ -12,26 +11,28 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import java.util.Set;
+
 public class ModBlockEntities {
     public static final BlockEntityType<CoalGeneratorBlockEntity> COAL_GENERATOR = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, FabricaMod.id("coal_generator"),
-            BlockEntityType.Builder.of(CoalGeneratorBlockEntity::new, ModBlocks.COAL_GENERATOR).build(null)
+            new BlockEntityType<>(CoalGeneratorBlockEntity::new, Set.of(ModBlocks.COAL_GENERATOR))
     );
 
     public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, FabricaMod.id("electric_furnace"),
-            BlockEntityType.Builder.of(ElectricFurnaceBlockEntity::new, ModBlocks.ELECTRIC_FURNACE).build(null)
+            new BlockEntityType<>(ElectricFurnaceBlockEntity::new, Set.of(ModBlocks.ELECTRIC_FURNACE))
     );
 
     public static final BlockEntityType<EnergyCableBlockEntity> ENERGY_CABLE = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, FabricaMod.id("energy_cable"),
-            BlockEntityType.Builder.of(EnergyCableBlockEntity::new, ModBlocks.ENERGY_CABLE).build(null)
+            new BlockEntityType<>(EnergyCableBlockEntity::new, Set.of(ModBlocks.ENERGY_CABLE))
     );
 
     public static final BlockEntityType<CrusherBlockEntity> CRUSHER = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, FabricaMod.id("crusher"),
-            BlockEntityType.Builder.of((pos, state) -> new CrusherBlockEntity(pos, state, MachineTier.BASIC), 
-                    ModBlocks.CRUSHER_BASIC, ModBlocks.CRUSHER_ADVANCED, ModBlocks.CRUSHER_ELITE, ModBlocks.CRUSHER_ULTIMATE).build(null)
+            new BlockEntityType<>((pos, state) -> new CrusherBlockEntity(pos, state, MachineTier.BASIC),
+                    Set.of(ModBlocks.CRUSHER_BASIC, ModBlocks.CRUSHER_ADVANCED, ModBlocks.CRUSHER_ELITE, ModBlocks.CRUSHER_ULTIMATE))
     );
 
     public static void register() {}

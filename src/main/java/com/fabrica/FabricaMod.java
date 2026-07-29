@@ -6,6 +6,7 @@ import com.fabrica.registry.ModBlockItems;
 import com.fabrica.registry.ModBlockEntities;
 import com.fabrica.registry.ModCreativeTab;
 import com.fabrica.registry.ModMenuTypes;
+import com.fabrica.registry.ModRecipes;
 import com.fabrica.energy.APNetworkManager;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;

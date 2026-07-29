@@ -31,6 +31,7 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
 
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(2, ItemStack.EMPTY);
     private int progress = 0;
+    private int totalCookTime = 0;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ELECTRIC_FURNACE, pos, state);
@@ -75,23 +76,26 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
         ItemStack input = inventory.get(0);
         ItemStack output = inventory.get(1);
 
-        var recipe = level.getRecipeManager()
+        var recipe = level.getServer().getRecipeManager()
             .getRecipeFor(ModRecipes.FURNACE_TYPE, new SingleRecipeInput(input), level)
             .orElse(null);
 
         if (recipe != null) {
             ItemStack result = recipe.value().result().copy();
+            int cookTime = recipe.value().cookTime();
             boolean canAcceptOutput = output.isEmpty()
                 || (ItemStack.isSameItemSameComponents(output, result) && output.getCount() < output.getMaxStackSize());
 
             if (canAcceptOutput) {
+                if (progress == 0) totalCookTime = cookTime;
+
                 int cost = recipe.value().energyCost();
                 if (energyStorage.amount >= cost) {
                     energyStorage.amount -= cost;
                     progress++;
                     this.overloadLevel = Math.max(0, this.overloadLevel - 1);
 
-                    if (progress >= recipe.value().cookTime()) {
+                    if (progress >= cookTime) {
                         if (output.isEmpty()) {
                             inventory.set(1, result);
                         } else {
@@ -99,6 +103,7 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
                         }
                         input.shrink(1);
                         progress = 0;
+                        totalCookTime = 0;
                     }
                     setChanged();
                 } else {
@@ -112,6 +117,7 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
         } else {
             progress = Math.max(0, progress - 2);
             this.overloadLevel = Math.max(0, this.overloadLevel - 2);
+            totalCookTime = 0;
         }
     }
 
@@ -125,6 +131,7 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
         super.loadAdditional(input);
         ContainerHelper.loadAllItems(input, inventory);
         this.progress = input.getIntOr("Progress", 0);
+        this.totalCookTime = input.getIntOr("TotalCookTime", 0);
     }
 
     @Override
@@ -132,6 +139,7 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, inventory);
         output.putInt("Progress", progress);
+        output.putInt("TotalCookTime", totalCookTime);
     }
 
     @Override
@@ -156,7 +164,8 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
             public int get(int index) {
                 return switch (index) {
                     case 0 -> progress;
-                    case 1 -> overloadLevel;
+                    case 1 -> totalCookTime;
+                    case 2 -> (int) energyStorage.amount;
                     default -> 0;
                 };
             }
@@ -165,13 +174,14 @@ public class ElectricFurnaceBlockEntity extends OverloadableMachineBlockEntity i
             public void set(int index, int value) {
                 switch (index) {
                     case 0 -> progress = value;
-                    case 1 -> overloadLevel = value;
+                    case 1 -> totalCookTime = value;
+                    case 2 -> energyStorage.amount = value;
                 }
             }
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         });
     }

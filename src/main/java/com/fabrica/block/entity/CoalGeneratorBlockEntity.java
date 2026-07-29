@@ -30,6 +30,7 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
 
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(1, ItemStack.EMPTY);
     private int burnTime = 0;
+    private int totalBurnTime = 0;
     private int energyPerTick = 0;
 
     private static final int MAX_EXTRACT = 32;
@@ -82,16 +83,18 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
                 energyStorage.amount += energyPerTick;
                 burnTime--;
                 setChanged();
+                if (burnTime == 0) totalBurnTime = 0;
             } else {
                 this.overloadLevel += 2;
             }
         } else if (!fuelStack.isEmpty()) {
-            var recipe = level.getRecipeManager()
+            var recipe = level.getServer().getRecipeManager()
                 .getRecipeFor(ModRecipes.FUEL_TYPE, new SingleRecipeInput(fuelStack), level)
                 .orElse(null);
             if (recipe != null) {
                 fuelStack.shrink(1);
                 burnTime = recipe.value().burnTime();
+                totalBurnTime = burnTime;
                 energyPerTick = recipe.value().energyPerTick();
                 setChanged();
             }
@@ -108,6 +111,7 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
         super.loadAdditional(input);
         ContainerHelper.loadAllItems(input, inventory);
         this.burnTime = input.getIntOr("BurnTime", 0);
+        this.totalBurnTime = input.getIntOr("TotalBurnTime", 0);
     }
 
     @Override
@@ -115,6 +119,7 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, inventory);
         output.putInt("BurnTime", burnTime);
+        output.putInt("TotalBurnTime", totalBurnTime);
     }
 
     @Override
@@ -139,7 +144,8 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
             public int get(int index) {
                 return switch (index) {
                     case 0 -> burnTime;
-                    case 1 -> overloadLevel;
+                    case 1 -> totalBurnTime;
+                    case 2 -> (int) energyStorage.amount;
                     default -> 0;
                 };
             }
@@ -148,13 +154,14 @@ public class CoalGeneratorBlockEntity extends OverloadableMachineBlockEntity imp
             public void set(int index, int value) {
                 switch (index) {
                     case 0 -> burnTime = value;
-                    case 1 -> overloadLevel = value;
+                    case 1 -> totalBurnTime = value;
+                    case 2 -> energyStorage.amount = value;
                 }
             }
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         });
     }

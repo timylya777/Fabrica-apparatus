@@ -19,9 +19,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
 public class ModRecipes {
-    public static final RecipeType<FurnaceRecipe> FURNACE_TYPE = RecipeType.register(FabricaMod.MOD_ID + ":furnace");
-    public static final RecipeType<FuelRecipe> FUEL_TYPE = RecipeType.register(FabricaMod.MOD_ID + ":fuel");
-    public static final RecipeType<ProcessingRecipe> PROCESSING_TYPE = RecipeType.register(FabricaMod.MOD_ID + ":processing");
+    public static final RecipeType<FurnaceRecipe> FURNACE_TYPE = registerType("furnace");
+    public static final RecipeType<FuelRecipe> FUEL_TYPE = registerType("fuel");
+    public static final RecipeType<ProcessingRecipe> PROCESSING_TYPE = registerType("processing");
 
     public static final RecipeBookCategory FABRICA_CATEGORY = new RecipeBookCategory();
 
@@ -58,14 +58,17 @@ public class ModRecipes {
     public static final RecipeSerializer<ProcessingRecipe> PROCESSING_SERIALIZER = new RecipeSerializer<>(
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     com.fabrica.recipe.MachineType.CODEC.fieldOf("machine_type").forGetter(ProcessingRecipe::getMachineType),
-                    Ingredient.CODEC.listOf().xmap(net.minecraft.core.NonNullList::create, list -> list).fieldOf("ingredients").forGetter(ProcessingRecipe::getIngredients),
+                    Ingredient.CODEC.listOf().xmap(ModRecipes::listToNonNullList, list -> list).fieldOf("ingredients").forGetter(ProcessingRecipe::getIngredients),
                     com.fabrica.recipe.ProcessingOutput.CODEC.listOf().fieldOf("outputs").forGetter(ProcessingRecipe::getOutputs),
                     Codec.INT.fieldOf("process_time").forGetter(ProcessingRecipe::getProcessTime),
                     Codec.LONG.fieldOf("energy_cost").forGetter(ProcessingRecipe::getEnergyCost)
             ).apply(instance, ProcessingRecipe::new)),
             StreamCodec.composite(
-                    ByteBufCodecs.enumConst(com.fabrica.recipe.MachineType.class), ProcessingRecipe::getMachineType,
-                    Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).xmap(net.minecraft.core.NonNullList::create, list -> list), ProcessingRecipe::getIngredients,
+                    ByteBufCodecs.fromCodec(com.fabrica.recipe.MachineType.CODEC), ProcessingRecipe::getMachineType,
+                    Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).<net.minecraft.core.NonNullList<Ingredient>>map(
+                            ModRecipes::listToNonNullList,
+                            list -> list
+                    ), ProcessingRecipe::getIngredients,
                     com.fabrica.recipe.ProcessingOutput.STREAM_CODEC.apply(ByteBufCodecs.list()), ProcessingRecipe::getOutputs,
                     ByteBufCodecs.INT, ProcessingRecipe::getProcessTime,
                     ByteBufCodecs.VAR_LONG, ProcessingRecipe::getEnergyCost,
@@ -73,11 +76,22 @@ public class ModRecipes {
             )
     );
 
+    private static <T extends net.minecraft.world.item.crafting.Recipe<?>> RecipeType<T> registerType(String name) {
+        net.minecraft.resources.Identifier id = FabricaMod.id(name);
+        RecipeType<T> type = new RecipeType<T>() {
+            @Override
+            public String toString() { return name; }
+        };
+        return Registry.register(BuiltInRegistries.RECIPE_TYPE, id, type);
+    }
+
+    private static <T> net.minecraft.core.NonNullList<T> listToNonNullList(java.util.List<T> list) {
+        net.minecraft.core.NonNullList<T> n = net.minecraft.core.NonNullList.create();
+        n.addAll(list);
+        return n;
+    }
+
     public static void register() {
-        Registry.register(BuiltInRegistries.RECIPE_TYPE, FabricaMod.id("furnace"), FURNACE_TYPE);
-        Registry.register(BuiltInRegistries.RECIPE_TYPE, FabricaMod.id("fuel"), FUEL_TYPE);
-        Registry.register(BuiltInRegistries.RECIPE_TYPE, FabricaMod.id("processing"), PROCESSING_TYPE);
-        
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, FabricaMod.id("furnace"), FURNACE_SERIALIZER);
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, FabricaMod.id("fuel"), FUEL_SERIALIZER);
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, FabricaMod.id("processing"), PROCESSING_SERIALIZER);

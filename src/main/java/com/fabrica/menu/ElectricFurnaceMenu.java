@@ -18,7 +18,7 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     public ElectricFurnaceMenu(int containerId, Inventory inventory) {
-        this(containerId, inventory, new SimpleContainer(2), new SimpleContainerData(2));
+        this(containerId, inventory, new SimpleContainer(2), new SimpleContainerData(3));
     }
 
     public ElectricFurnaceMenu(int containerId, Inventory inventory, Container container, ContainerData data) {
@@ -71,7 +71,18 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         return data.get(0);
     }
 
-    public int getOverloadLevel() {
+    public int getTotalCookTime() {
         return data.get(1);
+    }
+
+    public int getCookProgress() {
+        int progress = data.get(0);
+        int total = data.get(1);
+        if (total == 0) return 0;
+        return progress * 24 / total;
+    }
+
+    public int getEnergyAmount() {
+        return data.get(2);
     }
 }

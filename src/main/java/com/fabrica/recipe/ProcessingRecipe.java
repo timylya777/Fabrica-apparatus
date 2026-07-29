@@ -1,18 +1,16 @@
-
 package com.fabrica.recipe;
 
 import com.fabrica.registry.ModRecipes;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -42,28 +40,43 @@ public class ProcessingRecipe implements Recipe<ProcessingRecipeInput> {
     }
 
     @Override
-    public ItemStack assemble(ProcessingRecipeInput input, net.minecraft.core.RegistryAccess registryAccess) {
+    public ItemStack assemble(ProcessingRecipeInput input) {
         return outputs.isEmpty() ? ItemStack.EMPTY : outputs.get(0).stack().copy();
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
+    public boolean showNotification() {
+        return false;
     }
 
     @Override
-    public ItemStack getResultItem(net.minecraft.core.RegistryAccess registryAccess) {
-        return outputs.isEmpty() ? ItemStack.EMPTY : outputs.get(0).stack().copy();
+    public String group() {
+        return "";
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<ProcessingRecipeInput>> getSerializer() {
         return ModRecipes.PROCESSING_SERIALIZER;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<? extends Recipe<ProcessingRecipeInput>> getType() {
         return ModRecipes.PROCESSING_TYPE;
+    }
+
+    @Override
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
+    }
+
+    @Override
+    public List<RecipeDisplay> display() {
+        return List.of();
+    }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() {
+        return ModRecipes.FABRICA_CATEGORY;
     }
 
     public MachineType getMachineType() { return machineType; }
@@ -71,33 +84,4 @@ public class ProcessingRecipe implements Recipe<ProcessingRecipeInput> {
     public List<ProcessingOutput> getOutputs() { return outputs; }
     public int getProcessTime() { return processTime; }
     public long getEnergyCost() { return energyCost; }
-
-    public static class Serializer implements RecipeSerializer<ProcessingRecipe> {
-        public static final MapCodec<ProcessingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                MachineType.CODEC.fieldOf("machine_type").forGetter(ProcessingRecipe::getMachineType),
-                Ingredient.CODEC.listOf().xmap(NonNullList::create, list -> list).fieldOf("ingredients").forGetter(ProcessingRecipe::getIngredients),
-                ProcessingOutput.CODEC.listOf().fieldOf("outputs").forGetter(ProcessingRecipe::getOutputs),
-                Codec.INT.fieldOf("process_time").forGetter(ProcessingRecipe::getProcessTime),
-                Codec.LONG.fieldOf("energy_cost").forGetter(ProcessingRecipe::getEnergyCost)
-        ).apply(instance, ProcessingRecipe::new));
-
-        public static final StreamCodec<net.minecraft.network.FriendlyByteBuf, ProcessingRecipe> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.enumConst(MachineType.class), ProcessingRecipe::getMachineType,
-                Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).xmap(NonNullList::create, list -> list), ProcessingRecipe::getIngredients,
-                ProcessingOutput.STREAM_CODEC.apply(ByteBufCodecs.list()), ProcessingRecipe::getOutputs,
-                ByteBufCodecs.INT, ProcessingRecipe::getProcessTime,
-                ByteBufCodecs.VAR_LONG, ProcessingRecipe::getEnergyCost,
-                ProcessingRecipe::new
-        );
-
-        @Override
-        public MapCodec<ProcessingRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<net.minecraft.network.FriendlyByteBuf, ProcessingRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
 }

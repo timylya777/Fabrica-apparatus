@@ -103,7 +103,7 @@ public abstract class ProcessingMachineBlockEntity extends OverloadableMachineBl
 
         if (ticksSinceRecheck >= RECIPE_RECHECK_INTERVAL || cachedRecipe == null) {
             List<ItemStack> inputs = inventory.subList(0, inputSlots);
-            Optional<RecipeHolder<ProcessingRecipe>> recipeOpt = level.getRecipeManager()
+            Optional<RecipeHolder<ProcessingRecipe>> recipeOpt = level.getServer().getRecipeManager()
                     .getRecipeFor(ModRecipes.PROCESSING_TYPE, new ProcessingRecipeInput(inputs), level);
             
             if (recipeOpt.isPresent()) {

@@ -18,7 +18,7 @@ public class CoalGeneratorMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     public CoalGeneratorMenu(int containerId, Inventory inventory) {
-        this(containerId, inventory, new SimpleContainer(1), new SimpleContainerData(2));
+        this(containerId, inventory, new SimpleContainer(1), new SimpleContainerData(3));
     }
 
     public CoalGeneratorMenu(int containerId, Inventory inventory, Container container, ContainerData data) {
@@ -64,11 +64,18 @@ public class CoalGeneratorMenu extends AbstractContainerMenu {
         return container.stillValid(player);
     }
 
-    public int getBurnTime() {
-        return data.get(0);
+    public boolean isBurning() {
+        return data.get(0) > 0;
     }
 
-    public int getOverloadLevel() {
-        return data.get(1);
+    public int getBurnProgress() {
+        int burnTime = data.get(0);
+        int totalBurnTime = data.get(1);
+        if (totalBurnTime == 0) return 0;
+        return burnTime * 13 / totalBurnTime;
+    }
+
+    public int getEnergyAmount() {
+        return data.get(2);
     }
 }

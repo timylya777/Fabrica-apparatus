@@ -38,9 +38,8 @@ public class ModCreativeTab {
                 MACHINES_KEY,
                 CreativeModeTab.builder(CreativeModeTab.Row.TOP, 6)
                         .title(Component.translatable("itemGroup.fabrica_apparatus.machines"))
-                        .icon(() -> new ItemStack(ModBlockItems.MACHINE_CASING))
+                        .icon(() -> new ItemStack(ModBlockItems.COAL_GENERATOR))
                         .displayItems((params, output) -> {
-                            output.accept(ModBlockItems.MACHINE_CASING);
                             output.accept(ModBlockItems.COAL_GENERATOR);
                             output.accept(ModBlockItems.ELECTRIC_FURNACE);
                         })

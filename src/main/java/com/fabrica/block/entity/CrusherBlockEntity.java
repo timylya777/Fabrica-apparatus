@@ -19,4 +19,9 @@ public class CrusherBlockEntity extends ProcessingMachineBlockEntity {
             }
         };
     }
+
+    @Override
+    public SimpleEnergyStorage getStorage() {
+        return this.energyStorage;
+    }
 }
