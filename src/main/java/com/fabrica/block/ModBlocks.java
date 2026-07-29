@@ -14,39 +14,33 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class ModBlocks {
 
-    public static final Block MACHINE_CASING = register(
-            "machine_casing",
-            new Block(
-                    BlockBehaviour.Properties.of()
-                            .strength(5.0F)
-                            .sound(SoundType.METAL)
-            )
-    );
 
     // BLOCK REGISTERGING IN ONE METHOD
-    private static Block register(String id, Block block) {
-        Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
+    private static Block register(String id, BlockBehaviour.Properties properties) {
+    Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
 
-        ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
-        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
+    ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
+    ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
 
-        Registry.register(
-                BuiltInRegistries.BLOCK,
-                blockKey,
-                block
-        );
+    Block block = new Block(properties.setId(blockKey));
 
-        Registry.register(
-                BuiltInRegistries.ITEM,
-                itemKey,
-                new BlockItem(
-                        block,
-                        new Item.Properties().setId(itemKey)
-                )
-        );
+    Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
 
-        return block;
+    Registry.register(
+            BuiltInRegistries.ITEM,
+            itemKey,
+            new BlockItem(block, new Item.Properties().setId(itemKey))
+    );
+
+    return block;
     }
+
+    public static final Block MACHINE_CASING = register(
+        "machine_casing",
+        BlockBehaviour.Properties.of()
+                .strength(5.0F)
+                .sound(SoundType.METAL)
+    );
 
     public static void register() {
     }
