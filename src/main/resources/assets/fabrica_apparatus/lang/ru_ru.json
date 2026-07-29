@@ -1,6 +1,12 @@
 {
+  "_blocks": "--- Блоки ---",
+  "block.fabrica_apparatus.cable": "Кабель",
+  "block.fabrica_apparatus.machine_casing": "Корпус машины",
+
+  "_items": "--- Предметы ---",
   "item.fabrica_apparatus.iron_figure": "Железный человечек",
-  "item.fabrica_apparatus.machine_casing" : "Корпус машины",
+  "item.fabrica_apparatus.cable": "Кабель",
+  "item.fabrica_apparatus.machine_casing": "Корпус машины",
 
   "_description" : "--------------------------------------",
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",
@@ -8,5 +14,5 @@
   "modmenu.nameTranslation.fabrica_apparatus": "Fabrica Apparatus",
   "modmenu.descriptionTranslation.fabrica_apparatus": "Величайший мод для Minecraft — Fabrica Apparatus. Он невероятен, захватывает дух и до неузнаваемости меняет игру. Огромная благодарность Katyn666 за шикарные текстуры.",
   "modmenu.github": "Github",
-	"modmenu.katyn_telegram": "Katyn666 Telegram"
+  "modmenu.katyn_telegram": "Katyn666 Telegram"
 }
