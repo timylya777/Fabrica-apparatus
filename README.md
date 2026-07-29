@@ -1,14 +1,16 @@
+
 # Fabrica Apparatus
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-26.2-green)
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-blue)
-![License](https://img.shields.io/badge/License-CC0-lightgrey)
+![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
 
 
-A technology-focused Minecraft mod for the latest Fabric versions.
 
-Fabrica Apparatus adds industrial machines, automation, logistics and advanced manufacturing while keeping a vanilla-friendly style.
+~~A technology-focused Minecraft mod for the latest Fabric versions.~~ mod na glinyanih chelovechkov
+
+Fabrica Apparatus adds ~~industrial machines, automation, logistics and advanced manufacturing while keeping a vanilla-friendly style.~~ glinyanih chelovechkov
 
 > ⚠️ The mod is currently in active development.
 
@@ -29,7 +31,7 @@ Fabrica Apparatus adds industrial machines, automation, logistics and advanced m
 ## Screenshots
 
 Coming soon...
-<img width="948" height="530" alt="изображение" src="https://github.com/user-attachments/assets/f76415e5-179c-4093-a7bf-a9a892cbdc21" />
+
 
 
 ---
@@ -68,4 +70,4 @@ Run:
 
 ## License
 
-CC0-1.0
+GPL-3.0 license
