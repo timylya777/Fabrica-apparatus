@@ -69,4 +69,4 @@ Run:
 
 ## License
 
-CC0-1.0
+GPL-3.0 license
