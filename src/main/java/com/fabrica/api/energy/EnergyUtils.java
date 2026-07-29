@@ -1,9 +1,9 @@
 package com.fabrica.api.energy;
 
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Вспомогательные методы работы с энергией.
@@ -17,12 +17,12 @@ public final class EnergyUtils {
      * Получить энергетическое хранилище соседнего блока.
      */
     public static IEnergyStorage getNeighborEnergyStorage(
-            World world,
+            Level world,
             BlockPos pos,
             Direction direction
     ) {
 
-        BlockPos target = pos.offset(direction);
+        BlockPos target = pos.relative(direction);
 
         BlockEntity be = world.getBlockEntity(target);
 
@@ -39,7 +39,7 @@ public final class EnergyUtils {
      * @return количество реально переданной энергии
      */
     public static long transferEnergy(
-            World world,
+            Level world,
             BlockPos from,
             BlockPos to,
             long maxAmount

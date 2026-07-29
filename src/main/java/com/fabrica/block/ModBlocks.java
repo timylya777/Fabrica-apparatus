@@ -18,42 +18,38 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 public class ModBlocks {
 
 
-    // BLOCK REGISTERGING IN ONE METHOD
     private static Block register(
         String id,
-        Block block,
+        BlockBehaviour.Properties properties,
         ResourceKey<CreativeModeTab> creativeTab
-    )   {
+    ) {
+        Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
+        ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
+        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
 
-    Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
+        Block block = new Block(properties.setId(blockKey));
+        Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
 
-    ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
-    ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
+        Item blockItem = Registry.register(
+                BuiltInRegistries.ITEM,
+                itemKey,
+                new BlockItem(block, new Item.Properties().setId(itemKey))
+        );
 
-    Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
+        CreativeModeTabEvents.modifyOutputEvent(creativeTab)
+                .register(output -> output.accept(blockItem));
 
-    Item blockItem = Registry.register(
-            BuiltInRegistries.ITEM,
-            itemKey,
-            new BlockItem(block, new Item.Properties().setId(itemKey))
-    );
-
-    CreativeModeTabEvents.modifyOutputEvent(creativeTab)
-            .register(output -> output.accept(blockItem));
-
-    return block;
-}
+        return block;
+    }
 
 public static void register() {
     }
 
     public static final Block MACHINE_CASING = register(
         "machine_casing",
-        new Block(
-                BlockBehaviour.Properties.of()
-                        .strength(5.0F)
-                        .sound(SoundType.METAL)
-        ),
+        BlockBehaviour.Properties.of()
+                .strength(5.0F)
+                .sound(SoundType.METAL),
         ResourceKey.create(
                 Registries.CREATIVE_MODE_TAB,
                 Identifier.withDefaultNamespace("ingredients")
