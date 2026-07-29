@@ -4,7 +4,8 @@
 ![Minecraft](https://img.shields.io/badge/Minecraft-26.2-green)
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-blue)
-![License](https://img.shields.io/badge/License-CC0-lightgrey)
+![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
+
 
 
 ~~A technology-focused Minecraft mod for the latest Fabric versions.~~ mod na glinyanih chelovechkov
