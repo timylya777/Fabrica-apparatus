@@ -1,47 +1,32 @@
+
 package com.fabrica.registry;
 
 import com.fabrica.FabricaMod;
+import com.fabrica.block.machine.CoalGeneratorBlock;
+import com.fabrica.block.machine.CrusherBlock;
+import com.fabrica.block.machine.ElectricFurnaceBlock;
+import com.fabrica.block.machine.EnergyCableBlock;
+import com.fabrica.energy.MachineTier;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
-public class ModBlockIds {
+public class ModBlocks {
+    public static final Block COAL_GENERATOR = register("coal_generator", new CoalGeneratorBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL)));
+    public static final Block ELECTRIC_FURNACE = register("electric_furnace", new ElectricFurnaceBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL)));
+    public static final Block ENERGY_CABLE = register("energy_cable", new EnergyCableBlock(BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.METAL).noOcclusion()));
 
-    public static final ResourceKey<Block> MACHINE_CASING =
-            ResourceKey.create(
-                    Registries.BLOCK,
-                    FabricaMod.id("machine_casing")
-            );
+    public static final Block CRUSHER_BASIC = register("crusher_basic", new CrusherBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL), MachineTier.BASIC));
+    public static final Block CRUSHER_ADVANCED = register("crusher_advanced", new CrusherBlock(BlockBehaviour.Properties.of().strength(3.5f).sound(SoundType.METAL), MachineTier.ADVANCED));
+    public static final Block CRUSHER_ELITE = register("crusher_elite", new CrusherBlock(BlockBehaviour.Properties.of().strength(4.0f).sound(SoundType.METAL), MachineTier.ELITE));
+    public static final Block CRUSHER_ULTIMATE = register("crusher_ultimate", new CrusherBlock(BlockBehaviour.Properties.of().strength(5.0f).sound(SoundType.METAL), MachineTier.ULTIMATE));
 
-    public static final ResourceKey<Item> MACHINE_CASING_ITEM =
-            ResourceKey.create(
-                    Registries.ITEM,
-                    FabricaMod.id("machine_casing")
-            );
+    private static Block register(String name, Block block) {
+        return Registry.register(BuiltInRegistries.BLOCK, FabricaMod.id(name), block);
+    }
 
-    public static final ResourceKey<Block> COAL_GENERATOR =
-            ResourceKey.create(
-                    Registries.BLOCK,
-                    FabricaMod.id("coal_generator")
-            );
-
-    public static final ResourceKey<Item> COAL_GENERATOR_ITEM =
-            ResourceKey.create(
-                    Registries.ITEM,
-                    FabricaMod.id("coal_generator")
-            );
-
-    public static final ResourceKey<Block> ELECTRIC_FURNACE =
-            ResourceKey.create(
-                    Registries.BLOCK,
-                    FabricaMod.id("electric_furnace")
-            );
-
-    public static final ResourceKey<Item> ELECTRIC_FURNACE_ITEM =
-            ResourceKey.create(
-                    Registries.ITEM,
-                    FabricaMod.id("electric_furnace")
-            );
+    public static void register() {}
 }
