@@ -1,31 +1,35 @@
 package com.fabrica.block.machine.fuel;
 
-// Импортируем готовые блоки и API
 import com.fabrica.api.energy.EnergyTier;
 import com.fabrica.block.machine.MachineBlock;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Concrete block for a coal generator
- */
 public class CoalGeneratorBlock extends MachineBlock {
+    public static final MapCodec<CoalGeneratorBlock> CODEC = simpleCodec(CoalGeneratorBlock::new);
 
-    // Храним конфиг блока: ёмкость буфера, тир, скорость генерации
     private final long capacity;
     private final EnergyTier tier;
     private final long productionRate;
 
-    // Конструктор принимает Properties (звук, прочность) + параметры генератора
+    public CoalGeneratorBlock(BlockBehaviour.Properties properties) {
+        this(properties, 0, EnergyTier.LV, 0);
+    }
+
     public CoalGeneratorBlock(BlockBehaviour.Properties properties, long capacity, EnergyTier tier, long productionRate) {
-        // super() передаёт настройки в MachineBlock → FabricaBlock → Block
         super(properties);
         this.capacity = capacity;
         this.tier = tier;
         this.productionRate = productionRate;
+    }
+
+    @Override
+    public MapCodec<? extends CoalGeneratorBlock> codec() {
+        return CODEC;
     }
 
     // Геттеры нужны, чтобы BlockEntity мог прочитать конфиг своего блока
