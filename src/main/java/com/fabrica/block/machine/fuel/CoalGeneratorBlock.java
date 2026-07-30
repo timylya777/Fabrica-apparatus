@@ -32,10 +32,6 @@ public class CoalGeneratorBlock extends MachineBlock {
         return CODEC;
     }
 
-    @Override
-    public MapCodec<? extends CoalGeneratorBlock> codec() {
-        return CODEC;
-    }
 
     public long getCapacity() { return capacity; }
     public EnergyTier getTier() { return tier; }
