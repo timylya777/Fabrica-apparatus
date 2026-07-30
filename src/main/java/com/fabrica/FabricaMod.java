@@ -1,8 +1,10 @@
 package com.fabrica;
 
-import com.fabrica.item.ModItems; // для айтемов
-import com.fabrica.block.ModBlocks; // а тут догодайся с трех раз что значит modBlocks
-import com.fabrica.block.custom.CableBlocks;
+import com.fabrica.block.ModBlockEntities;
+import com.fabrica.cable.FabricaCables;
+import com.fabrica.energy.FabricaEnergy;
+import com.fabrica.item.ModItems;
+import com.fabrica.block.ModBlocks;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -24,9 +26,11 @@ public class FabricaMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		ModItems.register(); //регистрирую мод айтемы
-		ModBlocks.register(); // омагад блоки
-		CableBlocks.register();
+		ModItems.register();
+		ModBlocks.register();
+		ModBlockEntities.register();
+		FabricaEnergy.register();
+		FabricaCables.register();
 		LOGGER.info("We are alive!");
 	}
 
