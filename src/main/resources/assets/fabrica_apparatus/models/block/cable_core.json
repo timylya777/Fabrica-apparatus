@@ -1,38 +1,22 @@
 {
-  "textures": {
-    "particle": "fabrica_apparatus:block/cable",
-    "texture": "fabrica_apparatus:block/cable"
-  },
-  "elements": [
-    {
-      "from": [5, 5, 5],
-      "to": [11, 11, 11],
-      "faces": {
-        "north": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        },
-        "south": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        },
-        "east": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        },
-        "west": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        },
-        "up": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        },
-        "down": {
-          "texture": "#texture",
-          "uv": [5, 5, 11, 11]
-        }
-      }
-    }
-  ]
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "fabrica_apparatus:block/cable",
+		"texture": "fabrica_apparatus:block/cable"
+	},
+	"elements": [
+		{
+			"from": [5, 5, 5],
+			"to": [11, 11, 11],
+			"faces": {
+				"north": {"uv": [5, 5, 11, 11], "texture": "#texture"},
+				"east": {"uv": [5, 5, 11, 11], "texture": "#texture"},
+				"south": {"uv": [5, 5, 11, 11], "texture": "#texture"},
+				"west": {"uv": [5, 5, 11, 11], "texture": "#texture"},
+				"up": {"uv": [5, 5, 11, 11], "texture": "#texture"},
+				"down": {"uv": [5, 5, 11, 11], "texture": "#texture"}
+			}
+		}
+	]
 }

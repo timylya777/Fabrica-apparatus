@@ -32,20 +32,18 @@ public class CoalGeneratorBlock extends MachineBlock {
         return CODEC;
     }
 
-    // Геттеры нужны, чтобы BlockEntity мог прочитать конфиг своего блока
+    @Override
+    public MapCodec<? extends CoalGeneratorBlock> codec() {
+        return CODEC;
+    }
+
     public long getCapacity() { return capacity; }
     public EnergyTier getTier() { return tier; }
     public long getProductionRate() { return productionRate; }
 
     @Nullable
     @Override
-    // EntityBlock требует: создать BlockEntity для этой позиции
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        // Создаём CoalGeneratorBlockEntity с параметрами из блока
         return new CoalGeneratorBlockEntity(pos, state, capacity, tier, productionRate);
     }
-
-    // Можно переопределить getTicker() из MachineBlock, если нужна своя логика тиков
-    // Но MachineBlock.getTicker() уже вызывает serverTick() у MachineBlockEntity
-    // CoalGeneratorBlockEntity наследует это — тикать будет само
 }
