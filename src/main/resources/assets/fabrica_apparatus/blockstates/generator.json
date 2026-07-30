@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "fabrica_apparatus:block/generator" },
+    "facing=east":  { "model": "fabrica_apparatus:block/generator", "y": 90 },
+    "facing=south": { "model": "fabrica_apparatus:block/generator", "y": 180 },
+    "facing=west":  { "model": "fabrica_apparatus:block/generator", "y": 270 }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "fabrica_apparatus:item/machine_casing"
+    "model": "fabrica_apparatus:block/machine_casing"
   }
 }
