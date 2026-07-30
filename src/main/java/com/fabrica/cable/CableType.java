@@ -8,16 +8,19 @@ public class CableType {
     private final Identifier id;
     private final String name;
     private final int color;
+    private final CableNodeFactory factory;
 
-    public CableType(Identifier id, String name, int color) {
+    public CableType(Identifier id, String name, int color, CableNodeFactory factory) {
         this.id = id;
         this.name = name;
         this.color = color;
+        this.factory = factory;
     }
 
     public Identifier getId() { return id; }
     public String getName() { return name; }
     public int getColor() { return color; }
+    public CableNodeFactory getFactory() { return factory; }
 
     @Override
     public boolean equals(Object o) {
