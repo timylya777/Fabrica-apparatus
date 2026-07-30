@@ -1,6 +1,20 @@
 {
-  "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "fabrica_apparatus:block/machine_casing"
-  }
+    "particle": "fabrica_apparatus:block/machine_casing",
+    "texture": "fabrica_apparatus:block/machine_casing"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "north" },
+        "south": { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "south" },
+        "east":  { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "east" },
+        "west":  { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "west" },
+        "up":    { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "up" },
+        "down":  { "texture": "#texture", "uv": [0, 0, 16, 16], "cullface": "down" }
+      }
+    }
+  ]
 }

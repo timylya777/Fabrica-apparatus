@@ -1,7 +1,62 @@
 {
-  "variants": {
-    "": {
-      "model": "fabrica_apparatus:block/cable"
+  "multipart": [
+    {
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_core"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection"
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "fabrica_apparatus:block/cable_connection",
+        "x": 90
+      }
     }
-  }
+  ]
 }

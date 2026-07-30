@@ -1,6 +1,5 @@
 package com.fabrica.block.machine;
 
-import com.fabrica.block.FabricaBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -11,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class MachineBlock extends FabricaBlock implements EntityBlock {
+public abstract class MachineBlock extends HorizontalMachineBlock implements EntityBlock {
     public MachineBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }

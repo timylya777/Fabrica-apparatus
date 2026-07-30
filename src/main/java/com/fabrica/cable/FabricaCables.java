@@ -23,7 +23,7 @@ public final class FabricaCables {
     public static final BlockEntityType<CableBlockEntity> CABLE_BE = Registry.register(
         BuiltInRegistries.BLOCK_ENTITY_TYPE,
         FabricaMod.id("cable"),
-        new BlockEntityType<>(CableBlockEntity::new, Set.of(CABLE_BLOCK))
+        new BlockEntityType<>(CableBlockEntity::new, Set.of())
     );
 
     private static CableBlock registerCableBlock() {
