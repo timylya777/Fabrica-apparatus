@@ -1,4 +1,4 @@
-﻿Starting a Gradle Daemon, 2 busy and 1 stopped Daemons could not be reused, use --status for details
+﻿Starting a Gradle Daemon, 2 busy and 2 stopped Daemons could not be reused, use --status for details
 
 > Configure project :
 Fabric Loom: 1.17.17
@@ -21,5 +21,5 @@ Fabric Loom: 1.17.17
 > Task :check UP-TO-DATE
 > Task :build
 
-BUILD SUCCESSFUL in 39s
+BUILD SUCCESSFUL in 38s
 7 actionable tasks: 3 executed, 4 up-to-date

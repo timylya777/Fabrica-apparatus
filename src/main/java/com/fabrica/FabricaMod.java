@@ -1,6 +1,7 @@
 package com.fabrica;
 
 import com.fabrica.block.ModBlockEntities;
+import com.fabrica.block.machine.fuel.FabricaGeneratorMachines;
 import com.fabrica.cable.FabricaCables;
 import com.fabrica.energy.FabricaEnergy;
 import com.fabrica.item.ModItems;
@@ -30,6 +31,7 @@ public class FabricaMod implements ModInitializer {
 		ModBlocks.register();
 		ModBlockEntities.register();
 		FabricaEnergy.register();
+		FabricaGeneratorMachines.register();
 		FabricaCables.register();
 		LOGGER.info("We are alive!");
 	}
