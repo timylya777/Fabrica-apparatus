@@ -3,7 +3,6 @@ package com.fabrica.block.machine.fuel;
 import com.fabrica.api.energy.EnergyTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**

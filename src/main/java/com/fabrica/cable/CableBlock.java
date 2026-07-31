@@ -27,7 +27,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityBlock, IEnergyConnectable {
