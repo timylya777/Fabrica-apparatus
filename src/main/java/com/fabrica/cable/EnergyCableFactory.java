@@ -1,9 +1,6 @@
 package com.fabrica.cable;
 
 import com.fabrica.api.energy.CableTier;
-import com.fabrica.api.energy.EnergyContainer;
-import com.fabrica.api.energy.EnergyConsumer;
-import com.fabrica.api.energy.EnergyProducer;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -14,9 +11,11 @@ import java.util.List;
 
 public class EnergyCableFactory implements CableNodeFactory {
 
+    private final String typeId;
     private final CableTier tier;
 
-    public EnergyCableFactory(CableTier tier) {
+    public EnergyCableFactory(String typeId, CableTier tier) {
+        this.typeId = typeId;
         this.tier = tier;
     }
 
@@ -30,5 +29,19 @@ public class EnergyCableFactory implements CableNodeFactory {
         EnergyCableNode node = new EnergyCableNode(new ArrayList<>(), tier);
         node.load(tag);
         return node;
+    }
+
+    @Override
+    public Network createNetwork(int id) {
+        return new EnergyNetwork(id, tier);
+    }
+
+    @Override
+    public String getTypeId() {
+        return typeId;
+    }
+
+    public CableTier getTier() {
+        return tier;
     }
 }

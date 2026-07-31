@@ -1,10 +1,9 @@
 package com.fabrica.cable;
 
-import com.fabrica.api.energy.EnergyConsumer;
-import com.fabrica.api.energy.EnergyProducer;
 import com.fabrica.api.energy.IEnergyConnectable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -13,7 +12,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,9 +26,11 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public class CableBlock extends Block implements SimpleWaterloggedBlock, IEnergyConnectable {
+public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityBlock, IEnergyConnectable {
 
     public static final BooleanProperty NORTH = BooleanProperty.create("north");
     public static final BooleanProperty EAST  = BooleanProperty.create("east");
@@ -107,6 +110,49 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, IEnergy
     }
 
     @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
+            CableBlockEntity be = getBlockEntity(level, pos);
+            if (be != null) {
+                for (CableNodeSlot slot : be.getNodes()) {
+                    if (slot != null) {
+                        slot.node().updateConnections(level, pos);
+                        CableNetworks networks = CableNetworks.get(serverLevel);
+                        NetworkManager manager = networks.getOrCreateManager(slot.type());
+                        manager.onNodeAdded(pos, slot.node(), serverLevel);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
+                                   Orientation orientation, boolean movedByPiston) {
+        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
+            CableBlockEntity be = getBlockEntity(level, pos);
+            if (be != null) {
+                for (CableNodeSlot slot : be.getNodes()) {
+                    if (slot != null) {
+                        slot.node().updateConnections(level, pos);
+                        CableNetworks networks = CableNetworks.get(serverLevel);
+                        NetworkManager manager = networks.getManager(slot.type());
+                        if (manager != null) {
+                            manager.onNodeRemoved(pos, serverLevel);
+                            manager.onNodeAdded(pos, slot.node(), serverLevel);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new CableBlockEntity(pos, state);
+    }
+
+    @Override
     public VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext context) {
         int mask = 0;
         if (state.getValue(DOWN))  mask |= 1;
@@ -147,7 +193,7 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, IEnergy
         if (neighborState.getBlock() instanceof IEnergyConnectable connectable) {
             return connectable.canConnectEnergy(fromCableToNeighbor.getOpposite());
         }
-        return false;
+        return neighborState.getBlock() instanceof CableBlock;
     }
 
     private boolean canConnect(BlockGetter world, BlockPos pos, Direction dir) {
@@ -159,7 +205,7 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, IEnergy
         }
 
         BlockEntity neighborEntity = world.getBlockEntity(neighborPos);
-        return neighborEntity instanceof EnergyProducer || neighborEntity instanceof EnergyConsumer;
+        return neighborEntity != null && !neighborEntity.isRemoved();
     }
 
     private static BooleanProperty getPropertyForDirection(Direction dir) {
@@ -171,5 +217,10 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, IEnergy
             case WEST  -> WEST;
             case EAST  -> EAST;
         };
+    }
+
+    private static CableBlockEntity getBlockEntity(Level level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        return be instanceof CableBlockEntity cableBE ? cableBE : null;
     }
 }
