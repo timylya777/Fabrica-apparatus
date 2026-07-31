@@ -3,16 +3,19 @@
   "block.fabrica_apparatus.cable": "Cable",
   "block.fabrica_apparatus.machine_casing": "Machine Casing",
   "block.fabrica_apparatus.generator": "Generator",
-  "block.fabrica_apparatus.consumer": "Consumer",
-  "block.fabrica_apparatus.furnace": "Furnace",
+  "block.fabrica_apparatus.electric_furnace": "Electric Furnace",
 
   "_items": "--- Items ---",
   "item.fabrica_apparatus.cable": "Cable",
   "item.fabrica_apparatus.machine_casing": "Machine Casing",
   "item.fabrica_apparatus.generator": "Generator",
-  "item.fabrica_apparatus.consumer": "Consumer",
-  "item.fabrica_apparatus.furnace": "Furnace",
+  "item.fabrica_apparatus.electric_furnace": "Electric Furnace",
   "item.fabrica_apparatus.iron_figure": "Iron Figure",
+  "item.fabrica_apparatus.debug_item": "Debug Item",
+
+  "_gui": "--- GUI ---",
+  "container.fabrica_apparatus.generator": "Generator",
+  "container.fabrica_apparatus.electric_furnace": "Electric Furnace",
 
   "_description": "--------------------------------------",
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",

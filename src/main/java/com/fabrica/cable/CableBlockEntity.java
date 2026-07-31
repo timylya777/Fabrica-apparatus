@@ -1,123 +1,154 @@
 package com.fabrica.cable;
 
+import com.fabrica.api.energy.CableTier;
+import com.fabrica.api.energy.EnergyApiLookup;
+import com.fabrica.api.energy.EnergyConsumer;
+import com.fabrica.api.energy.EnergyContainer;
+import com.fabrica.api.energy.EnergyProducer;
+import com.fabrica.api.energy.EnergyStorageComponent;
+import com.fabrica.api.energy.IEnergyConnectable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-import java.util.Optional;
-
 public class CableBlockEntity extends BlockEntity {
 
-    private final CableNodeSlot[] nodes = new CableNodeSlot[MAX_NODES];
-    public static final int MAX_NODES = 3;
+    private static final CableTier TIER = CableTier.COPPER_LV;
+
+    private CableNetwork network;
 
     public CableBlockEntity(BlockPos pos, BlockState state) {
         super(FabricaCables.CABLE_BE, pos, state);
+        this.network = new CableNetwork();
+        this.network.addMember(this);
     }
 
-    public CableNodeSlot[] getNodes() {
-        return nodes;
+    public void setNetwork(CableNetwork network) {
+        this.network = network;
     }
 
-    public boolean canAddNode(CableType type) {
-        for (CableNodeSlot slot : nodes) {
-            if (slot != null && slot.type().getId().equals(type.getId())) {
-                return false;
+    public CableNetwork getNetwork() {
+        return network;
+    }
+
+    public void serverTick() {
+        if (level == null || level.isClientSide()) return;
+
+        mergeWithConnectedNeighbors();
+
+        EnergyStorageComponent buffer = network.getBuffer();
+        long before = buffer.getEnergy();
+        long available = before;
+
+        long tick = level.getServer().getTickCount();
+        if (network.lastTick != tick) {
+            network.lastTick = tick;
+            network.lastDemand = network.pendingDemand;
+            network.pullRemaining = network.pendingDemand;
+            network.pendingDemand = 0;
+        }
+
+        long localDemand = 0;
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = worldPosition.relative(dir);
+            BlockEntity neighborBe = level.getBlockEntity(neighborPos);
+            if (neighborBe == null || neighborBe.isRemoved() || neighborBe instanceof CableBlockEntity) {
+                continue;
+            }
+            if (!isMachineConnected(dir, neighborPos)) continue;
+            EnergyConsumer consumer = EnergyApiLookup.CONSUMER.find(level, neighborPos, dir.getOpposite());
+            if (consumer != null) {
+                localDemand += consumer.getEnergyDemand();
             }
         }
-        for (CableNodeSlot slot : nodes) {
-            if (slot == null) return true;
+        network.pendingDemand += localDemand;
+
+        long budget = Math.min(network.pullRemaining, buffer.getCapacity() - available);
+        if (budget > 0) {
+            for (Direction dir : Direction.values()) {
+                if (budget <= 0) break;
+                BlockPos neighborPos = worldPosition.relative(dir);
+                BlockEntity neighborBe = level.getBlockEntity(neighborPos);
+                if (neighborBe == null || neighborBe.isRemoved() || neighborBe instanceof CableBlockEntity) {
+                    continue;
+                }
+                if (!isMachineConnected(dir, neighborPos)) continue;
+
+                EnergyProducer producer = EnergyApiLookup.PRODUCER.find(level, neighborPos, dir.getOpposite());
+                if (producer == null) continue;
+                EnergyContainer container = EnergyApiLookup.CONTAINER.find(level, neighborPos, dir.getOpposite());
+                if (container == null) continue;
+                long want = Math.min(budget, TIER.maxTransfer());
+                long canExtract = Math.min(container.extractEnergy(want, true), budget);
+                if (canExtract > 0) {
+                    long extracted = container.extractEnergy(canExtract, false);
+                    available += extracted;
+                    budget -= extracted;
+                    network.pullRemaining -= extracted;
+                }
+            }
+        }
+
+        for (Direction dir : Direction.values()) {
+            if (available <= 0) break;
+            BlockPos neighborPos = worldPosition.relative(dir);
+            BlockEntity neighborBe = level.getBlockEntity(neighborPos);
+            if (neighborBe == null || neighborBe.isRemoved() || neighborBe instanceof CableBlockEntity) {
+                continue;
+            }
+            if (!isMachineConnected(dir, neighborPos)) continue;
+
+            EnergyConsumer consumer = EnergyApiLookup.CONSUMER.find(level, neighborPos, dir.getOpposite());
+            if (consumer != null) {
+                long demand = consumer.getEnergyDemand();
+                if (demand > 0) {
+                    long toSend = Math.min(available, Math.min(TIER.maxTransfer(), demand));
+                    if (toSend > 0) {
+                        consumer.receiveEnergy(toSend);
+                        available -= toSend;
+                    }
+                }
+            }
+        }
+
+        buffer.setEnergy(available);
+        if (buffer.getEnergy() != before) {
+            setChanged();
+        }
+    }
+
+    private void mergeWithConnectedNeighbors() {
+        for (Direction dir : Direction.values()) {
+            BlockEntity neighborBe = level.getBlockEntity(worldPosition.relative(dir));
+            if (neighborBe instanceof CableBlockEntity other && network != other.network) {
+                network.absorb(other.network);
+            }
+        }
+    }
+
+    private boolean isMachineConnected(Direction dir, BlockPos neighborPos) {
+        BlockState neighborState = level.getBlockState(neighborPos);
+        if (neighborState.getBlock() instanceof IEnergyConnectable connectable) {
+            return connectable.canConnectEnergy(neighborPos, neighborState, dir.getOpposite());
         }
         return false;
-    }
-
-    public boolean addNode(CableType type, CableNode node) {
-        for (int i = 0; i < MAX_NODES; i++) {
-            if (nodes[i] == null) {
-                nodes[i] = new CableNodeSlot(type, node);
-                setChanged();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void removeNode(CableType type) {
-        for (int i = 0; i < MAX_NODES; i++) {
-            if (nodes[i] != null && nodes[i].type().getId().equals(type.getId())) {
-                nodes[i] = null;
-                setChanged();
-                return;
-            }
-        }
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        var nodesTag = new net.minecraft.nbt.CompoundTag();
-        for (int i = 0; i < MAX_NODES; i++) {
-            CableNodeSlot slot = nodes[i];
-            if (slot == null) continue;
-
-            var slotTag = new net.minecraft.nbt.CompoundTag();
-            slotTag.putString("type", slot.type().getId().toString());
-            slotTag.put("node_data", slot.node().save());
-            nodesTag.put(String.valueOf(i), slotTag);
-        }
-        output.store("nodes", net.minecraft.nbt.CompoundTag.CODEC, nodesTag);
+        output.putLong("energy", network.getShare());
+        output.putLong("capacity", CableNetwork.PER_CABLE_CAPACITY);
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-
-        for (int i = 0; i < MAX_NODES; i++) {
-            nodes[i] = null;
-        }
-
-        Optional<net.minecraft.nbt.CompoundTag> opt = input.read("nodes", net.minecraft.nbt.CompoundTag.CODEC);
-        if (opt.isEmpty()) return;
-
-        var nodesTag = opt.get();
-        for (String key : nodesTag.keySet()) {
-            var slotTag = nodesTag.getCompoundOrEmpty(key);
-            int slotIndex = Integer.parseInt(key);
-            if (slotIndex < 0 || slotIndex >= MAX_NODES) continue;
-
-            String typeId = slotTag.getStringOr("type", "");
-            var nodeData = slotTag.getCompoundOrEmpty("node_data");
-
-            CableNodeFactory factory = FabricaCables.getFactory(typeId);
-            if (factory == null) continue;
-
-            CableNode node = factory.createNodeFromNbt(nodeData);
-            nodes[slotIndex] = new CableNodeSlot(
-                new CableType(net.minecraft.resources.Identifier.parse(typeId), "", 0, factory),
-                node
-            );
-        }
-    }
-
-    @Override
-    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
-        if (level instanceof ServerLevel serverLevel) {
-            CableNetworks networks = CableNetworks.get(serverLevel);
-            for (CableNodeSlot slot : nodes) {
-                if (slot != null) {
-                    NetworkManager manager = networks.getManager(slot.type());
-                    if (manager != null) {
-                        manager.onNodeRemoved(pos, serverLevel);
-                    }
-                }
-            }
-        }
-    }
-
-    public Object getRenderAttachmentData() {
-        return nodes;
+        long energy = input.getLongOr("energy", 0);
+        network.getBuffer().setCapacity(CableNetwork.PER_CABLE_CAPACITY);
+        network.getBuffer().setEnergy(energy);
     }
 }

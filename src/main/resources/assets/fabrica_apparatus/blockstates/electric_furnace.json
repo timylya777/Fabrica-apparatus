@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "fabrica_apparatus:block/electric_furnace" },
+    "facing=east":  { "model": "fabrica_apparatus:block/electric_furnace", "y": 90 },
+    "facing=south": { "model": "fabrica_apparatus:block/electric_furnace", "y": 180 },
+    "facing=west":  { "model": "fabrica_apparatus:block/electric_furnace", "y": 270 }
+  }
+}

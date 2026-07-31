@@ -1,6 +1,7 @@
 package com.fabrica.block.machine;
 
 import com.fabrica.api.energy.IEnergyConnectable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +30,7 @@ public abstract class HorizontalMachineBlock extends HorizontalDirectionalBlock 
     }
 
     @Override
-    public boolean canConnectEnergy(Direction fromNeighborToUs) {
+    public boolean canConnectEnergy(BlockPos pos, BlockState state, Direction fromNeighborToUs) {
         return true;
     }
 }

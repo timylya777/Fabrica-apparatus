@@ -3,16 +3,19 @@
   "block.fabrica_apparatus.cable": "Кабель",
   "block.fabrica_apparatus.machine_casing": "Корпус машины",
   "block.fabrica_apparatus.generator": "Генератор",
-  "block.fabrica_apparatus.consumer": "Потребитель",
-  "block.fabrica_apparatus.furnace": "Печь",
+  "block.fabrica_apparatus.electric_furnace": "Электрическая печь",
 
   "_items": "--- Предметы ---",
   "item.fabrica_apparatus.cable": "Кабель",
   "item.fabrica_apparatus.machine_casing": "Корпус машины",
   "item.fabrica_apparatus.generator": "Генератор",
-  "item.fabrica_apparatus.consumer": "Потребитель",
-  "item.fabrica_apparatus.furnace": "Печь",
+  "item.fabrica_apparatus.electric_furnace": "Электрическая печь",
   "item.fabrica_apparatus.iron_figure": "Железный человечек",
+  "item.fabrica_apparatus.debug_item": "Предмет отладки",
+
+  "_gui": "--- ГУИ ---",
+  "container.fabrica_apparatus.generator": "Генератор",
+  "container.fabrica_apparatus.electric_furnace": "Электрическая печь",
 
   "_description": "--------------------------------------",
   "mod.fabrica_apparatus.name": "Fabrica Apparatus",

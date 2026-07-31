@@ -1,7 +1,7 @@
 package com.fabrica.block;
 
 import com.fabrica.FabricaMod;
-import com.fabrica.block.machine.consumer.ConsumerBlockEntity;
+import com.fabrica.block.machine.furnace.ElectricFurnaceBlockEntity;
 import com.fabrica.block.machine.generator.GeneratorBlockEntity;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -17,10 +17,10 @@ public final class ModBlockEntities {
         new BlockEntityType<>(GeneratorBlockEntity::new, Set.of(ModBlocks.GENERATOR))
     );
 
-    public static final BlockEntityType<ConsumerBlockEntity> CONSUMER = Registry.register(
+    public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE = Registry.register(
         BuiltInRegistries.BLOCK_ENTITY_TYPE,
-        FabricaMod.id("consumer"),
-        new BlockEntityType<>(ConsumerBlockEntity::new, Set.of(ModBlocks.CONSUMER))
+        FabricaMod.id("electric_furnace"),
+        new BlockEntityType<>(ElectricFurnaceBlockEntity::new, Set.of(ModBlocks.ELECTRIC_FURNACE))
     );
 
     public static void register() {

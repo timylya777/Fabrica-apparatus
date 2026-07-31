@@ -1,10 +1,9 @@
-package com.fabrica.block.machine.generator;
+package com.fabrica.block.machine.furnace;
 
 import com.fabrica.api.energy.EnergyTier;
 import com.fabrica.block.machine.MachineBlock;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -15,37 +14,32 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class GeneratorBlock extends MachineBlock {
-    public static final MapCodec<GeneratorBlock> CODEC = simpleCodec(GeneratorBlock::new);
+public class ElectricFurnaceBlock extends MachineBlock {
+    public static final MapCodec<ElectricFurnaceBlock> CODEC = simpleCodec(ElectricFurnaceBlock::new);
 
     private final long capacity;
     private final EnergyTier tier;
-    private final long productionRate;
+    private final long consumptionRate;
 
-    public GeneratorBlock(BlockBehaviour.Properties properties) {
+    public ElectricFurnaceBlock(BlockBehaviour.Properties properties) {
         this(properties, 0, EnergyTier.LV, 0);
     }
 
-    public GeneratorBlock(BlockBehaviour.Properties properties, long capacity, EnergyTier tier, long productionRate) {
+    public ElectricFurnaceBlock(BlockBehaviour.Properties properties, long capacity, EnergyTier tier, long consumptionRate) {
         super(properties);
         this.capacity = capacity;
         this.tier = tier;
-        this.productionRate = productionRate;
+        this.consumptionRate = consumptionRate;
     }
 
     @Override
-    public MapCodec<? extends GeneratorBlock> codec() {
+    public MapCodec<? extends ElectricFurnaceBlock> codec() {
         return CODEC;
     }
 
     public long getCapacity() { return capacity; }
     public EnergyTier getTier() { return tier; }
-    public long getProductionRate() { return productionRate; }
-
-    @Override
-    public boolean canConnectEnergy(BlockPos pos, BlockState state, Direction fromNeighborToUs) {
-        return true;
-    }
+    public long getConsumptionRate() { return consumptionRate; }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
@@ -69,6 +63,6 @@ public class GeneratorBlock extends MachineBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new GeneratorBlockEntity(pos, state, capacity, tier, productionRate);
+        return new ElectricFurnaceBlockEntity(pos, state, capacity, tier, consumptionRate);
     }
 }

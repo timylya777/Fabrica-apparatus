@@ -3,7 +3,6 @@ package com.fabrica.cable;
 import com.fabrica.api.energy.IEnergyConnectable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -14,18 +13,21 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -104,51 +106,37 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
                                   BlockPos pos, Direction direction, BlockPos neighborPos,
                                   BlockState neighborState, RandomSource random) {
         return state
-                .setValue(getPropertyForDirection(direction), canConnect(neighborState, direction))
+                .setValue(getPropertyForDirection(direction), canConnect(neighborState, direction, neighborPos))
                 .setValue(WATERLOGGED, level.getFluidState(pos).getType() == Fluids.WATER);
     }
 
+    @Nullable
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
-        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            CableBlockEntity be = getBlockEntity(level, pos);
-            if (be != null) {
-                for (CableNodeSlot slot : be.getNodes()) {
-                    if (slot != null) {
-                        slot.node().updateConnections(level, pos);
-                        CableNetworks networks = CableNetworks.get(serverLevel);
-                        NetworkManager manager = networks.getOrCreateManager(slot.type());
-                        manager.onNodeAdded(pos, slot.node(), serverLevel);
-                    }
-                }
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide()) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof CableBlockEntity cableBE) {
+                cableBE.serverTick();
             }
-        }
-    }
-
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
-                                   Orientation orientation, boolean movedByPiston) {
-        if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
-            CableBlockEntity be = getBlockEntity(level, pos);
-            if (be != null) {
-                for (CableNodeSlot slot : be.getNodes()) {
-                    if (slot != null) {
-                        slot.node().updateConnections(level, pos);
-                        CableNetworks networks = CableNetworks.get(serverLevel);
-                        NetworkManager manager = networks.getManager(slot.type());
-                        if (manager != null) {
-                            manager.onNodeRemoved(pos, serverLevel);
-                            manager.onNodeAdded(pos, slot.node(), serverLevel);
-                        }
-                    }
-                }
-            }
-        }
+        };
     }
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CableBlockEntity(pos, state);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, Orientation orientation, boolean moved) {
+        if (!level.isClientSide() && neighborBlock instanceof CableBlock) {
+            if (level.getBlockEntity(pos) instanceof CableBlockEntity cable) {
+                CableNetwork network = cable.getNetwork();
+                if (network != null) {
+                    CableNetwork.rebuildComponents(network);
+                }
+            }
+        }
+        super.neighborChanged(state, level, pos, neighborBlock, orientation, moved);
     }
 
     @Override
@@ -179,7 +167,7 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
     }
 
     @Override
-    public boolean canConnectEnergy(Direction fromNeighborToUs) {
+    public boolean canConnectEnergy(BlockPos pos, BlockState state, Direction fromNeighborToUs) {
         return true;
     }
 
@@ -188,9 +176,9 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
         return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
-    private boolean canConnect(BlockState neighborState, Direction fromCableToNeighbor) {
+    private boolean canConnect(BlockState neighborState, Direction fromCableToNeighbor, BlockPos neighborPos) {
         if (neighborState.getBlock() instanceof IEnergyConnectable connectable) {
-            return connectable.canConnectEnergy(fromCableToNeighbor.getOpposite());
+            return connectable.canConnectEnergy(neighborPos, neighborState, fromCableToNeighbor.getOpposite());
         }
         return neighborState.getBlock() instanceof CableBlock;
     }
@@ -199,7 +187,7 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
         BlockPos neighborPos = pos.relative(dir);
         BlockState neighborState = world.getBlockState(neighborPos);
 
-        if (canConnect(neighborState, dir)) {
+        if (canConnect(neighborState, dir, neighborPos)) {
             return true;
         }
 
@@ -216,10 +204,5 @@ public class CableBlock extends Block implements SimpleWaterloggedBlock, EntityB
             case WEST  -> WEST;
             case EAST  -> EAST;
         };
-    }
-
-    private static CableBlockEntity getBlockEntity(Level level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        return be instanceof CableBlockEntity cableBE ? cableBE : null;
     }
 }

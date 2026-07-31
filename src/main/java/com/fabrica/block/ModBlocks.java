@@ -2,7 +2,7 @@ package com.fabrica.block;
 
 import com.fabrica.FabricaMod;
 import com.fabrica.api.energy.EnergyTier;
-import com.fabrica.block.machine.consumer.ConsumerBlock;
+import com.fabrica.block.machine.furnace.ElectricFurnaceBlock;
 import com.fabrica.block.machine.generator.GeneratorBlock;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
@@ -70,7 +70,7 @@ public class ModBlocks {
         return block;
     }
 
-    private static ConsumerBlock registerConsumer(
+    private static ElectricFurnaceBlock registerElectricFurnace(
         String id,
         BlockBehaviour.Properties properties,
         ResourceKey<CreativeModeTab> creativeTab,
@@ -82,7 +82,7 @@ public class ModBlocks {
         ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
 
-        ConsumerBlock block = new ConsumerBlock(properties.setId(blockKey), capacity, tier, consumptionRate);
+        ElectricFurnaceBlock block = new ElectricFurnaceBlock(properties.setId(blockKey), capacity, tier, consumptionRate);
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
 
         Item blockItem = Registry.register(
@@ -122,8 +122,8 @@ public class ModBlocks {
         100
     );
 
-    public static final ConsumerBlock CONSUMER = registerConsumer(
-        "consumer",
+    public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerElectricFurnace(
+        "electric_furnace",
         BlockBehaviour.Properties.of()
                 .strength(3.0F)
                 .sound(SoundType.METAL),
@@ -133,7 +133,7 @@ public class ModBlocks {
         ),
         2000,
         EnergyTier.LV,
-        80
+        20
     );
 
     public static void register() {

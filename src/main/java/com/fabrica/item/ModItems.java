@@ -10,18 +10,20 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
+import java.util.function.Function;
+
 public class ModItems {
 
     // ITEM REGISTERING IN ONE METHOD
     private static Item register(
         String id,
-        Item.Properties properties,
+        Function<Item.Properties, Item> factory,
         ResourceKey<CreativeModeTab> creativeTab
     ) {
         Identifier identifier = Identifier.fromNamespaceAndPath(FabricaMod.MOD_ID, id);
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
 
-        Item item = new Item(properties.setId(itemKey));
+        Item item = factory.apply(new Item.Properties().setId(itemKey));
         Registry.register(BuiltInRegistries.ITEM, itemKey, item);
 
         CreativeModeTabEvents.modifyOutputEvent(creativeTab)
@@ -32,7 +34,16 @@ public class ModItems {
 
     public static final Item IRON_FIGURE = register(
         "iron_figure",
-        new Item.Properties(),
+        Item::new,
+        ResourceKey.create(
+                Registries.CREATIVE_MODE_TAB,
+                Identifier.withDefaultNamespace("ingredients")
+        )
+    );
+
+    public static final Item DEBUG_ITEM = register(
+        "debug_item",
+        DebugItem::new,
         ResourceKey.create(
                 Registries.CREATIVE_MODE_TAB,
                 Identifier.withDefaultNamespace("ingredients")
