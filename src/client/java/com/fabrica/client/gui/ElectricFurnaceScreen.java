@@ -26,7 +26,7 @@ public class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurna
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);
-        String energy = menu.getEnergy() + " / " + menu.getCapacity() + " EU";
+        String energy = menu.getEnergy() + " / " + menu.getCapacity() + " AP";
         extractor.text(font, energy, leftPos + 8, topPos + 70, 0x404040);
 
         int total = menu.getTotalTime();

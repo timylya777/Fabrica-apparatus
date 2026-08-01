@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/copper_lv_cable",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 12042933
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/aluminum_ev_cable",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 14737632
+      }
+    ]
+  }
+}

@@ -26,7 +26,7 @@ public class GeneratorScreen extends AbstractContainerScreen<GeneratorMenu> {
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);
-        String energy = menu.getStoredEnergy() + " / " + menu.getEnergyCapacity() + " EU";
+        String energy = menu.getStoredEnergy() + " / " + menu.getEnergyCapacity() + " AP";
         extractor.text(font, energy, leftPos + 8, topPos + 70, 0x404040);
 
         int total = menu.getTotalBurnTime();

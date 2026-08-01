@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/platinum_iv_cable",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 15066850
+      }
+    ]
+  }
+}

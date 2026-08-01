@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/tungsten_luv_cable",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 10198959
+      }
+    ]
+  }
+}

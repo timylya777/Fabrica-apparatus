@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/superconductor_cable",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 58879
+      }
+    ]
+  }
+}

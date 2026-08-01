@@ -3,7 +3,8 @@
 	"package": "com.fabrica.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"FabricaClientMixin"
+		"FabricaClientMixin",
+		"ClientPacketListenerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

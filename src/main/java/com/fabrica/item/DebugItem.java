@@ -4,8 +4,6 @@ import com.fabrica.api.energy.EnergyContainer;
 import com.fabrica.api.energy.EnergyConsumer;
 import com.fabrica.block.machine.EnergyMachineBlockEntity;
 import com.fabrica.block.machine.fuel.AbstractFuelGeneratorBlockEntity;
-import com.fabrica.cable.CableBlockEntity;
-import com.fabrica.cable.CableNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -34,18 +32,11 @@ public class DebugItem extends Item {
                     .append(" @ ").append(pos.getX()).append(" ").append(pos.getY()).append(" ").append(pos.getZ());
 
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof CableBlockEntity cable) {
-                CableNetwork network = cable.getNetwork();
-                sb.append(" | NET: ").append(network.getBuffer().getEnergy())
-                        .append("/").append(network.getBuffer().getCapacity())
-                        .append(" EU, cables=").append(network.getMemberCount())
-                        .append(", share=").append(network.getShare());
-            }
             if (be instanceof EnergyMachineBlockEntity machine) {
                 EnergyContainer container = machine.getEnergyContainer();
                 sb.append(" | ENERGY: ").append(container.getEnergy())
                         .append("/").append(container.getCapacity())
-                        .append(" EU, tier=").append(container.getTier().name());
+                        .append(" AP, tier=").append(container.getTier().name());
             }
             if (be instanceof EnergyConsumer consumer) {
                 sb.append(", demand=").append(consumer.getEnergyDemand());

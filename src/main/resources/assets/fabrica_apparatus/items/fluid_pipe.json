@@ -1,0 +1,12 @@
+﻿{
+  "model": {
+    "type": "minecraft:model",
+    "model": "fabrica_apparatus:item/fluid_pipe",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 14599002
+      }
+    ]
+  }
+}
