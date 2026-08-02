@@ -41,9 +41,14 @@ public final class MeNetwork {
                 }
                 BlockEntity blockEntity = level.getBlockEntity(neighbor);
                 if (blockEntity instanceof MeNetworkNode node) {
-                    // Сосед — узел сети: добавляем его хранилище и продолжаем обход.
-                    storages.add(node.getMeStorage());
+                    // Сосед — узел сети: продолжаем обход через него.
                     queue.add(neighbor);
+                    // Хранилище добавляем только от узлов-владельцев: у коннекторов
+                    // (сеток) getMeStorage() пересчитывает всю сеть, и опрос их во
+                    // время обхода приводит к бесконечной рекурсии.
+                    if (!(node instanceof MeNetworkConnector)) {
+                        storages.add(node.getMeStorage());
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.fabrica.conduit;
 
+import com.fabrica.CreativeTabs;
 import com.fabrica.FabricaMod;
 import com.fabrica.api.energy.CableTier;
 import com.fabrica.conduit.api.PipeNetworkData;
@@ -44,11 +45,9 @@ import java.util.Map;
  */
 public final class FabricaPipes {
 
-	// Ключ творческой вкладки, в которую добавляются все предметы-трубы.
-	private static final ResourceKey<CreativeModeTab> TAB = ResourceKey.create(
-		Registries.CREATIVE_MODE_TAB,
-		Identifier.withDefaultNamespace("ingredients")
-	);
+	// Ключ творческой вкладки, в которую добавляются все предметы-трубы
+	// и кабели (вкладка самого мода, а не ванильная "ingredients").
+	private static final ResourceKey<CreativeModeTab> TAB = CreativeTabs.MAIN_TAB;
 
 	// Данные сети по умолчанию для каждого типа трубы (используются при создании новой сети).
 	private static final Map<PipeNetworkType, PipeNetworkData> DEFAULT_DATA = new HashMap<>();

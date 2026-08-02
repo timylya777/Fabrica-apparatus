@@ -54,7 +54,9 @@ public abstract class AbstractMachineRecipe implements Recipe<ProcessingInput> {
 
     @Override
     public PlacementInfo placementInfo() {
-        return PlacementInfo.NOT_PLACEABLE;
+        // Формируем реальную раскладку из ингредиентов: NOT_PLACEABLE считается
+        // "невозможной для размещения" и рецепт выбрасывается из книги с варнингом.
+        return PlacementInfo.create(ingredients);
     }
 
     public List<Ingredient> getIngredientsList() {

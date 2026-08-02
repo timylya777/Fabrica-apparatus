@@ -8,12 +8,14 @@ import com.fabrica.me.MeNetworkNode;
 import com.fabrica.me.MeStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -56,6 +58,17 @@ public class MeDriveBlockEntity extends FabricaBlockEntity implements MenuProvid
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return new MeDriveMenu(containerId, inventory, this);
+    }
+
+    // При удалении блока (включая ломание) выбрасываем все диски наружу,
+    // иначе содержимое дисковода терялось бы бесследно.
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        Level level = getLevel();
+        if (level != null && !level.isClientSide()) {
+            Containers.dropContents(level, worldPosition, disks);
+        }
     }
 
     // Сохраняем диски списком предметов в NBT.
