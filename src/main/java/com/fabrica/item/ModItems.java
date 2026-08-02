@@ -43,6 +43,42 @@ public class ModItems {
         )
     );
 
+    public static final Item BRICK_FIGURE = register(
+        "brick_figure",
+        Item::new,
+        ResourceKey.create(
+                Registries.CREATIVE_MODE_TAB,
+                Identifier.withDefaultNamespace("ingredients")
+        )
+    );
+
+    public static final Item CLAY_FIGURE = register(
+        "clay_figure",
+        Item::new,
+        ResourceKey.create(
+                Registries.CREATIVE_MODE_TAB,
+                Identifier.withDefaultNamespace("ingredients")
+        )
+    );
+
+    public static final Item COPPER_FIGURE = register(
+        "copper_figure",
+        Item::new,
+        ResourceKey.create(
+                Registries.CREATIVE_MODE_TAB,
+                Identifier.withDefaultNamespace("ingredients")
+        )
+    );
+
+    public static final Item TERRACOTTA_FIGURE = register(
+        "terracotta_figure",
+        Item::new,
+        ResourceKey.create(
+                Registries.CREATIVE_MODE_TAB,
+                Identifier.withDefaultNamespace("ingredients")
+        )
+    );
+
     public static final Item DEBUG_ITEM = register(
         "debug_item",
         DebugItem::new,
