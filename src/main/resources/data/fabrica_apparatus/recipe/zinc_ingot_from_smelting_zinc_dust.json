@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:zinc_dust",
+    "group":  "zinc_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:zinc_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

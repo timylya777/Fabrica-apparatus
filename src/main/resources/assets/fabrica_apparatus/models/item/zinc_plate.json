@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "layer0":  "fabrica_apparatus:item/zinc_plate"
+                 },
+    "parent":  "minecraft:item/generated"
+}

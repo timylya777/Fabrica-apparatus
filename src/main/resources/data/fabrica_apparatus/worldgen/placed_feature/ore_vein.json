@@ -1,0 +1,12 @@
+﻿{
+    "feature":  "fabrica_apparatus:ore_vein",
+    "placement":  [
+                      {
+                          "type":  "minecraft:rarity_filter",
+                          "chance":  8
+                      },
+                      {
+                          "type":  "minecraft:in_square"
+                      }
+                  ]
+}

@@ -22,6 +22,12 @@ public final class ModMenus {
         new MenuType<>(ElectricFurnaceMenu::new, FeatureFlags.VANILLA_SET)
     );
 
+    public static final MenuType<MaceratorMenu> MACERATOR = Registry.register(
+        BuiltInRegistries.MENU,
+        FabricaMod.id("macerator"),
+        new MenuType<>(MaceratorMenu::new, FeatureFlags.VANILLA_SET)
+    );
+
     public static final MenuType<MeDriveMenu> ME_DRIVE = Registry.register(
         BuiltInRegistries.MENU,
         FabricaMod.id("me_drive"),

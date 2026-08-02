@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:aluminum_dust",
+    "group":  "aluminum_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:aluminum_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

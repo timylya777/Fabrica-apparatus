@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:bronze_dust",
+    "group":  "bronze_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:bronze_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:nickel_dust",
+    "group":  "nickel_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:nickel_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

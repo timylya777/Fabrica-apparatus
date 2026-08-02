@@ -1,0 +1,19 @@
+﻿{
+    "variants":  {
+                     "facing=north":  {
+                                          "model":  "fabrica_apparatus:block/macerator"
+                                      },
+                     "facing=south":  {
+                                          "model":  "fabrica_apparatus:block/macerator",
+                                          "y":  180
+                                      },
+                     "facing=east":  {
+                                         "model":  "fabrica_apparatus:block/macerator",
+                                         "y":  90
+                                     },
+                     "facing=west":  {
+                                         "model":  "fabrica_apparatus:block/macerator",
+                                         "y":  270
+                                     }
+                 }
+}

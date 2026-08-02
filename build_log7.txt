@@ -1,0 +1,12 @@
+
+> Configure project :
+Fabric Loom: 1.17.17
+Project directory 'C:\Users\boris\OneDrive\Documents\Fabrica-apparatus' is located in OneDrive. This is known to cause issues and slower performance. Consider moving the project to a different location.
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources
+> Task :classes
+> Task :compileClientJava
+
+BUILD SUCCESSFUL in 4s
+3 actionable tasks: 2 executed, 1 up-to-date

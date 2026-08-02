@@ -1,6 +1,8 @@
 package com.fabrica.item;
 
+import com.fabrica.CreativeTabs;
 import com.fabrica.FabricaMod;
+import com.fabrica.item.material.Material;
 import com.fabrica.me.MeStorageDiskItem;
 import com.fabrica.me.MeStorageDiskTier;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -12,6 +14,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ModItems {
@@ -37,92 +41,51 @@ public class ModItems {
     public static final Item IRON_FIGURE = register(
         "iron_figure",
         Item::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
-    );
-
-    public static final Item BRICK_FIGURE = register(
-        "brick_figure",
-        Item::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
-    );
-
-    public static final Item CLAY_FIGURE = register(
-        "clay_figure",
-        Item::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
-    );
-
-    public static final Item COPPER_FIGURE = register(
-        "copper_figure",
-        Item::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
-    );
-
-    public static final Item TERRACOTTA_FIGURE = register(
-        "terracotta_figure",
-        Item::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
 
     public static final Item DEBUG_ITEM = register(
         "debug_item",
         DebugItem::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_BASIC = register(
         "me_storage_disk_basic",
         properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.BASIC),
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_ADVANCED = register(
         "me_storage_disk_advanced",
         properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.ADVANCED),
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_ELITE = register(
         "me_storage_disk_elite",
         properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.ELITE),
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
 
     public static final KeyItem KEY = register(
         "key",
         KeyItem::new,
-        ResourceKey.create(
-                Registries.CREATIVE_MODE_TAB,
-                Identifier.withDefaultNamespace("ingredients")
-        )
+        CreativeTabs.MAIN_TAB
     );
+
+    // Материалы: слитки, пыли и пластины для каждого материала мода.
+    public static final Map<Material, Item> INGOTS = new EnumMap<>(Material.class);
+    public static final Map<Material, Item> DUSTS = new EnumMap<>(Material.class);
+    public static final Map<Material, Item> PLATES = new EnumMap<>(Material.class);
+
+    static {
+        for (Material material : Material.values()) {
+            INGOTS.put(material, register(material.id() + "_ingot", Item::new, CreativeTabs.MAIN_TAB));
+            DUSTS.put(material, register(material.id() + "_dust", Item::new, CreativeTabs.MAIN_TAB));
+            PLATES.put(material, register(material.id() + "_plate", Item::new, CreativeTabs.MAIN_TAB));
+        }
+    }
 
     /**
      * Метод инициализации. 

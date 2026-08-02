@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "layer0":  "fabrica_apparatus:item/silver_ingot"
+                 },
+    "parent":  "minecraft:item/generated"
+}

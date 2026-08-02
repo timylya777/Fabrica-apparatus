@@ -7,6 +7,9 @@ import com.fabrica.energy.FabricaEnergy;
 import com.fabrica.gui.ModMenus;
 import com.fabrica.gui.PipeSettingsPackets;
 import com.fabrica.item.ModItems;
+import com.fabrica.recipe.ModRecipeSerializers;
+import com.fabrica.recipe.ModRecipeTypes;
+import com.fabrica.worldgen.ModWorldGen;
 import com.fabrica.block.ModBlocks;
 import com.fabrica.me.MeLookups;
 import com.fabrica.me.MePackets;
@@ -32,6 +35,7 @@ public class FabricaMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		// Регистрация предметов, блоков и их блок-сущностей.
+		CreativeTabs.register();
 		ModItems.register();
 		ModBlocks.register();
 		ModBlockEntities.register();
@@ -39,6 +43,10 @@ public class FabricaMod implements ModInitializer {
 		FabricaEnergy.register();
 		FabricaPipes.register();
 		PipeNetworks.init();
+		// Рецепты машин (мацерация, сплавка) и мировая генерация руд.
+		ModRecipeTypes.register();
+		ModRecipeSerializers.register();
+		ModWorldGen.register();
 		// Меню (контейнеры) и сетевые пакеты: настройки труб и ME-сети.
 		ModMenus.register();
 		PipeSettingsPackets.register();

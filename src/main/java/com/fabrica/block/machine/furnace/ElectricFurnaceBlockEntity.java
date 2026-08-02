@@ -6,6 +6,10 @@ import com.fabrica.api.energy.EnergyTier;
 import com.fabrica.block.ModBlockEntities;
 import com.fabrica.block.machine.EnergyMachineBlockEntity;
 import com.fabrica.gui.ElectricFurnaceMenu;
+import com.fabrica.recipe.AbstractMachineRecipe;
+import com.fabrica.recipe.AlloyingRecipe;
+import com.fabrica.recipe.ModRecipeTypes;
+import com.fabrica.recipe.ProcessingInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -23,17 +27,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.List;
+
 // Электропечь: тратит энергию на переплавку предметов (входной слот 0 -> выходной слот 0).
 public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity implements EnergyConsumer, MenuProvider {
 
-    // Входной слот (0): предмет для переплавки.
-    protected final SimpleContainer inputInventory = new SimpleContainer(1) {
+    // Входные слоты (0, 1): предмет для плавки и второй ингредиент сплава.
+    protected final SimpleContainer inputInventory = new SimpleContainer(2) {
         @Override
         public void setChanged() {
             ElectricFurnaceBlockEntity.this.setChanged();
         }
     };
-    // Выходной слот (0): готовый результат плавки.
+    // Выходной слот (0): готовый результат плавки/сплавки.
     protected final SimpleContainer outputInventory = new SimpleContainer(1) {
         @Override
         public void setChanged() {
@@ -47,8 +53,8 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
     // Текущий и полный прогресс плавки (в тиках).
     protected int progress = 0;
     protected int totalTime = 0;
-    // Активный рецепт: при смене входного предмета прогресс сбрасывается.
-    protected RecipeHolder<SmeltingRecipe> currentRecipe;
+    // Активный рецепт (плавка или сплавка): при смене входных предметов прогресс сбрасывается.
+    protected RecipeHolder<?> currentRecipe;
 
     // Конструктор без параметров (для CODEC): настройки берутся из блока.
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
@@ -139,17 +145,17 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
             return;
         }
 
-        RecipeHolder<SmeltingRecipe> recipe = findRecipe(input);
-        // Предмет сменился: сбрасываем прогресс и начинаем новый рецепт.
+        RecipeHolder<?> recipe = findRecipe();
+        // Предметы сменились: сбрасываем прогресс и начинаем новый рецепт.
         if (currentRecipe != recipe) {
             currentRecipe = recipe;
             progress = 0;
-            totalTime = recipe != null ? recipe.value().cookingTime() : 0;
+            totalTime = recipe != null ? getRecipeTime(recipe) : 0;
         }
 
         if (recipe == null || totalTime <= 0) return;
 
-        ItemStack result = recipe.value().assemble(new SingleRecipeInput(input));
+        ItemStack result = assemble(recipe);
         if (!canPlaceResult(result)) return;
 
         // Тратим до consumptionRate энергии за тик и двигаем прогресс.
@@ -158,7 +164,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         energyStorage.removeEnergy(used);
         progress++;
 
-        // Плавка завершена: кладём результат в выход и тратим один входной предмет.
+        // Операция завершена: кладём результат в выход и тратим входные предметы.
         if (progress >= totalTime) {
             ItemStack current = outputInventory.getItem(0);
             if (current.isEmpty()) {
@@ -166,11 +172,34 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
             } else {
                 current.grow(result.getCount());
             }
-            input.shrink(1);
+            inputInventory.getItem(0).shrink(1);
+            // Рецепт сплавки тратит второй входной слот.
+            if (recipe.value() instanceof AbstractMachineRecipe) {
+                inputInventory.getItem(1).shrink(1);
+            }
             progress = 0;
             currentRecipe = null;
             totalTime = 0;
         }
+    }
+
+    // Время операции: у плавки — из рецепта, у сплавки — из рецепта машины.
+    private static int getRecipeTime(RecipeHolder<?> recipe) {
+        if (recipe.value() instanceof SmeltingRecipe smelting) return smelting.cookingTime();
+        if (recipe.value() instanceof AbstractMachineRecipe machine) return machine.getTime();
+        return 0;
+    }
+
+    // Сборка результата с входом, по которому рецепт был найден.
+    private ItemStack assemble(RecipeHolder<?> recipe) {
+        ItemStack in0 = inputInventory.getItem(0);
+        if (recipe.value() instanceof AbstractMachineRecipe machine) {
+            return machine.assemble(new ProcessingInput(List.of(in0, inputInventory.getItem(1))));
+        }
+        if (recipe.value() instanceof SmeltingRecipe smelting) {
+            return smelting.assemble(new SingleRecipeInput(in0));
+        }
+        return ItemStack.EMPTY;
     }
 
     // Результат помещается в выход: слот пуст либо совпадает по типу и влезает по стеку.
@@ -181,11 +210,20 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         return current.getCount() + result.getCount() <= current.getMaxStackSize();
     }
 
-    // Ищем рецепт плавки для входного предмета в серверном менеджере рецептов.
-    private RecipeHolder<SmeltingRecipe> findRecipe(ItemStack input) {
+    // Поиск рецепта: если во втором слоте есть ингредиент, сначала ищем сплавку,
+    // иначе обычную плавку по первому слоту.
+    private RecipeHolder<?> findRecipe() {
         if (level == null || level.getServer() == null) return null;
+        ItemStack in0 = inputInventory.getItem(0);
+        ItemStack in1 = inputInventory.getItem(1);
+        if (!in1.isEmpty()) {
+            RecipeHolder<AlloyingRecipe> alloy = level.getServer().getRecipeManager()
+                    .getRecipeFor(ModRecipeTypes.ALLOYING, new ProcessingInput(List.of(in0, in1)), level)
+                    .orElse(null);
+            if (alloy != null) return alloy;
+        }
         return level.getServer().getRecipeManager()
-                .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(input), level)
+                .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(in0), level)
                 .orElse(null);
     }
 

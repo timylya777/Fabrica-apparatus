@@ -1,0 +1,6 @@
+﻿{
+    "model":  {
+                  "model":  "fabrica_apparatus:item/zinc_ingot",
+                  "type":  "minecraft:model"
+              }
+}

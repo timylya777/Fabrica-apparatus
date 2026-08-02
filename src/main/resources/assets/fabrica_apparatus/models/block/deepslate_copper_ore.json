@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "all":  "fabrica_apparatus:block/deepslate_copper_ore"
+                 },
+    "parent":  "minecraft:block/cube_all"
+}

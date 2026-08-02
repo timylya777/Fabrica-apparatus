@@ -1,0 +1,14 @@
+﻿{
+    "key":  {
+                "#":  "fabrica_apparatus:copper_plate"
+            },
+    "pattern":  [
+                    "###",
+                    "# #",
+                    "###"
+                ],
+    "result":  {
+                   "id":  "fabrica_apparatus:machine_casing"
+               },
+    "type":  "minecraft:crafting_shaped"
+}

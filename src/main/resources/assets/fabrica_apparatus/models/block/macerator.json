@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "all":  "fabrica_apparatus:block/macerator"
+                 },
+    "parent":  "minecraft:block/cube_all"
+}

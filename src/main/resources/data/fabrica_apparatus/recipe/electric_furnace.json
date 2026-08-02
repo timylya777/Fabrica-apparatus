@@ -1,0 +1,15 @@
+﻿{
+    "key":  {
+                "C":  "fabrica_apparatus:copper_lv_cable",
+                "M":  "fabrica_apparatus:machine_casing"
+            },
+    "pattern":  [
+                    "MMM",
+                    "MCM",
+                    "MCM"
+                ],
+    "result":  {
+                   "id":  "fabrica_apparatus:electric_furnace"
+               },
+    "type":  "minecraft:crafting_shaped"
+}

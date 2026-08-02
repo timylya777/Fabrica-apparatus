@@ -3,6 +3,7 @@ package com.fabrica.block;
 import com.fabrica.FabricaMod;
 import com.fabrica.block.machine.furnace.ElectricFurnaceBlockEntity;
 import com.fabrica.block.machine.generator.GeneratorBlockEntity;
+import com.fabrica.block.machine.macerator.MaceratorBlockEntity;
 import com.fabrica.block.me.MeDriveBlockEntity;
 import com.fabrica.block.me.MeGridBlockEntity;
 import net.minecraft.core.Registry;
@@ -26,6 +27,13 @@ public final class ModBlockEntities {
         BuiltInRegistries.BLOCK_ENTITY_TYPE,
         FabricaMod.id("electric_furnace"),
         new BlockEntityType<>(ElectricFurnaceBlockEntity::new, Set.of(ModBlocks.ELECTRIC_FURNACE))
+    );
+
+    // Мацератор: дробит руду в пыль.
+    public static final BlockEntityType<MaceratorBlockEntity> MACERATOR = Registry.register(
+        BuiltInRegistries.BLOCK_ENTITY_TYPE,
+        FabricaMod.id("macerator"),
+        new BlockEntityType<>(MaceratorBlockEntity::new, Set.of(ModBlocks.MACERATOR))
     );
 
     // Дисковод ME: хранит диски и предоставляет MeStorage.

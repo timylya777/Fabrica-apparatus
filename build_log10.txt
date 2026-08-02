@@ -1,0 +1,116 @@
+
+> Configure project :
+Fabric Loom: 1.17.17
+Project directory 'C:\Users\boris\OneDrive\Documents\Fabrica-apparatus' is located in OneDrive. This is known to cause issues and slower performance. Consider moving the project to a different location.
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :generateLog4jConfig UP-TO-DATE
+> Task :generateDLIConfig UP-TO-DATE
+> Task :configureLaunch UP-TO-DATE
+
+> Task :runServer
+[19:00:46] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 26.2 with Fabric Loader 0.19.3
+[19:00:46] [main/INFO] (FabricLoader/Mappings) Mappings not present!
+[19:00:47] [main/INFO] (FabricLoader) Loading 43 mods:
+	- fabric-api 0.156.0+26.2
+	   |-- fabric-key-mapping-api-v1 2.0.5+e2bdee789e
+	   |-- fabric-model-loading-api-v1 8.0.16+c80601bb9e
+	   |-- fabric-renderer-api-v1 14.1.3+2b0d8a229e
+	   |-- fabric-renderer-indigo 9.1.3+2b0d8a229e
+	   |-- fabric-rendering-v1 25.3.2+515ac5339e
+	   |-- fabric-screen-api-v1 5.1.0+48e3c0b09e
+	   \-- fabric-sound-api-v1 2.0.5+11a26f319e
+	- fabric-api-base 2.0.4+ece063239e
+	- fabric-api-lookup-api-v1 2.0.17+11e1c9a39e
+	- fabric-biome-api-v1 18.0.6+c7bd5b8e9e
+	- fabric-block-api-v1 3.0.3+ec56b6019e
+	- fabric-block-getter-api-v2 2.0.7+ec56b6019e
+	- fabric-command-api-v2 3.1.0+00cb03469e
+	- fabric-content-registries-v0 11.3.0+d0a699d09e
+	- fabric-convention-tags-v2 4.7.0+1f023a9e9e
+	- fabric-crash-report-info-v1 1.0.5+086d547a9e
+	- fabric-creative-tab-api-v1 5.0.14+d871b99e9e
+	- fabric-data-attachment-api-v1 2.2.18+515ac5339e
+	- fabric-data-generation-api-v1 25.5.0+aed122aa9e
+	- fabric-debug-api-v1 1.0.2+c792624d9e
+	- fabric-dimensions-v1 5.1.11+515ac5339e
+	- fabric-entity-events-v1 5.0.5+06488ac19e
+	- fabric-events-interaction-v0 5.2.7+515ac5339e
+	- fabric-game-rule-api-v1 4.0.8+46a6d00c9e
+	- fabric-gametest-api-v1 4.0.21+4a7fa0819e
+	- fabric-item-api-v1 14.4.0+49a69a7b9e
+	- fabric-lifecycle-events-v1 4.1.3+4575b05f9e
+	- fabric-loot-api-v3 3.0.17+06488ac19e
+	- fabric-menu-api-v1 2.0.16+086d547a9e
+	- fabric-message-api-v1 7.0.7+086d547a9e
+	- fabric-networking-api-v1 6.3.3+72073ef09e
+	- fabric-object-builder-api-v1 24.1.0+6fcd5f039e
+	- fabric-particles-v1 5.0.18+d1756aa99e
+	- fabric-permission-api-v1 1.0.4+536fad2f9e
+	- fabric-recipe-api-v1 9.0.20+11e1c9a39e
+	- fabric-registry-sync-v0 7.1.0+c7bd5b8e9e
+	- fabric-rendering-fluids-v1 6.0.4+06488ac19e
+	- fabric-resource-conditions-api-v1 6.1.0+10e9a28b9e
+	- fabric-resource-loader-v0 3.3.20+4fc5413f9e
+	- fabric-resource-loader-v1 2.0.13+9edec1269e
+	- fabric-serialization-api-v1 2.0.4+11a26f319e
+	- fabric-tag-api-v1 2.1.4+515ac5339e
+	- fabric-transfer-api-v1 8.0.12+11dbb7d79e
+	- fabric-transitive-access-wideners-v1 8.1.4+67c847259e
+	- fabrica_apparatus 1.0.0
+	- fabricloader 0.19.3
+	- java 25
+	- minecraft 26.2
+	- mixinextras 0.5.4
+[19:00:47] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/boris/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.17.3+mixin.0.8.7/41c4a3984a80f4679e759fb9f495587acc5cdac7/sponge-mixin-0.17.3+mixin.0.8.7.jar Service=Knot/Fabric Env=SERVER
+[19:00:47] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_25
+[19:00:48] [main/INFO] (FabricLoader/MixinExtras|Service) Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.4).
+[19:01:02] [main/INFO] (fabrica_apparatus) We are alive!
+[19:01:02] [main/INFO] (Minecraft) Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
+[19:01:04] [Worker-Main-3/INFO] (Minecraft) No existing world data, creating new world
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/aluminum_ore' from 'fabrica_apparatus:loot_table/blocks/aluminum_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@45f7278]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/copper_ore' from 'fabrica_apparatus:loot_table/blocks/copper_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@191be473]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_aluminum_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_aluminum_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@2917471d]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_copper_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_copper_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@3a063900]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_lead_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_lead_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@3d118d91]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_nickel_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_nickel_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@6e9961f6]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_silver_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_silver_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@3da743f3]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_tin_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_tin_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@4bcddafe]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/deepslate_zinc_ore' from 'fabrica_apparatus:loot_table/blocks/deepslate_zinc_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@61d0c646]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/lead_ore' from 'fabrica_apparatus:loot_table/blocks/lead_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@3268953a]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/nickel_ore' from 'fabrica_apparatus:loot_table/blocks/nickel_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@79c1c2f2]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/silver_ore' from 'fabrica_apparatus:loot_table/blocks/silver_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@4b0b0347]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/tin_ore' from 'fabrica_apparatus:loot_table/blocks/tin_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@7ed3aeb4]
+[19:01:04] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:blocks/zinc_ore' from 'fabrica_apparatus:loot_table/blocks/zinc_ore.json': DataResult.Error['Not a json array: "System.Collections.Hashtable" missed input: {"minecraft:enchantments":"System.Collections.Hashtable"}': net.minecraft.world.level.storage.loot.LootTable@21852e3d]
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:aluminum_dust_from_macerating' from 'fabrica_apparatus:recipe/aluminum_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:aluminum_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:bronze_ingot_from_alloying' from 'fabrica_apparatus:recipe/bronze_ingot_from_alloying.json': DataResult.Error['Item fabrica_apparatus:bronze_ingot does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:copper_dust_from_macerating' from 'fabrica_apparatus:recipe/copper_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:copper_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:lead_dust_from_macerating' from 'fabrica_apparatus:recipe/lead_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:lead_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:nickel_dust_from_macerating' from 'fabrica_apparatus:recipe/nickel_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:nickel_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:silver_dust_from_macerating' from 'fabrica_apparatus:recipe/silver_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:silver_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:tin_dust_from_macerating' from 'fabrica_apparatus:recipe/tin_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:tin_dust does not have components yet']
+[19:01:05] [Worker-Main-5/ERROR] (Minecraft) Couldn't parse data file 'fabrica_apparatus:zinc_dust_from_macerating' from 'fabrica_apparatus:recipe/zinc_dust_from_macerating.json': DataResult.Error['Item fabrica_apparatus:zinc_dust does not have components yet']
+[19:01:06] [main/INFO] (Minecraft) Loaded 1608 recipes
+[19:01:06] [main/INFO] (Minecraft) Loaded 1688 advancements
+[19:01:06] [main/INFO] (BiomeModificationImpl) Applied 55 biome modifications to 55 of 66 new biomes in 9.988 ms
+[19:01:06] [Server thread/INFO] (Minecraft) Starting minecraft server version 26.2
+[19:01:06] [Server thread/INFO] (Minecraft) Loading properties
+[19:01:06] [Server thread/INFO] (Minecraft) Default game type: SURVIVAL
+[19:01:06] [Server thread/INFO] (Minecraft) Generating keypair
+[19:01:06] [Server thread/INFO] (Minecraft) Starting Minecraft server on *:25565
+[19:01:06] [Server thread/INFO] (Minecraft) Preparing level "world"
+[19:01:07] [Server thread/INFO] (Minecraft) Selecting global world spawn...
+[19:01:13] [Server thread/INFO] (Minecraft) Loading 0 persistent chunks...
+[19:01:13] [Server thread/INFO] (Minecraft) Preparing spawn area: 100%
+[19:01:13] [Server thread/INFO] (Minecraft) Time elapsed: 6218 ms
+[19:01:13] [Server thread/INFO] (Minecraft) Done (6.924s)! For help, type "help"
+[19:01:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[19:01:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[19:01:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[19:01:13] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[19:01:13] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[19:01:13] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[19:01:13] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+[19:02:13] [Server thread/INFO] (Minecraft) Server empty for 60 seconds, pausing

@@ -1,0 +1,10 @@
+﻿{
+    "ingredients":  [
+                        "fabrica_apparatus:aluminum_ingot"
+                    ],
+    "result":  {
+                   "id":  "fabrica_apparatus:aluminum_mv_cable",
+                   "count":  2
+               },
+    "type":  "minecraft:crafting_shapeless"
+}

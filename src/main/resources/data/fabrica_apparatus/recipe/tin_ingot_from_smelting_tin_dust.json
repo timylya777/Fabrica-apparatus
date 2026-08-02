@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:tin_dust",
+    "group":  "tin_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:tin_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

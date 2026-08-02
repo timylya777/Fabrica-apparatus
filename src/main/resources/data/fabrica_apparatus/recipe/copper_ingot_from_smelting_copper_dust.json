@@ -1,0 +1,9 @@
+﻿{
+    "ingredient":  "fabrica_apparatus:copper_dust",
+    "group":  "copper_ingot",
+    "result":  {
+                   "id":  "fabrica_apparatus:copper_ingot"
+               },
+    "experience":  0.5,
+    "type":  "minecraft:smelting"
+}

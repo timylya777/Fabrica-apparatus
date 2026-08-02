@@ -31,8 +31,10 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         checkContainerDataCount(data, DATA_COUNT);
         this.blockEntity = blockEntity;
         this.data = data;
-        // Слот 0 — вход (сырьё), слот 1 — выход (результат), слоты 2..37 — инвентарь игрока.
-        addSlot(new Slot(blockEntity != null ? blockEntity.getInputInventory() : new SimpleContainer(1), 0, 56, 35));
+        // Слоты 0, 1 — вход (сырьё и ингредиент сплава), слот 2 — выход,
+        // слоты 3..38 — инвентарь игрока.
+        addSlot(new Slot(blockEntity != null ? blockEntity.getInputInventory() : new SimpleContainer(2), 0, 56, 35));
+        addSlot(new Slot(blockEntity != null ? blockEntity.getInputInventory() : new SimpleContainer(2), 1, 30, 35));
         addSlot(new Slot(blockEntity != null ? blockEntity.getOutputInventory() : new SimpleContainer(1), 0, 116, 35));
         addStandardInventorySlots(inventory, 8, 84);
         addDataSlots(data);
@@ -54,7 +56,7 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         return data.get(3);
     }
 
-    // Shift+клик: из слоёв печи (0..1) — в инвентарь, из инвентаря — во входной слот.
+    // Shift+клик: из слотов печи (0..2) — в инвентарь, из инвентаря — во входные слоты.
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;
@@ -62,14 +64,14 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         if (slot != null && slot.hasItem()) {
             ItemStack slotStack = slot.getItem();
             stack = slotStack.copy();
-            if (index == 0 || index == 1) {
+            if (index == 0 || index == 1 || index == 2) {
                 // input/output -> player inventory
-                if (!this.moveItemStackTo(slotStack, 2, 38, true)) {
+                if (!this.moveItemStackTo(slotStack, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
-                // player inventory -> input slot
-                if (!this.moveItemStackTo(slotStack, 0, 1, false)) {
+                // player inventory -> input slots
+                if (!this.moveItemStackTo(slotStack, 0, 2, false)) {
                     return ItemStack.EMPTY;
                 }
             }

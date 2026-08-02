@@ -1,0 +1,13 @@
+﻿{
+    "time":  400,
+    "ingredients":  [
+                        "fabrica_apparatus:copper_ingot",
+                        "fabrica_apparatus:tin_ingot"
+                    ],
+    "result":  {
+                   "id":  "fabrica_apparatus:bronze_ingot",
+                   "count":  4
+               },
+    "type":  "fabrica_apparatus:alloying",
+    "eu":  8
+}

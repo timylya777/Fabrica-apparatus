@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "layer0":  "fabrica_apparatus:item/copper_dust"
+                 },
+    "parent":  "minecraft:item/generated"
+}

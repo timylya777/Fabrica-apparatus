@@ -1,0 +1,10 @@
+﻿{
+    "ingredients":  [
+                        "fabrica_apparatus:nickel_ingot"
+                    ],
+    "result":  {
+                   "id":  "fabrica_apparatus:nickel_plate",
+                   "count":  1
+               },
+    "type":  "minecraft:crafting_shapeless"
+}

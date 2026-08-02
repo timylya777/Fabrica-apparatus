@@ -3,6 +3,7 @@ package com.fabrica.client;
 import com.fabrica.client.gui.ElectricFurnaceScreen;
 import com.fabrica.client.gui.GeneratorScreen;
 import com.fabrica.client.gui.ItemPipeSettingsScreen;
+import com.fabrica.client.gui.MaceratorScreen;
 import com.fabrica.client.gui.MeDriveScreen;
 import com.fabrica.client.gui.MeGridScreen;
 import com.fabrica.client.render.pipe.PipeMeshCache;
@@ -41,6 +42,7 @@ public class FabricaModClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		MenuScreens.register(ModMenus.GENERATOR, GeneratorScreen::new);
 		MenuScreens.register(ModMenus.ELECTRIC_FURNACE, ElectricFurnaceScreen::new);
+		MenuScreens.register(ModMenus.MACERATOR, MaceratorScreen::new);
 		MenuScreens.register(ModMenus.ME_DRIVE, MeDriveScreen::new);
 		MenuScreens.register(ModMenus.ME_GRID, MeGridScreen::new);
 		MenuScreens.register(ModMenus.ITEM_PIPE_SETTINGS, ItemPipeSettingsScreen::new);

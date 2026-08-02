@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "layer0":  "fabrica_apparatus:item/bronze_dust"
+                 },
+    "parent":  "minecraft:item/generated"
+}

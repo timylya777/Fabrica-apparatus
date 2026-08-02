@@ -1,0 +1,17 @@
+﻿{
+    "key":  {
+                "C":  "fabrica_apparatus:copper_lv_cable",
+                "P":  "fabrica_apparatus:copper_plate",
+                "M":  "fabrica_apparatus:machine_casing",
+                "I":  "minecraft:iron_ingot"
+            },
+    "pattern":  [
+                    "PPP",
+                    "CIC",
+                    "MMM"
+                ],
+    "result":  {
+                   "id":  "fabrica_apparatus:generator"
+               },
+    "type":  "minecraft:crafting_shaped"
+}

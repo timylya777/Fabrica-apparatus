@@ -1,0 +1,10 @@
+﻿{
+    "ingredients":  [
+                        "fabrica_apparatus:copper_ingot"
+                    ],
+    "result":  {
+                   "id":  "fabrica_apparatus:copper_plate",
+                   "count":  1
+               },
+    "type":  "minecraft:crafting_shapeless"
+}

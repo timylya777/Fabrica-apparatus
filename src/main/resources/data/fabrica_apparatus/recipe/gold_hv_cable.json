@@ -1,0 +1,10 @@
+﻿{
+    "ingredients":  [
+                        "minecraft:gold_ingot"
+                    ],
+    "result":  {
+                   "id":  "fabrica_apparatus:gold_hv_cable",
+                   "count":  2
+               },
+    "type":  "minecraft:crafting_shapeless"
+}

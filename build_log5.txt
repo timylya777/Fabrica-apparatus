@@ -1,0 +1,65 @@
+
+> Configure project :
+Fabric Loom: 1.17.17
+Project directory 'C:\Users\boris\OneDrive\Documents\Fabrica-apparatus' is located in OneDrive. This is known to cause issues and slower performance. Consider moving the project to a different location.
+
+> Task :compileJava
+C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\MaceratingRecipe.java:31: error: cannot find symbol
+    public RecipeType<? extends Recipe<ProcessingInput>> getType() {
+                                ^
+  symbol:   class Recipe
+  location: class MaceratingRecipe
+C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\MaceratingRecipe.java:36: error: cannot find symbol
+    public RecipeSerializer<? extends Recipe<ProcessingInput>> getSerializer() {
+                                      ^
+  symbol:   class Recipe
+  location: class MaceratingRecipe
+C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\AlloyingRecipe.java:31: error: cannot find symbol
+    public RecipeType<? extends Recipe<ProcessingInput>> getType() {
+                                ^
+  symbol:   class Recipe
+  location: class AlloyingRecipe
+C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\AlloyingRecipe.java:36: error: cannot find symbol
+    public RecipeSerializer<? extends Recipe<ProcessingInput>> getSerializer() {
+                                      ^
+  symbol:   class Recipe
+  location: class AlloyingRecipe
+4 errors
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/boris/OneDrive/Documents/Fabrica-apparatus/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\MaceratingRecipe.java:31: error: cannot find symbol
+      public RecipeType<? extends Recipe<ProcessingInput>> getType() {
+                                  ^
+    symbol:   class Recipe
+    location: class MaceratingRecipe
+  C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\MaceratingRecipe.java:36: error: cannot find symbol
+      public RecipeSerializer<? extends Recipe<ProcessingInput>> getSerializer() {
+                                        ^
+    symbol:   class Recipe
+    location: class MaceratingRecipe
+  C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\AlloyingRecipe.java:31: error: cannot find symbol
+      public RecipeType<? extends Recipe<ProcessingInput>> getType() {
+                                  ^
+    symbol:   class Recipe
+    location: class AlloyingRecipe
+  C:\Users\boris\OneDrive\Documents\Fabrica-apparatus\src\main\java\com\fabrica\recipe\AlloyingRecipe.java:36: error: cannot find symbol
+      public RecipeSerializer<? extends Recipe<ProcessingInput>> getSerializer() {
+                                        ^
+    symbol:   class Recipe
+    location: class AlloyingRecipe
+  4 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 5s
+1 actionable task: 1 executed

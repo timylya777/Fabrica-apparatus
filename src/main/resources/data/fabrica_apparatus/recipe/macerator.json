@@ -1,0 +1,16 @@
+﻿{
+    "key":  {
+                "C":  "fabrica_apparatus:copper_lv_cable",
+                "P":  "fabrica_apparatus:copper_plate",
+                "M":  "fabrica_apparatus:machine_casing"
+            },
+    "pattern":  [
+                    "MPM",
+                    "PCP",
+                    "MPM"
+                ],
+    "result":  {
+                   "id":  "fabrica_apparatus:macerator"
+               },
+    "type":  "minecraft:crafting_shaped"
+}
