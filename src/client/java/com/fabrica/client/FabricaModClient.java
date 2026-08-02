@@ -47,7 +47,7 @@ public class FabricaModClient implements ClientModInitializer {
 		CustomUnbakedBlockStateModel.register(PipeUnbakedModel.TYPE_ID, PipeUnbakedModel.CODEC);
 		InvalidateRenderStateCallback.EVENT.register(PipeMeshCache::clearAll);
 		registerSyncReceiver();
-		// registerPipeRenderers();
+		registerPipeRenderers();
 	}
 
 	private static void registerSyncReceiver() {
