@@ -59,7 +59,7 @@ public class FluidNetworkNode extends PipeNetworkNode {
 					}
 				}
 			}
-			targets.add(new FluidTarget(connection.priority, storage));
+			targets.add(new FluidTarget(connection.priority, storage, connection.canExtract(), connection.canInsert()));
 		}
 	}
 
@@ -67,6 +67,15 @@ public class FluidNetworkNode extends PipeNetworkNode {
 	private Storage<FluidVariant> getNeighborStorage(ServerLevel world, BlockPos pos, FluidConnection connection) {
 		Storage<FluidVariant> storage = FluidStorage.SIDED.find(world, pos.relative(connection.direction), connection.direction.getOpposite());
 		return storage != null ? storage : Storage.empty();
+	}
+
+	@Override
+	public void buildInitialConnections(Level world, BlockPos pos) {
+		for (Direction direction : Direction.values()) {
+			if (canConnect(world, pos, direction)) {
+				connections.add(new FluidConnection(direction, BLOCK_IN_OUT, 0));
+			}
+		}
 	}
 
 	@Override
@@ -82,6 +91,13 @@ public class FluidNetworkNode extends PipeNetworkNode {
 			}
 			return false;
 		});
+		// Auto-connect to newly placed tanks, like MI
+		for (Direction direction : Direction.values()) {
+			boolean connected = connections.stream().anyMatch(connection -> connection.direction == direction);
+			if (!connected && canConnect(world, pos, direction)) {
+				connections.add(new FluidConnection(direction, BLOCK_IN_OUT, 0));
+			}
+		}
 	}
 
 	@Override
@@ -102,19 +118,26 @@ public class FluidNetworkNode extends PipeNetworkNode {
 
 	@Override
 	public void removeConnection(Level world, BlockPos pos, Direction direction) {
-		// Cycle if it exists
-		for (int i = 0; i < connections.size(); i++) {
-			FluidConnection conn = connections.get(i);
-			if (conn.direction == direction) {
-				if (conn.type == BLOCK_IN)
-					conn.type = BLOCK_IN_OUT;
-				else if (conn.type == BLOCK_IN_OUT)
-					conn.type = BLOCK_OUT;
-				else
-					connections.remove(i);
-				return;
+		// Remove if it exists
+		connections.removeIf(connection -> connection.direction == direction);
+	}
+
+	@Override
+	public boolean cycleConnectionMode(Level world, BlockPos pos, Direction direction) {
+		// Cycle import -> import/export -> export -> import
+		for (FluidConnection connection : connections) {
+			if (connection.direction == direction) {
+				if (connection.type == BLOCK_IN) {
+					connection.type = BLOCK_IN_OUT;
+				} else if (connection.type == BLOCK_IN_OUT) {
+					connection.type = BLOCK_OUT;
+				} else {
+					connection.type = BLOCK_IN;
+				}
+				return true;
 			}
 		}
+		return false;
 	}
 
 	@Override
@@ -127,7 +150,7 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 		// Otherwise try to connect
 		if (canConnect(world, pos, direction)) {
-			connections.add(new FluidConnection(direction, BLOCK_IN, 0));
+			connections.add(new FluidConnection(direction, BLOCK_IN_OUT, 0));
 		}
 	}
 

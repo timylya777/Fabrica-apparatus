@@ -189,8 +189,13 @@ public class PipeNetworkManager {
 	 * Add a node and create a new network for it.
 	 */
 	public void addNode(PipeNetworkNode node, BlockPos pos, PipeNetworkData data) {
-		if (networkByBlock.containsKey(pos))
-			throw new IllegalArgumentException("Cannot add a node that is already in the network.");
+		if (networkByBlock.containsKey(pos)) {
+			// A stale entry can remain if a previous pipe at this position was
+			// removed through a path that only unloaded its node. Clean it up
+			// before adding the new node, otherwise the position would be
+			// permanently unplaceable.
+			removeNode(pos);
+		}
 
 		PipeNetwork network = createNetwork(data.clone());
 		if (node != null) {

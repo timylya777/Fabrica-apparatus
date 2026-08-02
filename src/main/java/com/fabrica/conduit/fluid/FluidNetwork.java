@@ -85,6 +85,9 @@ public class FluidNetwork extends PipeNetwork {
 	 * @return The amount that was successfully transferred.
 	 */
 	private static long transferByPriority(TransferOperation operation, List<FluidTarget> targets, FluidVariant fluid, long maxAmount, TransactionContext transaction) {
+		// Only transfer through targets that allow this operation (respects the
+		// import/export mode of each connection).
+		targets.removeIf(target -> operation == TransferOperation.INSERT ? !target.canInsert : !target.canExtract);
 		// Sort by decreasing priority
 		targets.sort(Comparator.comparingInt(target -> -target.priority));
 		// Transfer for each bucket

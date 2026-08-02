@@ -9,12 +9,16 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 class FluidTarget {
 	final int priority;
 	final Storage<FluidVariant> storage;
+	final boolean canExtract;
+	final boolean canInsert;
 
 	// A temporary value used to sort fluid targets
 	long simulationResult;
 
-	public FluidTarget(int priority, Storage<FluidVariant> storage) {
+	public FluidTarget(int priority, Storage<FluidVariant> storage, boolean canExtract, boolean canInsert) {
 		this.priority = priority;
 		this.storage = storage;
+		this.canExtract = canExtract;
+		this.canInsert = canInsert;
 	}
 }

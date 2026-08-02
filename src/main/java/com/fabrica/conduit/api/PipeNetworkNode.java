@@ -33,6 +33,14 @@ public abstract class PipeNetworkNode {
 
 	public abstract void addConnection(PipeBlockEntity pipe, Player player, Level world, BlockPos pos, Direction direction);
 
+	/**
+	 * Cycle the import/export mode of the connection to a machine on the given
+	 * side. Returns true if the mode was changed.
+	 */
+	public boolean cycleConnectionMode(Level world, BlockPos pos, Direction direction) {
+		return false;
+	}
+
 	public abstract void save(ValueOutput output);
 
 	public abstract void read(ValueInput input);

@@ -1,12 +1,14 @@
 package com.fabrica.conduit.impl;
 
 import com.fabrica.conduit.FabricaPipes;
+import com.fabrica.conduit.api.PipeEndpointType;
 import com.fabrica.conduit.api.PipeNetworkData;
 import com.fabrica.conduit.api.PipeNetworkType;
 import com.fabrica.conduit.electricity.ElectricityNetworkData;
 import com.fabrica.conduit.fluid.FluidNetworkData;
 import com.fabrica.conduit.item.ItemNetworkData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -40,11 +42,34 @@ public class PipeItem extends Item {
 
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
+		Player player = context.getPlayer();
+		if (player != null && player.isShiftKeyDown()) {
+			// Shift+click only breaks connections between pipes, it never places
+			// pipes.
+			if (tryBreakConnection(context)) {
+				Level world = context.getLevel();
+				SoundType group = world.getBlockState(context.getClickedPos()).getSoundType();
+				world.playSound(player, context.getClickedPos(), group.getBreakSound(), SoundSource.BLOCKS,
+						(group.getVolume() + 1.0F) / 2.0F, group.getPitch() * 0.8F);
+				return InteractionResult.SUCCESS;
+			}
+			return InteractionResult.PASS;
+		}
+
+		// Like MI, clicking a connected part of an item/fluid pipe with the pipe
+		// item cycles the mode: arrow into the block (insert), out of the block
+		// (extract), or both.
+		if (tryCycleMode(context)) {
+			Level world = context.getLevel();
+			SoundType group = world.getBlockState(context.getClickedPos()).getSoundType();
+			world.playSound(context.getPlayer(), context.getClickedPos(), group.getPlaceSound(), SoundSource.BLOCKS,
+					(group.getVolume() + 1.0F) / 4.0F, group.getPitch());
+			return InteractionResult.SUCCESS;
+		}
+
 		BlockPos placingPos = tryPlace(context);
 		if (placingPos != null) {
 			Level world = context.getLevel();
-			Player player = context.getPlayer();
-
 			// update adjacent pipes
 			world.updateNeighborsAt(placingPos, Blocks.AIR);
 			// remove one from stack
@@ -81,6 +106,65 @@ public class PipeItem extends Item {
 			}
 		}
 		return super.useOn(context);
+	}
+
+	// Try breaking a connection between two pipes on the clicked side, returns
+	// true if a connection was found and removed
+	private boolean tryBreakConnection(UseOnContext context) {
+		Level world = context.getLevel();
+		BlockPos clickedPos = context.getClickedPos();
+		Direction clickedFace = context.getClickedFace();
+		// Direct click on a pipe, or click through to the pipe behind
+		if (breakConnectionAt(world, clickedPos, clickedFace)) {
+			return true;
+		}
+		return breakConnectionAt(world, clickedPos.relative(clickedFace), clickedFace.getOpposite());
+	}
+
+	private boolean breakConnectionAt(Level world, BlockPos pos, Direction direction) {
+		if (!(world.getBlockEntity(pos) instanceof PipeBlockEntity pipeEntity)) {
+			return false;
+		}
+		PipeEndpointType[] connections = pipeEntity.connections.get(type);
+		if (connections == null || connections[direction.get3DDataValue()] != PipeEndpointType.PIPE) {
+			return false;
+		}
+		if (!world.isClientSide()) {
+			pipeEntity.removeConnection(type, direction);
+		}
+		return true;
+	}
+
+	// Try cycling the import/export mode of a machine connection on the clicked
+	// side, returns true if a connection mode was cycled.
+	private boolean tryCycleMode(UseOnContext context) {
+		if (isCable()) {
+			return false;
+		}
+		Level world = context.getLevel();
+		BlockPos clickedPos = context.getClickedPos();
+		Direction clickedFace = context.getClickedFace();
+		// Direct click on a pipe, or click through to the pipe behind
+		if (cycleModeAt(world, clickedPos, clickedFace)) {
+			return true;
+		}
+		return cycleModeAt(world, clickedPos.relative(clickedFace), clickedFace.getOpposite());
+	}
+
+	private boolean cycleModeAt(Level world, BlockPos pos, Direction direction) {
+		if (!(world.getBlockEntity(pos) instanceof PipeBlockEntity pipeEntity)) {
+			return false;
+		}
+		// Only machine connections can be cycled, pipe links cannot.
+		PipeEndpointType[] connections = pipeEntity.connections.get(type);
+		if (connections == null || connections[direction.get3DDataValue()] == null
+				|| connections[direction.get3DDataValue()] == PipeEndpointType.PIPE) {
+			return false;
+		}
+		if (!world.isClientSide()) {
+			pipeEntity.cycleConnectionMode(type, direction);
+		}
+		return true;
 	}
 
 	// Try placing the pipe and registering the new pipe to the entity, returns null

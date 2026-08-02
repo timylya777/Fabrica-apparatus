@@ -1,7 +1,9 @@
 package com.fabrica.conduit.impl;
 
 import com.fabrica.conduit.FabricaPipes;
+import com.fabrica.conduit.api.PipeEndpointType;
 import com.fabrica.conduit.api.PipeNetworkNode;
+import com.fabrica.item.KeyItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +12,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -134,8 +135,53 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos blockPos, Player player,
 			InteractionHand hand, BlockHitResult hit) {
+		// The key configures pipes: click a part to cycle the import/export mode,
+		// shift+click to add or remove the machine connection.
+		if (stack.getItem() instanceof KeyItem) {
+			return useKey(state, world, blockPos, player, hit);
+		}
 		// Pipe placement and connection additions are handled by PipeItem.useOn.
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
+	}
+
+	private InteractionResult useKey(BlockState state, Level world, BlockPos blockPos, Player player, BlockHitResult hit) {
+		if (!(world.getBlockEntity(blockPos) instanceof PipeBlockEntity pipeEntity) || pipeEntity.getNodes().isEmpty()) {
+			return InteractionResult.PASS;
+		}
+
+		PipeVoxelShape partShape = getHitPart(pipeEntity, hit);
+		if (partShape == null) {
+			return InteractionResult.PASS;
+		}
+
+		SoundType group = state.getSoundType();
+
+		if (player.isShiftKeyDown()) {
+			// Shift+click toggles the connection to the machine on the clicked
+			// side. Pipe links can only be changed with the matching pipe item.
+			Direction direction = partShape.direction != null ? partShape.direction : hit.getDirection();
+			if (!world.isClientSide()) {
+				pipeEntity.toggleMachineConnection(player, partShape.type, direction);
+			} else {
+				world.playSound(player, blockPos, group.getPlaceSound(), SoundSource.BLOCKS, (group.getVolume() + 1.0F) / 4.0F,
+						group.getPitch() * 0.8F);
+			}
+			world.updateNeighborsAt(blockPos, Blocks.AIR);
+		} else if (partShape.direction != null) {
+			// Clicking a side connector cycles the import/export mode of item
+			// and fluid pipes.
+			if (!world.isClientSide()) {
+				pipeEntity.cycleConnectionMode(partShape.type, partShape.direction);
+			} else {
+				world.playSound(player, blockPos, group.getBreakSound(), SoundSource.BLOCKS, (group.getVolume() + 1.0F) / 4.0F,
+						group.getPitch() * 0.8F);
+			}
+			world.updateNeighborsAt(blockPos, Blocks.AIR);
+		} else {
+			return InteractionResult.PASS;
+		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -149,47 +195,21 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 			return InteractionResult.PASS;
 		}
 
-		SoundType group = state.getSoundType();
-		Vec3 hitPos = hit.getLocation();
-
-		if (player.isShiftKeyDown()) {
-			// Remove the pipe part and drop it.
-			boolean removeBlock = pipeEntity.connections.size() == 1;
-			if (!world.isClientSide()) {
-				pipeEntity.removePipeAndDropContainedItems(partShape.type);
-			}
-			if (removeBlock) {
-				world.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
-			}
-			world.updateNeighborsAt(blockPos, Blocks.AIR);
-			if (!world.isClientSide()) {
-				world.addFreshEntity(new ItemEntity(world, hitPos.x, hitPos.y, hitPos.z,
-						new ItemStack(FabricaPipes.getPipeItem(partShape.type))));
-			}
-			world.playSound(player, blockPos, group.getBreakSound(), SoundSource.BLOCKS, (group.getVolume() + 1.0F) / 2.0F,
-					group.getPitch() * 0.8F);
-		} else {
-			// Toggle a connection: click the center to add a connection towards the clicked side,
-			// click an existing side connector to remove it.
-			if (partShape.direction == null) {
+		// Shift+click on an item pipe connection opens the settings menu
+		// (white/black list and filter slots). Everything else is configured
+		// with the key.
+		if (player.isShiftKeyDown() && partShape.direction != null && partShape.type == FabricaPipes.ITEM_PIPE) {
+			PipeEndpointType[] connection = pipeEntity.connections.get(partShape.type);
+			if (connection != null && connection[partShape.direction.get3DDataValue()] != null
+					&& connection[partShape.direction.get3DDataValue()] != PipeEndpointType.PIPE) {
 				if (!world.isClientSide()) {
-					pipeEntity.addConnection(player, partShape.type, hit.getDirection());
-				} else {
-					world.playSound(player, blockPos, group.getPlaceSound(), SoundSource.BLOCKS,
-							(group.getVolume() + 1.0F) / 4.0F, group.getPitch() * 0.8F);
+					pipeEntity.openConnectionSettings(player, partShape.type, partShape.direction);
 				}
-			} else {
-				if (!world.isClientSide()) {
-					pipeEntity.removeConnection(partShape.type, partShape.direction);
-				} else {
-					world.playSound(player, blockPos, group.getBreakSound(), SoundSource.BLOCKS,
-							(group.getVolume() + 1.0F) / 4.0F, group.getPitch() * 0.8F);
-				}
+				return InteractionResult.SUCCESS;
 			}
-			world.updateNeighborsAt(blockPos, Blocks.AIR);
 		}
 
-		return InteractionResult.SUCCESS;
+		return InteractionResult.PASS;
 	}
 
 	@Override

@@ -27,8 +27,8 @@ import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemNetwork extends PipeNetwork {
-	public static final int TICK_RATE = 60;
-	static final int BASE_ITEM_PIPE_TRANSFER = 8;
+	public static final int TICK_RATE = 20;
+	static final int BASE_ITEM_PIPE_TRANSFER = 16;
 
 	int inactiveTicks = 0;
 	long lastMovedItems = 0;

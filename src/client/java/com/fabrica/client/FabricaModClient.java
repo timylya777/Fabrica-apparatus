@@ -2,18 +2,26 @@ package com.fabrica.client;
 
 import com.fabrica.client.gui.ElectricFurnaceScreen;
 import com.fabrica.client.gui.GeneratorScreen;
+import com.fabrica.client.gui.ItemPipeSettingsScreen;
+import com.fabrica.client.gui.MeDriveScreen;
+import com.fabrica.client.gui.MeGridScreen;
 import com.fabrica.client.render.pipe.PipeMeshCache;
 import com.fabrica.client.render.pipe.PipeRenderer;
 import com.fabrica.client.render.pipe.PipeUnbakedModel;
 import com.fabrica.conduit.FabricaPipes;
 import com.fabrica.conduit.api.PipeNetworkType;
+import com.fabrica.gui.MeGridMenu;
 import com.fabrica.gui.ModMenus;
+import com.fabrica.me.MePackets;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,9 +31,25 @@ public class FabricaModClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		MenuScreens.register(ModMenus.GENERATOR, GeneratorScreen::new);
 		MenuScreens.register(ModMenus.ELECTRIC_FURNACE, ElectricFurnaceScreen::new);
+		MenuScreens.register(ModMenus.ME_DRIVE, MeDriveScreen::new);
+		MenuScreens.register(ModMenus.ME_GRID, MeGridScreen::new);
+		MenuScreens.register(ModMenus.ITEM_PIPE_SETTINGS, ItemPipeSettingsScreen::new);
 		CustomUnbakedBlockStateModel.register(PipeUnbakedModel.TYPE_ID, PipeUnbakedModel.CODEC);
 		InvalidateRenderStateCallback.EVENT.register(PipeMeshCache::clearAll);
+		registerSyncReceiver();
 		registerPipeRenderers();
+	}
+
+	private static void registerSyncReceiver() {
+		ClientPlayNetworking.registerGlobalReceiver(MePackets.MeGridSyncPayload.TYPE, (payload, context) -> {
+			context.client().execute(() -> {
+				Player player = Minecraft.getInstance().player;
+				if (player != null && player.containerMenu instanceof MeGridMenu menu
+						&& menu.containerId == payload.containerId()) {
+					menu.applySync(payload.entries(), payload.used(), payload.capacity());
+				}
+			});
+		});
 	}
 
 	/**

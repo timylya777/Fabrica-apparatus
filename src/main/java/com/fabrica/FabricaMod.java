@@ -5,8 +5,11 @@ import com.fabrica.conduit.FabricaPipes;
 import com.fabrica.conduit.impl.PipeNetworks;
 import com.fabrica.energy.FabricaEnergy;
 import com.fabrica.gui.ModMenus;
+import com.fabrica.gui.PipeSettingsPackets;
 import com.fabrica.item.ModItems;
 import com.fabrica.block.ModBlocks;
+import com.fabrica.me.MeLookups;
+import com.fabrica.me.MePackets;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -35,6 +38,9 @@ public class FabricaMod implements ModInitializer {
 		FabricaPipes.register();
 		PipeNetworks.init();
 		ModMenus.register();
+		PipeSettingsPackets.register();
+		MePackets.register();
+		MeLookups.register();
 		LOGGER.info("We are alive!");
 	}
 

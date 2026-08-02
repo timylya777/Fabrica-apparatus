@@ -54,7 +54,33 @@ public class GeneratorMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        return ItemStack.EMPTY;
+        ItemStack stack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
+            ItemStack slotStack = slot.getItem();
+            stack = slotStack.copy();
+            if (index == 0) {
+                // fuel slot -> player inventory
+                if (!this.moveItemStackTo(slotStack, 1, 37, true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else {
+                // player inventory -> fuel slot
+                if (!this.moveItemStackTo(slotStack, 0, 1, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            if (slotStack.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+            if (slotStack.getCount() == stack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+            slot.onTake(player, slotStack);
+        }
+        return stack;
     }
 
     @Override

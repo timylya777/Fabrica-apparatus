@@ -6,6 +6,8 @@ import com.fabrica.conduit.api.PipeNetworkData;
 import com.fabrica.conduit.api.PipeNetworkManager;
 import com.fabrica.conduit.api.PipeNetworkNode;
 import com.fabrica.conduit.api.PipeNetworkType;
+import com.fabrica.conduit.item.ItemNetworkNode;
+import com.fabrica.gui.ItemPipeSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -227,6 +229,73 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 	}
 
+	/**
+	 * Toggle the connection to a machine on the given side: connect if there is
+	 * a machine and no connection yet, disconnect otherwise. Never touches pipe
+	 * links.
+	 */
+	public void toggleMachineConnection(Player player, PipeNetworkType type, Direction direction) {
+		for (PipeNetworkNode pipe : pipes) {
+			if (pipe.getType() == type) {
+				PipeEndpointType[] connections = pipe.getConnections(worldPosition);
+				if (connections == null) {
+					return;
+				}
+				PipeEndpointType connection = connections[direction.get3DDataValue()];
+				if (connection == PipeEndpointType.PIPE) {
+					// There is another pipe on this side, don't touch it.
+					return;
+				}
+				if (connection != null) {
+					pipe.removeConnection(level, worldPosition, direction);
+				} else {
+					pipe.addConnection(this, player, level, worldPosition, direction);
+				}
+				onConnectionsChanged();
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Cycle the import/export mode of a machine connection. Returns true if the
+	 * mode was changed.
+	 */
+	public boolean cycleConnectionMode(PipeNetworkType type, Direction direction) {
+		for (PipeNetworkNode pipe : pipes) {
+			if (pipe.getType() == type) {
+				boolean changed = pipe.cycleConnectionMode(level, worldPosition, direction);
+				if (changed) {
+					onConnectionsChanged();
+				}
+				return changed;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Open the connection settings menu (white/black list and filter slots) for
+	 * the item pipe connection on the given side. Only works for item pipes.
+	 */
+	public void openConnectionSettings(Player player, PipeNetworkType type, Direction direction) {
+		if (level.isClientSide()) {
+			return;
+		}
+		for (PipeNetworkNode pipe : pipes) {
+			if (pipe.getType() == type && pipe instanceof ItemNetworkNode itemNode) {
+				PipeEndpointType[] connections = pipe.getConnections(worldPosition);
+				if (connections != null) {
+					PipeEndpointType connection = connections[direction.get3DDataValue()];
+					if (connection != null && connection != PipeEndpointType.PIPE) {
+						ItemPipeSettingsMenu.open((ServerPlayer) player, this, itemNode, direction);
+					}
+				}
+				return;
+			}
+		}
+	}
+
 	public boolean customUse(PipeVoxelShape shape, Player player, net.minecraft.world.InteractionHand hand) {
 		for (var node : pipes) {
 			if (node.getType() == shape.type) {
@@ -238,12 +307,18 @@ public class PipeBlockEntity extends BlockEntity {
 
 	@Override
 	public void setRemoved() {
-		if (stateReplaced) {
+		// A real removal replaces the pipe block, while a chunk unload keeps it.
+		// Some removal paths don't set stateReplaced, so also check the block
+		// state: at this point the old block was already replaced if the pipe
+		// was truly removed.
+		boolean removed = stateReplaced || (level != null && level.getBlockState(worldPosition).getBlock() != FabricaPipes.PIPE_BLOCK);
+		if (removed) {
 			loadPipes();
 			for (PipeNetworkNode pipe : pipes) {
 				pipe.getManager().removeNode(worldPosition);
 			}
 			// Don't clear pipes, otherwise they can't be dropped when broken by hand.
+			updateNeighborPipes();
 		} else {
 			for (PipeNetworkNode pipe : pipes) {
 				pipe.onUnload();
@@ -252,6 +327,20 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 
 		super.setRemoved();
+	}
+
+	/**
+	 * Update the connections of adjacent pipes so they drop the links towards
+	 * this removed pipe and re-render.
+	 */
+	private void updateNeighborPipes() {
+		if (level == null || level.isClientSide()) return;
+		for (Direction direction : Direction.values()) {
+			BlockPos neighborPos = worldPosition.relative(direction);
+			if (level.getBlockEntity(neighborPos) instanceof PipeBlockEntity neighborPipe) {
+				neighborPipe.updateConnections();
+			}
+		}
 	}
 
 	@Override

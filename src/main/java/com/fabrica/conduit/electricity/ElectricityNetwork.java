@@ -68,8 +68,9 @@ public class ElectricityNetwork extends PipeNetwork {
 	}
 
 	static boolean canConnect(CableTier tier, EnergyContainer storage) {
-		var storageTier = storage.getTier();
-		return storageTier != null && storageTier.compareTo(tier.voltageTier()) >= 0;
+		// Like MI, any cable can connect to any machine; the cable tier only
+		// limits the transfer rate.
+		return storage.getTier() != null;
 	}
 
 	/**

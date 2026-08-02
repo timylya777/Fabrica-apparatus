@@ -35,6 +35,15 @@ public class ItemNetworkNode extends PipeNetworkNode {
 	int inactiveTicks = 0;
 
 	@Override
+	public void buildInitialConnections(Level world, BlockPos pos) {
+		for (Direction direction : Direction.values()) {
+			if (canConnect(world, pos, direction)) {
+				connections.add(new ItemConnection(direction, BLOCK_IN_OUT, 0, -10));
+			}
+		}
+	}
+
+	@Override
 	public void updateConnections(Level world, BlockPos pos) {
 		// Remove the connection to the outside world if a connection to another pipe is made.
 		var levelNetworks = PipeNetworks.get((ServerLevel) world);
@@ -47,6 +56,13 @@ public class ItemNetworkNode extends PipeNetworkNode {
 			}
 			return false;
 		});
+		// Auto-connect to newly placed inventories, like MI
+		for (Direction direction : Direction.values()) {
+			boolean connected = connections.stream().anyMatch(connection -> connection.direction == direction);
+			if (!connected && canConnect(world, pos, direction)) {
+				connections.add(new ItemConnection(direction, BLOCK_IN_OUT, 0, -10));
+			}
+		}
 	}
 
 	private boolean canConnect(Level world, BlockPos pos, Direction direction) {
@@ -68,19 +84,83 @@ public class ItemNetworkNode extends PipeNetworkNode {
 
 	@Override
 	public void removeConnection(Level world, BlockPos pos, Direction direction) {
-		// Cycle if it exists
-		for (int i = 0; i < connections.size(); i++) {
-			ItemConnection conn = connections.get(i);
-			if (conn.direction == direction) {
-				if (conn.type == BLOCK_IN)
-					conn.type = BLOCK_IN_OUT;
-				else if (conn.type == BLOCK_IN_OUT)
-					conn.type = BLOCK_OUT;
-				else
-					connections.remove(i);
-				return;
+		// Remove if it exists
+		connections.removeIf(connection -> connection.direction == direction);
+	}
+
+	@Override
+	public boolean cycleConnectionMode(Level world, BlockPos pos, Direction direction) {
+		// Cycle import -> import/export -> export -> import
+		for (ItemConnection connection : connections) {
+			if (connection.direction == direction) {
+				if (connection.type == BLOCK_IN) {
+					connection.type = BLOCK_IN_OUT;
+				} else if (connection.type == BLOCK_IN_OUT) {
+					connection.type = BLOCK_OUT;
+				} else {
+					connection.type = BLOCK_IN;
+				}
+				return true;
 			}
 		}
+		return false;
+	}
+
+	@Nullable
+	private ItemConnection getConnection(Direction direction) {
+		for (ItemConnection connection : connections) {
+			if (connection.direction == direction) {
+				return connection;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether the connection on the given side uses a whitelist (only the
+	 * configured items pass) or a blacklist (everything except them passes).
+	 */
+	public boolean isWhitelist(Direction direction) {
+		ItemConnection connection = getConnection(direction);
+		return connection != null && connection.whitelist;
+	}
+
+	/**
+	 * Set the whitelist/blacklist mode of the connection on the given side.
+	 * Returns true if the mode was changed.
+	 */
+	public boolean setWhitelist(Direction direction, boolean whitelist) {
+		ItemConnection connection = getConnection(direction);
+		if (connection == null || connection.whitelist == whitelist) {
+			return false;
+		}
+		connection.whitelist = whitelist;
+		return true;
+	}
+
+	/**
+	 * Get the filter stack in the given slot of the connection on the given side.
+	 */
+	public ItemVariant getFilterStack(Direction direction, int slot) {
+		ItemConnection connection = getConnection(direction);
+		if (connection == null || slot < 0 || slot >= SLOTS) {
+			return ItemVariant.blank();
+		}
+		return connection.stacks[slot];
+	}
+
+	/**
+	 * Set the filter stack in the given slot of the connection on the given side.
+	 * Returns true if the slot was changed.
+	 */
+	public boolean setFilterStack(Direction direction, int slot, ItemVariant variant) {
+		ItemConnection connection = getConnection(direction);
+		if (connection == null || slot < 0 || slot >= SLOTS) {
+			return false;
+		}
+		connection.stacks[slot] = variant != null ? variant : ItemVariant.blank();
+		connection.refreshStacksCache();
+		return true;
 	}
 
 	@Override
@@ -93,7 +173,7 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		}
 		// Otherwise try to connect
 		if (canConnect(world, pos, direction)) {
-			connections.add(new ItemConnection(direction, BLOCK_IN, 0, -10));
+			connections.add(new ItemConnection(direction, BLOCK_IN_OUT, 0, -10));
 		}
 	}
 

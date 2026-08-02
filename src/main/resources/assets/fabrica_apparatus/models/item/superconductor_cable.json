@@ -1,6 +1,6 @@
-﻿{
+{
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "fabrica_apparatus:block/pipes/electricity"
+    "layer0": "fabrica_apparatus:item/cable"
   }
 }
