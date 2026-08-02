@@ -21,6 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Экран ME-сетки (GUI): показывает записи ME-хранилища сеткой 9x6 ячеек
+ * с иконками предметов и их количеством, поддерживает поиск по строке
+ * (поле ввода вверху), прокрутку колесом мыши и операции с записями:
+ * take (взять предметы в руку) и insert (положить предметы из руки в сетку).
+ * Записи фильтруются по поисковому запросу, серверу отправляются пакеты
+ * {@link MeGridTakePayload} / {@link MeGridInsertPayload}.
+ */
 public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
     private static final Identifier TEXTURE = FabricaMod.id("textures/gui/me_grid.png");
     private static final int COLS = 9;
@@ -37,6 +45,10 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         super(menu, inventory, title, 176, 244);
     }
 
+    /**
+     * Создаёт поле поиска: введённый текст запоминается в нижнем регистре
+     * (фильтр для {@link #visibleEntries()}) и сбрасывает прокрутку в начало.
+     */
     @Override
     protected void init() {
         super.init();
@@ -50,6 +62,11 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         searchBox.setFocused(true);
     }
 
+    /**
+     * Возвращает записи, видимые на экране: фильтрует все записи меню по
+     * поисковому запросу, ограничивает прокрутку допустимым максимумом и
+     * берёт срез длиной до COLS*ROWS записей, начиная с позиции прокрутки.
+     */
     private List<MeItemStack> visibleEntries() {
         List<MeItemStack> filtered = MePackets.filterEntries(menu.getEntries(), query);
         int maxScroll = Math.max(0, (int) Math.ceil((filtered.size() - COLS * ROWS) / (double) COLS));
@@ -59,6 +76,11 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         return filtered.subList(start, end);
     }
 
+    /**
+     * Рисует содержимое экрана: текст занятости/ёмкости в правом верхнем углу,
+     * сетку из иконок предметов с количеством (декорации стака) и подсветку
+     * наведённой ячейки с тултипом, включающим количество записей.
+     */
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);
@@ -90,6 +112,11 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         }
     }
 
+    /**
+     * Обработка клика по ячейке сетки: если в руке пусто — отправляет пакет
+     * take (Shift = 64 шт., иначе 1 шт.) для взятой записи; если в руке есть
+     * предмет — отправляет пакет insert с количеством из руки.
+     */
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int index = cellIndex(event.x(), event.y());
@@ -110,6 +137,10 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         return super.mouseClicked(event, doubleClick);
     }
 
+    /**
+     * Прокрутка колесом мыши: если курсор над сеткой, смещает позицию
+     * прокрутки на одну строку вверх/вниз в пределах допустимого диапазона.
+     */
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (cellIndex(mouseX, mouseY) >= 0) {
@@ -121,6 +152,10 @@ public class MeGridScreen extends AbstractContainerScreen<MeGridMenu> {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
+    /**
+     * Пересчитывает координаты курсора в индекс ячейки сетки (0..COLS*ROWS-1);
+     * возвращает -1, если курсор вне сетки.
+     */
     private int cellIndex(double mouseX, double mouseY) {
         int x = (int) Math.floor(mouseX - leftPos - GRID_X);
         int y = (int) Math.floor(mouseY - topPos - GRID_Y);

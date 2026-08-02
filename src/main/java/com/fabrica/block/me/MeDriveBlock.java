@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
+// Блок дисковода ME: хранит диски и открывает их GUI при клике.
 public class MeDriveBlock extends Block implements EntityBlock {
     public static final MapCodec<MeDriveBlock> CODEC = simpleCodec(MeDriveBlock::new);
 
@@ -26,6 +27,7 @@ public class MeDriveBlock extends Block implements EntityBlock {
         return CODEC;
     }
 
+    // Клик по дисководу открывает его GUI (только на сервере).
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {

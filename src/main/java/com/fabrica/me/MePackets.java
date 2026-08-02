@@ -22,8 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Сетевые пакеты ME-сетки: приём с клиента запросов take/insert,
+ * рассылка синхронизации (sync) состояния сети клиенту.
+ * Плюс утилиты сериализации записей сети в NBT и фильтрации по запросу поиска.
+ */
 public final class MePackets {
 
+    /**
+     * Пакет от клиента: взять предметы из ME-сети.
+     * containerId — идентификатор открытого меню, query — поисковый запрос,
+     * index — индекс записи в отфильтрованном списке, count — количество.
+     */
     public record MeGridTakePayload(int containerId, String query, int index, int count)
             implements CustomPacketPayload {
         public static final Type<MeGridTakePayload> TYPE = new Type<>(FabricaMod.id("me_grid_take"));
@@ -40,6 +50,10 @@ public final class MePackets {
         }
     }
 
+    /**
+     * Пакет от клиента: вставить предметы, которые игрок держит на курсоре,
+     * в ME-сеть (count — количество из стака на курсоре).
+     */
     public record MeGridInsertPayload(int containerId, int count) implements CustomPacketPayload {
         public static final Type<MeGridInsertPayload> TYPE = new Type<>(FabricaMod.id("me_grid_insert"));
         public static final StreamCodec<RegistryFriendlyByteBuf, MeGridInsertPayload> STREAM_CODEC = StreamCodec.composite(
@@ -53,6 +67,10 @@ public final class MePackets {
         }
     }
 
+    /**
+     * Пакет с сервера: синхронизация состояния сети клиенту
+     * (занято, ёмкость и все записи сети в NBT).
+     */
     public record MeGridSyncPayload(int containerId, long used, long capacity, CompoundTag entries)
             implements CustomPacketPayload {
         public static final Type<MeGridSyncPayload> TYPE = new Type<>(FabricaMod.id("me_grid_sync"));
@@ -69,11 +87,13 @@ public final class MePackets {
         }
     }
 
+    /** Зарегистрировать типы пакетов и обработчики запросов на сервере. */
     public static void register() {
         PayloadTypeRegistry.serverboundPlay().register(MeGridTakePayload.TYPE, MeGridTakePayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MeGridInsertPayload.TYPE, MeGridInsertPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MeGridSyncPayload.TYPE, MeGridSyncPayload.STREAM_CODEC);
 
+        // Обработчик take: выполняем на серверном потоке, валидируем открытое меню.
         ServerPlayNetworking.registerGlobalReceiver(MeGridTakePayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             player.level().getServer().execute(() -> {
@@ -85,6 +105,7 @@ public final class MePackets {
             });
         });
 
+        // Обработчик insert: выполняем на серверном потоке, валидируем открытое меню.
         ServerPlayNetworking.registerGlobalReceiver(MeGridInsertPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
             player.level().getServer().execute(() -> {
@@ -97,6 +118,7 @@ public final class MePackets {
         });
     }
 
+    /** Отправить клиенту актуальное состояние сети его меню (used/capacity/entries). */
     public static void sendSync(ServerPlayer player, MeGridMenu menu) {
         if (menu.getBlockEntity() == null || !ServerPlayNetworking.canSend(player, MeGridSyncPayload.TYPE)) {
             return;
@@ -110,6 +132,7 @@ public final class MePackets {
         )));
     }
 
+    /** Сериализовать записи сети в NBT-тег (список {id, count}). */
     public static CompoundTag entriesToTag(List<MeItemStack> entries) {
         CompoundTag root = new CompoundTag();
         ListTag list = new ListTag();
@@ -123,6 +146,7 @@ public final class MePackets {
         return root;
     }
 
+    /** Десериализовать NBT-тег обратно в список записей сети. */
     public static List<MeItemStack> entriesFromTag(CompoundTag root) {
         if (root == null) {
             return List.of();
@@ -153,6 +177,7 @@ public final class MePackets {
         return entries;
     }
 
+    /** Отфильтровать записи сети по текстовому запросу (по имени предмета). */
     public static List<MeItemStack> filterEntries(List<MeItemStack> entries, String query) {
         if (query == null || query.isBlank()) {
             return entries;

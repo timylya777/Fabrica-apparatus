@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+// База всех машин: обеспечивает серверный тик сущности через getTicker.
 public abstract class MachineBlock extends HorizontalMachineBlock implements EntityBlock {
     public MachineBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -19,6 +20,7 @@ public abstract class MachineBlock extends HorizontalMachineBlock implements Ent
     @Override
     public abstract BlockEntity newBlockEntity(BlockPos pos, BlockState state);
 
+    // Тикер: машины работают только на сервере, один тик в игровой тик.
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

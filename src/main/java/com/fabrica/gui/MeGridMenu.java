@@ -23,9 +23,11 @@ public class MeGridMenu extends AbstractContainerMenu {
     @Nullable
     private final ServerPlayer owner;
 
+    // Кэш содержимого и статистики хранилища для отображения на клиенте.
     private List<MeItemStack> entries = List.of();
     private long used;
     private long capacity;
+    // Последняя отправленная версия списка — чтобы не слать одинаковые пакеты.
     private List<MeItemStack> lastSent = List.of();
 
     public MeGridMenu(int containerId, Inventory inventory) {
@@ -36,6 +38,7 @@ public class MeGridMenu extends AbstractContainerMenu {
         super(ModMenus.ME_GRID, containerId);
         this.blockEntity = blockEntity;
         this.owner = inventory.player instanceof ServerPlayer serverPlayer ? serverPlayer : null;
+        // Только инвентарь игрока: содержимое ME-сети рисуется клиентом отдельно.
         addStandardInventorySlots(inventory, 8, 166);
     }
 
@@ -56,12 +59,14 @@ public class MeGridMenu extends AbstractContainerMenu {
         return capacity;
     }
 
+    // Применяет синхронизированное содержимое сети, пришедшее с сервера.
     public void applySync(CompoundTag tag, long used, long capacity) {
         this.entries = MePackets.entriesFromTag(tag);
         this.used = used;
         this.capacity = capacity;
     }
 
+    // Извлекает предметы из ME-сети по запросу клиента и кладёт их в инвентарь игрока.
     public long takeFromGrid(Player player, String query, int index, int count) {
         if (blockEntity == null || index < 0 || count <= 0) {
             return 0;
@@ -82,6 +87,7 @@ public class MeGridMenu extends AbstractContainerMenu {
         return taken;
     }
 
+    // Вставляет предмет из курсора игрока в ME-сеть.
     public long insertCarried(Player player, int count) {
         if (blockEntity == null) {
             return 0;
@@ -101,6 +107,7 @@ public class MeGridMenu extends AbstractContainerMenu {
         return inserted;
     }
 
+    // Отправляет клиенту содержимое сети, если оно изменилось с прошлого раза.
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
@@ -113,6 +120,7 @@ public class MeGridMenu extends AbstractContainerMenu {
         }
     }
 
+    // Shift+клик: стак из слота инвентаря сразу помещается в ME-сеть.
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         if (blockEntity == null || index < 0 || index >= slots.size()) {

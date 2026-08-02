@@ -18,14 +18,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+// Дисковод ME: хранит диски и предоставляет MeStorage (виртуальное содержимое дисков).
 public class MeDriveBlockEntity extends FabricaBlockEntity implements MenuProvider, MeNetworkNode {
 
+    // 8 слотов для дисков ME.
     protected final SimpleContainer disks = new SimpleContainer(8) {
         @Override
         public void setChanged() {
             MeDriveBlockEntity.this.setChanged();
         }
     };
+    // Кэш хранилища: создаётся лениво при первом запросе.
     private MeDriveStorage storage;
 
     public MeDriveBlockEntity(BlockPos pos, BlockState state) {
@@ -36,6 +39,7 @@ public class MeDriveBlockEntity extends FabricaBlockEntity implements MenuProvid
         return disks;
     }
 
+    // Создаём MeStorage поверх инвентаря дисков (только один раз).
     @Override
     public MeStorage getMeStorage() {
         if (storage == null) {
@@ -54,12 +58,14 @@ public class MeDriveBlockEntity extends FabricaBlockEntity implements MenuProvid
         return new MeDriveMenu(containerId, inventory, this);
     }
 
+    // Сохраняем диски списком предметов в NBT.
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         disks.storeAsItemList(output.list("Disks", ItemStack.OPTIONAL_CODEC));
     }
 
+    // Восстанавливаем диски из NBT.
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);

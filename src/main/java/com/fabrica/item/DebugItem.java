@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+// Отладочный предмет: клик по блоку выводит в чат его энергию и параметры.
 public class DebugItem extends Item {
 
     public DebugItem(Item.Properties properties) {
@@ -23,6 +24,7 @@ public class DebugItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
+        // Отладка работает только на сервере — клиент не знает состояние блоков.
         if (!level.isClientSide()) {
             BlockPos pos = context.getClickedPos();
             BlockState state = level.getBlockState(pos);
@@ -32,15 +34,18 @@ public class DebugItem extends Item {
                     .append(" @ ").append(pos.getX()).append(" ").append(pos.getY()).append(" ").append(pos.getZ());
 
             BlockEntity be = level.getBlockEntity(pos);
+            // Машины: заряд, ёмкость и уровень (tier) энергохранилища.
             if (be instanceof EnergyMachineBlockEntity machine) {
                 EnergyContainer container = machine.getEnergyContainer();
                 sb.append(" | ENERGY: ").append(container.getEnergy())
                         .append("/").append(container.getCapacity())
                         .append(" AP, tier=").append(container.getTier().name());
             }
+            // Потребители энергии: текущий спрос.
             if (be instanceof EnergyConsumer consumer) {
                 sb.append(", demand=").append(consumer.getEnergyDemand());
             }
+            // Генераторы: состояние горения и время до выгорания топлива.
             if (be instanceof AbstractFuelGeneratorBlockEntity generator) {
                 sb.append(" | BURN: ").append(generator.isBurning())
                         .append(", burnTime=").append(generator.getBurnTime())

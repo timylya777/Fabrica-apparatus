@@ -18,12 +18,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+// Сущность ME-сетки: подключается к глобальной MeNetwork по своей позиции.
 public class MeGridBlockEntity extends FabricaBlockEntity implements MenuProvider, MeNetworkNode {
 
     public MeGridBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ME_GRID, pos, state);
     }
 
+    // Хранилище берём из MeNetwork по позиции блока; вне мира возвращаем пустое.
     @Override
     public MeStorage getMeStorage() {
         Level level = getLevel();
@@ -35,6 +37,7 @@ public class MeGridBlockEntity extends FabricaBlockEntity implements MenuProvide
         return Component.translatable("block.fabrica_apparatus.me_grid");
     }
 
+    // Открытие GUI на сервере сопровождается синхронизацией содержимого сети клиенту.
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         MeGridMenu menu = new MeGridMenu(containerId, inventory, this);

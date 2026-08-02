@@ -22,6 +22,7 @@ public class MeDriveMenu extends AbstractContainerMenu {
     public MeDriveMenu(int containerId, Inventory inventory, @Nullable MeDriveBlockEntity blockEntity) {
         super(ModMenus.ME_DRIVE, containerId);
         this.blockEntity = blockEntity;
+        // Слоты 0..7 — диски (2 ряда по 4), слоты 8..43 — инвентарь игрока.
         SimpleContainer disks = blockEntity != null ? blockEntity.getDisks() : new SimpleContainer(8);
         for (int row = 0; row < 2; row++) {
             for (int col = 0; col < 4; col++) {
@@ -31,6 +32,7 @@ public class MeDriveMenu extends AbstractContainerMenu {
         addStandardInventorySlots(inventory, 8, 84);
     }
 
+    // Shift+клик: диск — в инвентарь, из инвентаря — в свободный слот диска.
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;

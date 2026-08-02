@@ -9,6 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * Экран электрической печи (GUI): рисует фоновую текстуру, показывает запас
+ * энергии в AP и зелёную полосу прогресса плавки/обжига, ширина которой
+ * зависит от прогресса текущей операции (данные из {@link ElectricFurnaceMenu}).
+ */
 public class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurnaceMenu> {
     private static final Identifier TEXTURE = FabricaMod.id("textures/gui/blast_furnace.png");
 
@@ -16,6 +21,7 @@ public class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurna
         super(menu, inventory, title);
     }
 
+    /** Рисует подложку экрана: текстуру доменной печи. */
     @Override
     public void extractBackground(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(extractor, mouseX, mouseY, partialTick);
@@ -23,6 +29,10 @@ public class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurna
             imageWidth, imageHeight, 256, 256);
     }
 
+    /**
+     * Рисует содержимое экрана: текст с энергией "текущая / ёмкость AP"
+     * и зелёную полосу прогресса обработки (ширина пропорциональна прогрессу).
+     */
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);

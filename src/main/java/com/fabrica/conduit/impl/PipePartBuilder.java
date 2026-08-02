@@ -7,6 +7,15 @@ import net.minecraft.world.phys.Vec3;
 import static net.minecraft.core.Direction.AxisDirection;
 
 /**
+ * Отвечает за построение геометрии частей трубы: абстрактный «маршрутизатор»
+ * сегментов трубы внутри блока. Держит текущую позицию (pos), направление
+ * (facing) и орты (right/up) и умеет рисовать прямые линии, короткие и длинные
+ * повороты, двигаться вперёд и поворачиваться. Конкретные подклассы решают,
+ * что делать с сегментами (например, PipeShapeBuilder строит VoxelShape).
+ * Статические методы getSlotPos/getRenderType/getInitialDirection определяют
+ * раскладку пяти слотов труб и тип сегмента по конфигурации соединений.
+ */
+/**
  * A class that can build pipe model parts using a simple interface.
  */
 public abstract class PipePartBuilder {
@@ -27,6 +36,9 @@ public abstract class PipePartBuilder {
 	protected Vec3 facing;
 	protected Vec3 right;
 
+	// Инициализация: задаёт направление сегмента, стартовую позицию внутри
+	// блока по номеру слота, подбирает орт right так, чтобы right и up смотрели
+	// внутрь блока, и отодвигается из центрального куба.
 	protected PipePartBuilder(int slotPos, Direction direction) {
 		this.facing = direction.getUnitVec3();
 		// initial position + half pipe + slotPos * width
@@ -46,6 +58,7 @@ public abstract class PipePartBuilder {
 	/**
 	 * Find out whether the axis direction is far from the sides of the block.
 	 */
+	// Проверяет, что направление «далеко» от стенок блока (внутри).
 	protected boolean isTowardsInside(Vec3 direction) {
 		return distanceToSide(direction) > 0.5f - 1e-6;
 	}
@@ -53,6 +66,7 @@ public abstract class PipePartBuilder {
 	/**
 	 * Get the distance along some axis direction to the nearest block side.
 	 */
+	// Расстояние от текущей позиции до ближайшей стенки блока вдоль оси.
 	protected float distanceToSide(Vec3 direction) {
 		float p = (float) direction.dot(pos);
 		if (p > 0) {
@@ -77,6 +91,7 @@ public abstract class PipePartBuilder {
 	/**
 	 * Move forward.
 	 */
+	// Сдвигает текущую позицию вперёд по facing.
 	void moveForward(float amount) {
 		this.pos = this.pos.add(this.facing.scale(amount));
 	}
@@ -105,6 +120,7 @@ public abstract class PipePartBuilder {
 	/**
 	 * Draw a straight line.
 	 */
+	// Прямая линия: при reduced сдвигаемся на ширину+зазор, рисуем до стенки.
 	public void straightLine(boolean reduced, boolean end) {
 		if (reduced)
 			moveForward(SIDE + SPACING);
@@ -114,6 +130,8 @@ public abstract class PipePartBuilder {
 	/**
 	 * Draw a short bend.
 	 */
+	// Короткий поворот: три колена под 90° (горизонталь — вертикаль —
+	// перпендикуляр) с учётом конфликтов соседних труб (Intent.BEND_CONFLICTING).
 	public void shortBend(boolean reduced, boolean end) {
 		if (reduced)
 			moveForward(SIDE + SPACING);
@@ -144,6 +162,7 @@ public abstract class PipePartBuilder {
 	/**
 	 * Draw a short bend, on the extra slot.
 	 */
+	// Короткий поворот в «дальнем» слоте (другая стартовая позиция).
 	public void farShortBend(boolean reduced, boolean end) {
 		if (reduced)
 			moveForward(SIDE + SPACING);
@@ -173,6 +192,8 @@ public abstract class PipePartBuilder {
 	/**
 	 * Draw a long bend.
 	 */
+	// Длинный поворот: как короткий, но с удлинёнными коленами, чтобы обойти
+	// трубу в соседнем слоте.
 	public void longBend(boolean reduced, boolean end) {
 		if (reduced)
 			moveForward(SIDE + SPACING);
@@ -199,6 +220,8 @@ public abstract class PipePartBuilder {
 		drawPipe(distanceToSide(facing), Intent.STRAIGHT, end);
 	}
 
+	// Переводит логический слот (порядок типов труб) в позицию на сетке пяти
+	// слотов: слот 0 — центр, 1 — левый край, 2 — правый край.
 	public static int getSlotPos(int slot) {
 		return slot == 0 ? 1 : slot == 1 ? 0 : 2;
 	}
@@ -206,6 +229,10 @@ public abstract class PipePartBuilder {
 	/**
 	 * Get the type of a connection.
 	 */
+	// Определяет тип сегмента соединения для рендера: 0 — нет соединения,
+	// 1 — прямая линия (к блоку или по умолчанию), 2 — короткий поворот,
+	// 3 — короткий поворот «далеко», 4 — длинный поворот. Счётчик connSlot —
+	// сколько труб того же направления занимают предыдущие слоты.
 	public static int getRenderType(int logicalSlot, Direction direction, PipeEndpointType[][] connections) {
 		if (connections[logicalSlot][direction.get3DDataValue()] == null) {
 			// no connection
@@ -242,6 +269,8 @@ public abstract class PipePartBuilder {
 	/**
 	 * Get the initial direction of a connection.
 	 */
+	// Возвращает начальное направление поворота для коротких изгибов в
+	// дальних слотах (нужно для корректной геометрии рендера).
 	public static Direction getInitialDirection(int logicalSlot, Direction connectionDirection, int renderType) {
 		if (renderType == 2) { // only for short bend
 			if (logicalSlot == 1) {

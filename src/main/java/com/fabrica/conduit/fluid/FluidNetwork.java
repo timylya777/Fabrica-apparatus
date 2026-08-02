@@ -18,18 +18,49 @@ import net.minecraft.server.level.ServerLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Жидкостная сеть (объединение соседних жидкостных труб). Отвечает за:
+ * - передачу одной жидкости по сети: каждый тик выбирается тип жидкости (первая
+ *   непустая ёмкость-источник), затем извлечение из источников в сеть
+ *   и вставка из сети в цели с учётом приоритетов подключений;
+ * - приоритеты: передача идёт по "вёдрам" (buckets) — сначала цели с большим
+ *   приоритетом, внутри ведра объём делится честно (симуляция + сортировка);
+ * - ёмкость: каждый узел хранит до nodeCapacity мБ (у жидкостной трубы — 1 ведро);
+ * - режимы подключений IN/IN_OUT/OUT каждого узла (вставка/извлечение);
+ * - слияние сетей при соединении (merge): если в одной сети нет жидкости —
+ *   поглощает данные другой без потерь;
+ * - статистику переданного объёма и ёмкости (stats/capacityStats) для GUI.
+ */
 public class FluidNetwork extends PipeNetwork {
+	// Логгер для сообщений об ошибках операций передачи.
 	private static final Logger LOGGER = LoggerFactory.getLogger(FluidNetwork.class);
 
+	// Ёмкость одного узла (блока трубы) в мБ (милливедра). Суммарная ёмкость сети
+	// = nodeCapacity * количество узлов. Устанавливается при создании сети.
 	final int nodeCapacity;
+	// Статистика фактически переданной жидкости (мБ/сек) для GUI.
 	final PipeStatsCollector stats = new PipeStatsCollector();
+	// Статистика суммарной ёмкости сети (для отображения в GUI).
 	final PipeStatsCollector capacityStats = new PipeStatsCollector();
 
+	// Создаёт жидкостную сеть с заданным id, данными (включая тип жидкости) и ёмкостью узла.
 	public FluidNetwork(int id, FluidNetworkData data, int nodeCapacity) {
 		super(id, data);
 		this.nodeCapacity = nodeCapacity;
 	}
 
+	/**
+	 * Главный тик сети. Алгоритм:
+	 * 1. Сбор целей: каждый узел добавляет свои подключённые ёмкости (FluidTarget)
+	 *    в общий список и при необходимости выбирает жидкость сети
+	 *    (gatherTargetsAndPickFluid). Также суммируется запас жидкости по узлам.
+	 * 2. Если жидкость ещё не выбрана (blank) — сеть ничего не делает.
+	 * 3. Извлечение: из источников выкачивается жидкость в сеть (свободное место).
+	 * 4. Вставка: из сети жидкость раздаётся целям-потребителям.
+	 *    Обе операции — внутри одной внешней транзакции (всё или ничего).
+	 * 5. Оставшийся запас делится поровну между узлами (евклидово деление).
+	 * 6. afterTick каждого узла: синхронизация клиенту при смене жидкости.
+	 */
 	@Override
 	public void tick(ServerLevel world) {
 		// Gather targets and hopefully set fluid
@@ -44,6 +75,7 @@ public class FluidNetwork extends PipeNetwork {
 			networkAmount += fluidNode.amount;
 			loadedNodeCount++;
 		}
+		// Суммарная ёмкость сети: по nodeCapacity на каждый загруженный узел.
 		long networkCapacity = (long) loadedNodeCount * nodeCapacity;
 		FluidVariant fluid = ((FluidNetworkData) data).fluid();
 
@@ -52,9 +84,11 @@ public class FluidNetwork extends PipeNetwork {
 		if (!fluid.isBlank()) {
 			// Extract from targets into the network
 			try (var tx = Transaction.openOuter()) {
+				// Извлечение: качаем из источников ровно свободное место сети.
 				extracted = transferByPriority(TransferOperation.EXTRACT, targets, fluid, networkCapacity - networkAmount, tx);
 				networkAmount += extracted;
 				// Insert into the targets from the network
+				// Вставка: раздаём весь запас сети потребителям.
 				inserted = transferByPriority(TransferOperation.INSERT, targets, fluid, networkAmount, tx);
 
 				networkAmount -= inserted;
@@ -62,6 +96,8 @@ public class FluidNetwork extends PipeNetwork {
 				tx.commit();
 			}
 
+			// Равномерное распределение оставшейся жидкости между узлами
+			// (как аккумуляторы сети; остаток уходит первым узлам).
 			for (var entry : iterateTickingNodes()) {
 				FluidNetworkNode fluidNode = (FluidNetworkNode) entry.getNode();
 				fluidNode.amount = networkAmount / loadedNodeCount;
@@ -73,6 +109,7 @@ public class FluidNetwork extends PipeNetwork {
 		stats.addValue(Math.max(extracted, inserted));
 		capacityStats.addValue(networkCapacity);
 
+		// После передачи: узлы синхронизируют клиента, если жидкость сети сменилась.
 		for (var entry : iterateTickingNodes()) {
 			((FluidNetworkNode) entry.getNode()).afterTick(world, entry.getPos());
 		}
@@ -84,6 +121,19 @@ public class FluidNetwork extends PipeNetwork {
 	 *
 	 * @return The amount that was successfully transferred.
 	 */
+	/**
+	 * Выполняет операцию передачи (извлечение/вставку) с учётом приоритетов.
+	 * Алгоритм:
+	 * 1. Отфильтровываются цели, не разрешающие данную операцию
+	 *    (например, при вставке нужны цели с режимом IN/IN_OUT).
+	 * 2. Цели сортируются по убыванию приоритета.
+	 * 3. Список делится на "вёдра" (buckets) — группы целей с одинаковым
+	 *    приоритетом; каждое ведро обрабатывается функцией transferForBucket.
+	 *    Сначала самые приоритетные цели, затем всё менее приоритетные,
+	 *    пока не будет передана вся сумма maxAmount.
+	 *
+	 * @return Суммарно переданный объём.
+	 */
 	private static long transferByPriority(TransferOperation operation, List<FluidTarget> targets, FluidVariant fluid, long maxAmount, TransactionContext transaction) {
 		// Only transfer through targets that allow this operation (respects the
 		// import/export mode of each connection).
@@ -94,6 +144,7 @@ public class FluidNetwork extends PipeNetwork {
 		long transferredAmount = 0;
 		int bucketStart = 0;
 		for (int i = 0; i < targets.size(); ++i) {
+			// Граница ведра: последний элемент или у следующего цели другой приоритет.
 			if (i == targets.size() - 1 || targets.get(bucketStart).priority != targets.get(i + 1).priority) {
 				transferredAmount += transferForBucket(operation, targets.subList(bucketStart, i + 1), fluid, maxAmount - transferredAmount, transaction);
 				bucketStart = i + 1;
@@ -108,6 +159,19 @@ public class FluidNetwork extends PipeNetwork {
 	 *
 	 * @return The amount that was successfully transferred.
 	 */
+	/**
+	 * Передаёт жидкость внутри одного ведра целей (одинаковый приоритет).
+	 * Алгоритм "честного деления":
+	 * 1. Перемешивание ведра — чтобы в среднем все цели получали поровну.
+	 * 2. Симуляция операции для каждой цели во вложенной транзакции
+	 *    (результат не применяется, сохраняется в simulationResult).
+	 * 3. Сортировка по результату симуляции: цели, принявшие/отдавшие больше,
+	 *    идут первыми — это даёт равномерное заполнение всех целей.
+	 * 4. Реальное выполнение: оставшийся объём делится поровну между оставшимися
+	 *    целями (remainingAmount / remainingTargets).
+	 *
+	 * @return Суммарно переданный объём в этом ведре.
+	 */
 	private static long transferForBucket(TransferOperation operation, List<FluidTarget> bucket, FluidVariant fluid, long maxAmount, TransactionContext transaction) {
 		// Shuffle the bucket for better average transfer when simulation returns the
 		// same result every time
@@ -115,6 +179,7 @@ public class FluidNetwork extends PipeNetwork {
 		// Simulate the transfer for every target
 		int maxAmountInt = (int) Math.min(Integer.MAX_VALUE, maxAmount);
 		for (FluidTarget target : bucket) {
+			// Вложенная транзакция: симуляция не меняет реальное состояние хранилища.
 			try (var nested = Transaction.openNested(transaction)) {
 				target.simulationResult = operation.transfer(target.storage, fluid, maxAmountInt, nested);
 			}
@@ -134,6 +199,9 @@ public class FluidNetwork extends PipeNetwork {
 		return transferredAmount;
 	}
 
+	// Два вида операций передачи: INSERT (вставка в хранилище) и EXTRACT (извлечение).
+	// Безопасная обёртка internalTransfer проверяет, что результат операции корректен
+	// (не отрицательный и не больше запрошенного), иначе логирует ошибку.
 	private enum TransferOperation {
 		INSERT {
 			@Override
@@ -150,6 +218,8 @@ public class FluidNetwork extends PipeNetwork {
 
 		abstract long internalTransfer(Storage<FluidVariant> handler, FluidVariant fluid, int maxAmount, TransactionContext transaction);
 
+		// Выполняет операцию и валидирует результат: отрицательный или превышающий
+		// запрошенный объём считается ошибкой хранилища и приводится к безопасному значению.
 		long transfer(Storage<FluidVariant> handler, FluidVariant fluid, int maxAmount, TransactionContext transaction) {
 			long ret = internalTransfer(handler, fluid, maxAmount, transaction);
 			if (ret < 0) {
@@ -166,6 +236,15 @@ public class FluidNetwork extends PipeNetwork {
 		}
 	}
 
+	/**
+	 * Слияние данных двух сетей при соединении труб. Правила:
+	 * - если хотя бы одна из сетей пуста (нет жидкости) — побеждают данные
+	 *   непустой сети (возвращается её копия);
+	 * - если пусты обе или непусты обе — вернётся null, и сети НЕ соединяются
+	 *   (разные жидкости не могут течь в одной сети).
+	 * Проверка делается в два прохода: сначала только по жидкости, затем ещё
+	 * и по фактическому запасу узлов (amount).
+	 */
 	@Override
 	public PipeNetworkData merge(PipeNetwork other) {
 		FluidNetworkData thisData = (FluidNetworkData) data;
@@ -183,6 +262,8 @@ public class FluidNetwork extends PipeNetwork {
 		return null;
 	}
 
+	// Проверка пустоты сети: жидкость не выбрана (blank), а при onlyFluid = false
+	// дополнительно ни один узел не хранит жидкости (amount != 0).
 	private boolean isEmpty(boolean onlyFluid) {
 		if (((FluidNetworkData) data).fluid().isBlank())
 			return true;

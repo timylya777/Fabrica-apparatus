@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class ElectricFurnaceMenu extends AbstractContainerMenu {
     private static final int DATA_COUNT = 4;
 
+    // Данные, синхронизируемые с клиентом: энергия, ёмкость, прогресс плавки.
     private final ContainerData data;
     @Nullable
     private final ElectricFurnaceBlockEntity blockEntity;
@@ -30,6 +31,7 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         checkContainerDataCount(data, DATA_COUNT);
         this.blockEntity = blockEntity;
         this.data = data;
+        // Слот 0 — вход (сырьё), слот 1 — выход (результат), слоты 2..37 — инвентарь игрока.
         addSlot(new Slot(blockEntity != null ? blockEntity.getInputInventory() : new SimpleContainer(1), 0, 56, 35));
         addSlot(new Slot(blockEntity != null ? blockEntity.getOutputInventory() : new SimpleContainer(1), 0, 116, 35));
         addStandardInventorySlots(inventory, 8, 84);
@@ -52,6 +54,7 @@ public class ElectricFurnaceMenu extends AbstractContainerMenu {
         return data.get(3);
     }
 
+    // Shift+клик: из слоёв печи (0..1) — в инвентарь, из инвентаря — во входной слот.
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;

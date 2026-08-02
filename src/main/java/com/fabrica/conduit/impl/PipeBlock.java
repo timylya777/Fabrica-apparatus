@@ -49,6 +49,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Отвечает за блок труб: размещение, waterlogging, клики игрока (ключ-конфигуратор
+ * и пустая рука), определение попадания в конкретную часть трубы (PipeVoxelShape),
+ * обновление соединений при изменении соседей, дроп предметов и вычисление формы
+ * (коллизии). Сами данные труб хранятся в PipeBlockEntity; в одном блоке может
+ * находиться до трёх разных типов труб.
+ */
+/**
  * The pipe block. Hosts up to three pipe types in a single block,
  * which are stored in the PipeBlockEntity.
  */
@@ -104,6 +111,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return SimpleWaterloggedBlock.super.placeLiquid(level, pos, state, fluidState);
 	}
 
+	// Проверяет, попал ли рейтрейс в одну из AABB-коробок заданной формы
+	// (точка сдвигается чуть к центру коробки, чтобы попадание считалось надёжным).
 	private static boolean isPartHit(VoxelShape shape, BlockHitResult hit) {
 		var pos = hit.getBlockPos();
 		Vec3 posInBlock = hit.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
@@ -117,6 +126,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return false;
 	}
 
+	// Определяет, какая часть трубы (какого типа и в каком направлении) была
+	// задета рейтрейсом; используется для обработки кликов ключом и рукой.
 	@Nullable
 	public static PipeVoxelShape getHitPart(Level level, BlockPos pos, BlockHitResult hit) {
 		return level.getBlockEntity(pos) instanceof PipeBlockEntity pipe ? getHitPart(pipe, hit) : null;
@@ -132,6 +143,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return null;
 	}
 
+	// Клик игрока предметом по трубе: ключ настраивает соединения,
+	// предмет трубы обрабатывает размещение и связи сам (см. PipeItem.useOn).
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos blockPos, Player player,
 			InteractionHand hand, BlockHitResult hit) {
@@ -144,6 +157,9 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
+	// Обработка клика ключом: shift+клик подключает/отключает машину на данной
+	// стороне, обычный клик по боковому коннектору циклически переключает
+	// режим ввода/вывода (для предметных и жидкостных труб).
 	private InteractionResult useKey(BlockState state, Level world, BlockPos blockPos, Player player, BlockHitResult hit) {
 		if (!(world.getBlockEntity(blockPos) instanceof PipeBlockEntity pipeEntity) || pipeEntity.getNodes().isEmpty()) {
 			return InteractionResult.PASS;
@@ -184,6 +200,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return InteractionResult.SUCCESS;
 	}
 
+	// Клик пустой рукой: shift+клик по коннектору предметной трубы открывает
+	// меню настроек соединения (белый/чёрный список и фильтры).
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos blockPos, Player player, BlockHitResult hit) {
 		if (!(world.getBlockEntity(blockPos) instanceof PipeBlockEntity pipeEntity) || pipeEntity.getNodes().isEmpty()) {
@@ -212,6 +230,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return InteractionResult.PASS;
 	}
 
+	// Дроп при разрушении блока: по предмету трубы на каждый установленный
+	// тип плюс предметы, хранящиеся внутри (например, содержимое фильтров).
 	@Override
 	protected List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
 		PipeBlockEntity pipeEntity = (PipeBlockEntity) builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
@@ -226,6 +246,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return droppedStacks;
 	}
 
+	// Соседний блок изменился — пересчитываем соединения труб (на сервере),
+	// например при установке/удалении машины рядом.
 	@Override
 	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation,
 			boolean movedByPiston) {
@@ -245,6 +267,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return true;
 	}
 
+	// Форма блока — динамическая: берётся объединённая коллизионная форма
+	// из BlockEntity (текущие части труб).
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		BlockEntity be = world.getBlockEntity(pos);
@@ -264,6 +288,8 @@ public class PipeBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 		return false;
 	}
 
+	// Отмечает BlockEntity, что блок реально удаляется (а не выгружается
+	// чанк): различает удаление и unload при setRemoved().
 	@Override
 	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
 		if (level.getBlockEntity(pos) instanceof PipeBlockEntity pipe) {

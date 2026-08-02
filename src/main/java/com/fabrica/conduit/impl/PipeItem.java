@@ -26,6 +26,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Отвечает за предмет конкретного типа трубы: размещение новых труб
+ * (добавление в существующий PipeBlockEntity или установка нового блока),
+ * добавление соединений между трубами, разрыв связей (shift+клик) и
+ * переключение режима ввода/вывода соединения с машиной. Поля type и
+ * defaultData описывают, какой тип сети создаёт этот предмет.
+ */
+/**
  * The item for a pipe type. Right-clicking a pipe block adds the pipe to it,
  * right-clicking a pipe block that already contains the pipe type adds a
  * connection towards the clicked side, otherwise the pipe block is placed.
@@ -40,6 +47,9 @@ public class PipeItem extends Item {
 		this.defaultData = defaultData;
 	}
 
+	// Главная точка входа: клик предметом по миру. Логика по приоритету:
+	// shift+клик — только разрыв соединений труб; иначе попытка сменить режим
+	// ввода/вывода, затем размещение трубы или добавление соединения.
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
 		Player player = context.getPlayer();
@@ -110,6 +120,9 @@ public class PipeItem extends Item {
 
 	// Try breaking a connection between two pipes on the clicked side, returns
 	// true if a connection was found and removed
+	// Ищет соединение труба-труба на кликнутой стороне: сначала в кликнутом
+	// блоке, затем «сквозь» клик — в блоке за ним. Возвращает true, если
+	// соединение найдено и разорвано.
 	private boolean tryBreakConnection(UseOnContext context) {
 		Level world = context.getLevel();
 		BlockPos clickedPos = context.getClickedPos();
@@ -121,6 +134,8 @@ public class PipeItem extends Item {
 		return breakConnectionAt(world, clickedPos.relative(clickedFace), clickedFace.getOpposite());
 	}
 
+	// Разрывает соединение PIPE на стороне direction у конкретного блока
+	// (если оно есть), через PipeBlockEntity.removeConnection.
 	private boolean breakConnectionAt(Level world, BlockPos pos, Direction direction) {
 		if (!(world.getBlockEntity(pos) instanceof PipeBlockEntity pipeEntity)) {
 			return false;
@@ -137,6 +152,8 @@ public class PipeItem extends Item {
 
 	// Try cycling the import/export mode of a machine connection on the clicked
 	// side, returns true if a connection mode was cycled.
+	// Ищет соединение с машиной на кликнутой стороне для смены режима
+	// ввода/вывода; кабели (электричество) этот режим не имеют.
 	private boolean tryCycleMode(UseOnContext context) {
 		if (isCable()) {
 			return false;
@@ -151,6 +168,8 @@ public class PipeItem extends Item {
 		return cycleModeAt(world, clickedPos.relative(clickedFace), clickedFace.getOpposite());
 	}
 
+	// Переключает режим соединения с машиной на стороне direction (только
+	// не-PIPE соединения), через PipeBlockEntity.cycleConnectionMode.
 	private boolean cycleModeAt(Level world, BlockPos pos, Direction direction) {
 		if (!(world.getBlockEntity(pos) instanceof PipeBlockEntity pipeEntity)) {
 			return false;
@@ -169,6 +188,8 @@ public class PipeItem extends Item {
 
 	// Try placing the pipe and registering the new pipe to the entity, returns null
 	// if it failed
+	// Пытается разместить трубу: сначала в кликнутом блоке, затем в соседнем
+	// за гранью клика. Возвращает позицию удачного размещения или null.
 	@Nullable
 	private BlockPos tryPlace(UseOnContext context) {
 		BlockPos hitPos = context.getClickedPos();
@@ -188,6 +209,9 @@ public class PipeItem extends Item {
 	 *
 	 * @return True if succeeded, false otherwise.
 	 */
+	// Добавляет тип трубы в существующий PipeBlockEntity (если можно), иначе
+	// заменяет целевой блок новым блоком трубы с учётом waterlogging и создаёт
+	// в нём первый узел (addPipe).
 	private boolean tryPlaceAt(UseOnContext context, BlockPos pos) {
 		Level world = context.getLevel();
 		// If there is a block entity we try to add the pipe.
@@ -215,6 +239,8 @@ public class PipeItem extends Item {
 		return false;
 	}
 
+	// Проверка, можно ли разместить блок трубы в позиции: блок заменяемый,
+	// может стоять в этом месте и не пересекается с объектами.
 	private static boolean canPlace(UseOnContext ctx, BlockPos pos) {
 		BlockState state = FabricaPipes.PIPE_BLOCK.defaultBlockState();
 		CollisionContext shapeContext = ctx.getPlayer() == null ? CollisionContext.empty() : CollisionContext.of(ctx.getPlayer());

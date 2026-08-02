@@ -12,8 +12,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * ME-сеть: обход блоков сетки от точки входа по соседям (BFS)
+ * и сбор всех MeStorage подключённых MeNetworkNode в единое MeNetworkStorage.
+ * Только утилитарные статические методы; инстанцирование запрещено.
+ */
 public final class MeNetwork {
 
+    /**
+     * Найти объединённое хранилище сети, начиная обход с origin:
+     * каждый соседний блок-узел (MeNetworkNode) добавляет своё хранилище в сеть.
+     */
     public static MeStorage getStorage(Level level, BlockPos origin) {
         List<MeStorage> storages = new ArrayList<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -24,6 +33,7 @@ public final class MeNetwork {
             if (!visited.add(current)) {
                 continue;
             }
+            // Проверяем всех шестерых соседей текущего блока.
             for (Direction direction : Direction.values()) {
                 BlockPos neighbor = current.relative(direction);
                 if (visited.contains(neighbor) || !level.isLoaded(neighbor)) {
@@ -31,6 +41,7 @@ public final class MeNetwork {
                 }
                 BlockEntity blockEntity = level.getBlockEntity(neighbor);
                 if (blockEntity instanceof MeNetworkNode node) {
+                    // Сосед — узел сети: добавляем его хранилище и продолжаем обход.
                     storages.add(node.getMeStorage());
                     queue.add(neighbor);
                 }

@@ -9,17 +9,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Хранилище всей ME-сети: обёртка над списком отдельных MeStorage
+ * (диски в приводах), объединяющая их в единое виртуальное хранилище.
+ * Операции распределяются по подключённым хранилищам по очереди,
+ * getEntries сливает записи и сортирует их.
+ */
 public class MeNetworkStorage implements MeStorage {
+    /** Все хранилища, подключённые к сети. */
     private final List<MeStorage> storages;
 
     public MeNetworkStorage(List<MeStorage> storages) {
         this.storages = List.copyOf(storages);
     }
 
+    /** Пустое хранилище сети (когда узлов нет). */
     public static MeStorage empty() {
         return new MeNetworkStorage(List.of());
     }
 
+    /** Вставить предметы, раскладывая по хранилищам сети по очереди. */
     @Override
     public long insert(Item item, long count) {
         long remaining = count;
@@ -32,6 +41,7 @@ public class MeNetworkStorage implements MeStorage {
         return count - remaining;
     }
 
+    /** Извлечь предметы, забирая из хранилищ сети по очереди. */
     @Override
     public long extract(Item item, long count) {
         long remaining = count;
@@ -44,6 +54,7 @@ public class MeNetworkStorage implements MeStorage {
         return count - remaining;
     }
 
+    /** Суммарное количество предмета во всей сети. */
     @Override
     public long countOf(Item item) {
         long total = 0;
@@ -53,6 +64,7 @@ public class MeNetworkStorage implements MeStorage {
         return total;
     }
 
+    /** Суммарное количество всех предметов в сети. */
     @Override
     public long getItemCount() {
         long total = 0;
@@ -62,6 +74,7 @@ public class MeNetworkStorage implements MeStorage {
         return total;
     }
 
+    /** Суммарная ёмкость всех хранилищ сети. */
     @Override
     public long getCapacity() {
         long total = 0;
@@ -71,6 +84,7 @@ public class MeNetworkStorage implements MeStorage {
         return total;
     }
 
+    /** Записи сети: слив по предметам из всех хранилищ + сортировка. */
     @Override
     public List<MeItemStack> getEntries() {
         Map<Item, Long> merged = new LinkedHashMap<>();
@@ -84,6 +98,7 @@ public class MeNetworkStorage implements MeStorage {
         return sortEntries(entries);
     }
 
+    /** Сортировка записей по строковому registry id предмета (для стабильного порядка в GUI). */
     public static List<MeItemStack> sortEntries(List<MeItemStack> entries) {
         entries.sort(Comparator.comparing(entry -> BuiltInRegistries.ITEM.getKey(entry.item()).toString()));
         return entries;

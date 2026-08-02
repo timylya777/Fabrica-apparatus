@@ -13,6 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Отвечает за абстрактную сеть труб одного типа: хранит узлы (PipeNetworkNode)
+ * по позициям, разбивку по чанкам (nodesByChunk), кэш «тикающихся» узлов
+ * (тики в активных чанках), тикает сеть, даёт возможность слияния сетей
+ * (merge) и очистки при удалении (onRemove). Узел может быть null в карте —
+ * так помечается выгруженная позиция. Подклассы (например, электрическая или
+ * предметная сеть) реализуют тик и данные сети (data).
+ */
+/**
  * A pipe network. It is very important that you create a new empty data object
  * if your constructor was passed null.
  */
@@ -33,6 +41,9 @@ public abstract class PipeNetwork {
 	/**
 	 * <b>Only access nodes that are ticking, for example with {@link #iterateTickingNodes}!</b>
 	 */
+	// Главный тик сети (каждый тик сервера): подклассы обрабатывают здесь
+	// перенос предметов/жидкостей/энергии. Доступ к узлам — только через
+	// iterateTickingNodes (тикаются лишь узлы в активных чанках).
 	public void tick(ServerLevel world) {}
 
 	/**
@@ -40,6 +51,9 @@ public abstract class PipeNetwork {
 	 *
 	 * @return null if there can be no merge, or the new pipe network data should there be a merge.
 	 */
+	// Слияние с другой сетью при явном запросе (например, объединение
+	// электрических сетей через трансформатор): возвращает новые объединённые
+	// данные или null, если слияние невозможно.
 	@Nullable
 	public PipeNetworkData merge(PipeNetwork other) {
 		return null;
@@ -55,11 +69,14 @@ public abstract class PipeNetwork {
 		return this.nodes.get(pos);
 	}
 
+	// Устанавливает/заменяет узел на позиции (и во внутренней разбивке по
+	// чанкам); null означает выгруженный узел.
 	public void setNode(BlockPos pos, @Nullable PipeNetworkNode node) {
 		this.nodes.put(pos.immutable(), node);
 		this.nodesByChunk.computeIfAbsent(ChunkPos.pack(pos), p -> new HashMap<>()).put(pos.immutable(), node);
 	}
 
+	// Удаляет узел с позиции, убирая и запись в разбивке по чанкам.
 	public void removeNode(BlockPos pos) {
 		this.nodes.remove(pos);
 		long chunk = ChunkPos.pack(pos);
@@ -76,6 +93,8 @@ public abstract class PipeNetwork {
 		return Collections.unmodifiableMap(this.nodes);
 	}
 
+	// Перечисляет узлы в активных (тикающихся) чанках; результат кэшируется,
+	// кэш инвалидируется при изменении сети или чанков (tickingCacheValid).
 	public Collection<PosNode> iterateTickingNodes() {
 		if (!tickingCacheValid) {
 			tickingNodesCache.clear();

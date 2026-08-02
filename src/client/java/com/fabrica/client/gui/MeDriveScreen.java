@@ -9,6 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * Экран ME-диска (хранилища): простой контейнерный экран, который рисует
+ * только фоновую текстуру. Слоты и содержимое диска обрабатывает
+ * связанное меню {@link MeDriveMenu}.
+ */
 public class MeDriveScreen extends AbstractContainerScreen<MeDriveMenu> {
     private static final Identifier TEXTURE = FabricaMod.id("textures/gui/gui_base.png");
 
@@ -16,6 +21,7 @@ public class MeDriveScreen extends AbstractContainerScreen<MeDriveMenu> {
         super(menu, inventory, title);
     }
 
+    /** Рисует подложку экрана: стандартную текстуру интерфейса. */
     @Override
     public void extractBackground(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(extractor, mouseX, mouseY, partialTick);

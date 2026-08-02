@@ -10,11 +10,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+// Меню настроек соединения предметной трубы: 4 ghost-фильтра и переключатель
+// «белый/чёрный список». Фильтры определяют, что труба извлекает и вставляет.
 /**
  * The connection settings menu of an item pipe: four filter slots and a
  * white/black list toggle. The configured items are the ones the pipe can
@@ -29,6 +32,7 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
     private final ItemNetworkNode itemNode;
     @Nullable
     private final Direction direction;
+    // data[0]: 1 = белый список, 0 = чёрный список.
     private final ContainerData data;
 
     public ItemPipeSettingsMenu(int containerId, Inventory inventory) {
@@ -47,6 +51,7 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
         SimpleContainer filterSlots = itemNode != null
                 ? new ConnectionFilterContainer(pipeEntity, itemNode, direction)
                 : new SimpleContainer(4);
+        // Слоты 0..3 — ghost-фильтры, слоты 4..39 — инвентарь игрока.
         for (int i = 0; i < 4; i++) {
             addSlot(new Slot(filterSlots, i, 62 + i * 18, 35));
         }
@@ -54,6 +59,7 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
+    // Открывает меню настроек соединения у серверного игрока.
     public static void open(ServerPlayer player, PipeBlockEntity pipeEntity, ItemNetworkNode itemNode, Direction direction) {
         player.openMenu(new net.minecraft.world.SimpleMenuProvider(
                 (containerId, inventory, ignored) -> new ItemPipeSettingsMenu(containerId, inventory, pipeEntity, itemNode, direction),
@@ -64,6 +70,7 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
         return data.get(0) == 1;
     }
 
+    // Меняет режим фильтра на сервере; при успехе обновляет данные и помечает трубу изменённой.
     public void setWhitelist(boolean whitelist) {
         if (itemNode != null) {
             if (itemNode.setWhitelist(direction, whitelist)) {
@@ -75,35 +82,41 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
         }
     }
 
+    // Shift+клик из инвентаря: предмет копируется в первый фильтр-слот (без расхода).
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        ItemStack stack = ItemStack.EMPTY;
+        // Shift+click from the player inventory writes a ghost item into the
+        // first filter slot, without consuming it.
         Slot slot = this.slots.get(index);
         if (slot != null && slot.hasItem()) {
-            ItemStack slotStack = slot.getItem();
-            stack = slotStack.copy();
-            if (index < 4) {
-                // filter slot -> player inventory
-                if (!this.moveItemStackTo(slotStack, 4, 40, true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-                // player inventory -> filter slots
-                if (!this.moveItemStackTo(slotStack, 0, 4, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            if (slotStack.isEmpty()) {
-                slot.setByPlayer(ItemStack.EMPTY);
-            } else {
-                slot.setChanged();
-            }
-            if (slotStack.getCount() == stack.getCount()) {
-                return ItemStack.EMPTY;
-            }
-            slot.onTake(player, slotStack);
+            this.slots.get(0).set(slot.getItem().copyWithCount(1));
+            broadcastChanges();
         }
-        return stack;
+        return ItemStack.EMPTY;
+    }
+
+    // Ghost-слоты: клик с предметом записывает его копию (1 шт.), пустой рукой
+    // или shift+клик — очищает фильтр; предмет из курсора при этом не тратится.
+    @Override
+    public void clicked(int slotId, int button, ContainerInput action, Player player) {
+        // The filter slots are "ghost" slots: clicking with an item writes it
+        // into the filter without consuming it, clicking with an empty hand (or
+        // shift+clicking) clears the filter.
+        if (slotId >= 0 && slotId < 4) {
+            if (action == ContainerInput.PICKUP) {
+                Slot filterSlot = this.slots.get(slotId);
+                ItemStack carried = getCarried();
+                filterSlot.set(carried.isEmpty() ? ItemStack.EMPTY : carried.copyWithCount(1));
+                broadcastChanges();
+            } else if (action == ContainerInput.QUICK_MOVE) {
+                if (this.slots.get(slotId).hasItem()) {
+                    this.slots.get(slotId).set(ItemStack.EMPTY);
+                    broadcastChanges();
+                }
+            }
+            return;
+        }
+        super.clicked(slotId, button, action, player);
     }
 
     @Override
@@ -112,6 +125,7 @@ public class ItemPipeSettingsMenu extends AbstractContainerMenu {
                 && pipeEntity.getBlockPos().distToCenterSqr(player.getX(), player.getY(), player.getZ()) < 64.0;
     }
 
+    // Контейнер фильтров: любое изменение сразу записывается в соединение трубы.
     /**
      * The four filter slots, directly backed by the connection of the pipe.
      */

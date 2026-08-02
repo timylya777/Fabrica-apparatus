@@ -11,13 +11,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Storage для Fabric transfer API, представляющий ME-сеть для внешних систем.
+ * Привязывается к блоку ME-сетки (MeGridBlockEntity): вставка/извлечение
+ * идут напрямую в хранилище сети блока, обходя его без транзакций.
+ */
 public class MeNetworkItemStorage implements Storage<ItemVariant> {
+    /** Блок ME-сетки, к сети которого привязано это хранилище. */
     private final MeGridBlockEntity blockEntity;
 
     public MeNetworkItemStorage(MeGridBlockEntity blockEntity) {
         this.blockEntity = blockEntity;
     }
 
+    /** Вставить предметы в ME-сеть блока сетки. */
     @Override
     public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource.isBlank() || maxAmount <= 0) {
@@ -27,6 +34,7 @@ public class MeNetworkItemStorage implements Storage<ItemVariant> {
         return blockEntity.getMeStorage().insert(stack.getItem(), maxAmount);
     }
 
+    /** Извлечь предметы из ME-сети блока сетки. */
     @Override
     public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource.isBlank() || maxAmount <= 0) {
@@ -36,6 +44,7 @@ public class MeNetworkItemStorage implements Storage<ItemVariant> {
         return blockEntity.getMeStorage().extract(stack.getItem(), maxAmount);
     }
 
+    /** Записи сети как StorageView (одна запись на тип предмета). */
     @Override
     public Iterator<StorageView<ItemVariant>> iterator() {
         List<StorageView<ItemVariant>> views = new ArrayList<>();
@@ -45,6 +54,7 @@ public class MeNetworkItemStorage implements Storage<ItemVariant> {
         return views.iterator();
     }
 
+    /** Представление одной записи сети {предмет, количество} для итерации. */
     private static class EntryView implements StorageView<ItemVariant> {
         private final MeItemStack entry;
 
@@ -72,6 +82,7 @@ public class MeNetworkItemStorage implements Storage<ItemVariant> {
             return false;
         }
 
+        /** Извлечение через StorageView не поддерживается — пустое хранилище сети. */
         @Override
         public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
             return 0;

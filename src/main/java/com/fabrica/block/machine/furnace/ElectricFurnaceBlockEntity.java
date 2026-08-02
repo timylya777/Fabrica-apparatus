@@ -23,27 +23,34 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+// Электропечь: тратит энергию на переплавку предметов (входной слот 0 -> выходной слот 0).
 public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity implements EnergyConsumer, MenuProvider {
 
+    // Входной слот (0): предмет для переплавки.
     protected final SimpleContainer inputInventory = new SimpleContainer(1) {
         @Override
         public void setChanged() {
             ElectricFurnaceBlockEntity.this.setChanged();
         }
     };
+    // Выходной слот (0): готовый результат плавки.
     protected final SimpleContainer outputInventory = new SimpleContainer(1) {
         @Override
         public void setChanged() {
             ElectricFurnaceBlockEntity.this.setChanged();
         }
     };
+    // Потребление энергии за тик и тир приёма энергии.
     protected long consumptionRate;
     protected EnergyTier consumeTier;
 
+    // Текущий и полный прогресс плавки (в тиках).
     protected int progress = 0;
     protected int totalTime = 0;
+    // Активный рецепт: при смене входного предмета прогресс сбрасывается.
     protected RecipeHolder<SmeltingRecipe> currentRecipe;
 
+    // Конструктор без параметров (для CODEC): настройки берутся из блока.
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ELECTRIC_FURNACE, pos, state, 0, EnergyTier.LV);
         if (state.getBlock() instanceof ElectricFurnaceBlock block) {
@@ -67,6 +74,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         this.consumeTier = tier;
     }
 
+    // Запрос энергии у сети: двойное потребление за тик, но не больше свободной ёмкости.
     @Override
     public long getEnergyDemand() {
         return Math.min(consumptionRate * 2, energyStorage.getCapacity() - energyStorage.getEnergy());
@@ -93,6 +101,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
     }
 
     @Override
+    // Данные для GUI: энергия, ёмкость, текущий и полный прогресс.
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return new ElectricFurnaceMenu(containerId, inventory, this, new ContainerData() {
             @Override
@@ -117,6 +126,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         });
     }
 
+    // Каждый серверный тик: без энергии печь не работает, иначе плавим по рецепту.
     @Override
     public void serverTick() {
         if (energyStorage.getEnergy() <= 0) return;
@@ -130,6 +140,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         }
 
         RecipeHolder<SmeltingRecipe> recipe = findRecipe(input);
+        // Предмет сменился: сбрасываем прогресс и начинаем новый рецепт.
         if (currentRecipe != recipe) {
             currentRecipe = recipe;
             progress = 0;
@@ -141,11 +152,13 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         ItemStack result = recipe.value().assemble(new SingleRecipeInput(input));
         if (!canPlaceResult(result)) return;
 
+        // Тратим до consumptionRate энергии за тик и двигаем прогресс.
         long used = Math.min(consumptionRate, energyStorage.getEnergy());
         if (used <= 0) return;
         energyStorage.removeEnergy(used);
         progress++;
 
+        // Плавка завершена: кладём результат в выход и тратим один входной предмет.
         if (progress >= totalTime) {
             ItemStack current = outputInventory.getItem(0);
             if (current.isEmpty()) {
@@ -160,6 +173,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         }
     }
 
+    // Результат помещается в выход: слот пуст либо совпадает по типу и влезает по стеку.
     private boolean canPlaceResult(ItemStack result) {
         ItemStack current = outputInventory.getItem(0);
         if (current.isEmpty()) return true;
@@ -167,6 +181,7 @@ public class ElectricFurnaceBlockEntity extends EnergyMachineBlockEntity impleme
         return current.getCount() + result.getCount() <= current.getMaxStackSize();
     }
 
+    // Ищем рецепт плавки для входного предмета в серверном менеджере рецептов.
     private RecipeHolder<SmeltingRecipe> findRecipe(ItemStack input) {
         if (level == null || level.getServer() == null) return null;
         return level.getServer().getRecipeManager()

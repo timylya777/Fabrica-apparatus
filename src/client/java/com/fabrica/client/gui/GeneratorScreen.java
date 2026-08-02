@@ -9,6 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * Экран генератора (GUI): рисует фоновую текстуру, отображает запас энергии
+ * в AP и анимирует полосу горения топлива пропорционально прогрессу
+ * (из меню {@link GeneratorMenu}).
+ */
 public class GeneratorScreen extends AbstractContainerScreen<GeneratorMenu> {
     private static final Identifier TEXTURE = FabricaMod.id("textures/gui/gui_base.png");
 
@@ -16,6 +21,7 @@ public class GeneratorScreen extends AbstractContainerScreen<GeneratorMenu> {
         super(menu, inventory, title);
     }
 
+    /** Рисует подложку экрана: стандартную текстуру интерфейса. */
     @Override
     public void extractBackground(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(extractor, mouseX, mouseY, partialTick);
@@ -23,6 +29,11 @@ public class GeneratorScreen extends AbstractContainerScreen<GeneratorMenu> {
             imageWidth, imageHeight, 256, 256);
     }
 
+    /**
+     * Рисует содержимое экрана: текст с энергией "текущая / ёмкость AP"
+     * и оранжевую полосу горения, высота которой зависит от прогресса
+     * сжигания текущего топлива.
+     */
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);

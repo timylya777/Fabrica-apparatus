@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public class GeneratorMenu extends AbstractContainerMenu {
     private static final int DATA_COUNT = 4;
 
+    // Синхронизируемые с клиентом данные: энергия, ёмкость, время горения.
     private final ContainerData data;
     @Nullable
     private final GeneratorBlockEntity blockEntity;
@@ -31,6 +32,7 @@ public class GeneratorMenu extends AbstractContainerMenu {
         checkContainerDataCount(data, DATA_COUNT);
         this.blockEntity = blockEntity;
         this.data = data;
+        // Слот 0 — топливо, слоты 1..36 — инвентарь игрока.
         addSlot(new Slot(blockEntity != null ? blockEntity.getFuelInventory() : new SimpleContainer(1), 0, 56, 53));
         addStandardInventorySlots(inventory, 8, 84);
         addDataSlots(data);
@@ -52,6 +54,7 @@ public class GeneratorMenu extends AbstractContainerMenu {
         return data.get(3);
     }
 
+    // Shift+клик: топливо — в инвентарь, из инвентаря — в топливный слот (0).
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack stack = ItemStack.EMPTY;

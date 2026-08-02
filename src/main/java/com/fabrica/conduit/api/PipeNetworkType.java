@@ -12,6 +12,13 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
+ * Отвечает за описание одного типа сети/трубы (предмет, жидкость,
+ * электричество): хранит идентификатор, фабрики сети и узла, кодек данных
+ * сети, цвет и «серийный номер» для сортировки труб в рендере, признак
+ * открытия GUI. Ведёт глобальный реестр всех типов (types) и позволяет
+ * регистрировать новые типы через register().
+ */
+/**
  * A pipe network type.
  */
 public final class PipeNetworkType implements Comparable<PipeNetworkType> {
@@ -79,6 +86,7 @@ public final class PipeNetworkType implements Comparable<PipeNetworkType> {
 		return color;
 	}
 
+	// Ищет тип сети по идентификатору в глобальном реестре.
 	@Nullable
 	public static PipeNetworkType get(Identifier identifier) {
 		return types.get(identifier);
@@ -88,6 +96,8 @@ public final class PipeNetworkType implements Comparable<PipeNetworkType> {
 		return new HashMap<>(types);
 	}
 
+	// Регистрирует новый тип сети: создаёт экземпляр с очередным серийным
+	// номером и кладёт в реестр (дубликат идентификатора запрещён).
 	public static <D> PipeNetworkType register(
 			Identifier identifier,
 			BiFunction<Integer, D, PipeNetwork> networkCtor,

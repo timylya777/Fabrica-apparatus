@@ -4,6 +4,8 @@ import java.util.List;
 
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
+// Составной приёмник: перебирает обработчики по порядку, передавая каждому
+// остаток (amount - inserted), пока не будет вставлено нужное количество.
 class CombinedInsertionHandler<T> implements InsertionHandler<T> {
 	private final List<? extends InsertionHandler<T>> handlers;
 

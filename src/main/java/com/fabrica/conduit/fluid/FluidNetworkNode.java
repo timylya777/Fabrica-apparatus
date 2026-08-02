@@ -28,22 +28,48 @@ import static com.fabrica.conduit.api.PipeEndpointType.BLOCK_IN_OUT;
 import static com.fabrica.conduit.api.PipeEndpointType.BLOCK_OUT;
 import static com.fabrica.conduit.api.PipeEndpointType.PIPE;
 
+/**
+ * Узел жидкостной сети — один блок жидкостной трубы. Отвечает за:
+ * - список подключений FluidConnection: направление, режим (BLOCK_IN —
+ *   вставка в трубу/IN_OUT — оба направления/OUT — извлечение) и приоритет;
+ * - запас жидкости узла (amount): каждая труба хранит свою долю жидкости сети;
+ * - авто-подключение к ёмкостям рядом: при установке трубы (buildInitialConnections)
+ *   и позже — при появлении новых ёмкостей рядом (updateConnections, как в MI);
+ * - выбор жидкости сети: если в данных сети жидкость ещё не выбрана, узел
+ *   находит первую непустую ёмкость среди своих подключений;
+ * - сбор целей (FluidTarget) для сети каждый тик, переключение режима
+ *   IN/IN_OUT/OUT игроком и сериализацию состояния.
+ */
 public class FluidNetworkNode extends PipeNetworkNode {
+	// Запас жидкости данного узла (мБ). Распределяется сетью поровну каждый тик.
 	long amount = 0;
+	// Все подключения к соседним блокам: направление, режим IN/IN_OUT/OUT, приоритет.
 	private final List<FluidConnection> connections = new ArrayList<>();
+	// Кэш типа жидкости, который узел показывал клиенту последний раз
+	// (для синхронизации при смене жидкости).
 	private FluidVariant cachedFluid = FluidVariant.blank();
 
 	/**
-	 * Add all valid targets to the target list, and pick the fluid for the network
-	 * if no fluid is set.
+	 * Собирает цели передачи для сети и выбирает жидкость, если она ещё не выбрана.
+	 * Алгоритм:
+	 * 1. Очистка некорректного запаса: amount не может превышать ёмкость узла,
+	 *    а при пустой жидкости сети запас принудительно обнуляется.
+	 * 2. Для каждого подключения ищется соседнее хранилище жидкости.
+	 * 3. Если жидкость сети ещё не выбрана и подключение разрешает извлечение
+	 *    (OUT/IN_OUT) — пробуем найти первую непустую ёмкость и записать её
+	 *    жидкость в данные сети (network.data).
+	 * 4. Каждое подключение добавляется в общий список targets как FluidTarget
+	 *    с приоритетом и флагами canInsert/canExtract — сеть по нему передаёт.
 	 */
 	void gatherTargetsAndPickFluid(ServerLevel world, BlockPos pos, List<FluidTarget> targets) {
 		FluidNetworkData data = (FluidNetworkData) network.data;
 		FluidNetwork network = (FluidNetwork) this.network;
 
+		// Запас узла не может превышать его ёмкость — ограничиваем.
 		if (amount > network.nodeCapacity) {
 			amount = network.nodeCapacity;
 		}
+		// Если жидкости в сети нет — запас узла не имеет смысла, обнуляем.
 		if (amount > 0 && data.fluid().isBlank()) {
 			amount = 0;
 		}
@@ -52,6 +78,7 @@ public class FluidNetworkNode extends PipeNetworkNode {
 			var storage = getNeighborStorage(world, pos, connection);
 			if (data.fluid().isBlank() && connection.canExtract()) {
 				// Try to set fluid, will return null if none could be found.
+				// Выбор жидкости: первая непустая ёмкость определяет тип жидкости сети.
 				for (var view : storage.nonEmptyViews()) {
 					if (view.getAmount() > 0) {
 						network.data = data = new FluidNetworkData(view.getResource());
@@ -63,12 +90,16 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Возвращает соседнее хранилище жидкости по направлению подключения
+	// (сторона соседнего блока, обращённая к трубе). Если хранилища нет — пустое.
 	@SuppressWarnings("unchecked")
 	private Storage<FluidVariant> getNeighborStorage(ServerLevel world, BlockPos pos, FluidConnection connection) {
 		Storage<FluidVariant> storage = FluidStorage.SIDED.find(world, pos.relative(connection.direction), connection.direction.getOpposite());
 		return storage != null ? storage : Storage.empty();
 	}
 
+	// Первичное авто-подключение при установке трубы: ко всем сторонам, где рядом
+	// есть ёмкость, создаётся подключение по умолчанию (IN_OUT, приоритет 0).
 	@Override
 	public void buildInitialConnections(Level world, BlockPos pos) {
 		for (Direction direction : Direction.values()) {
@@ -78,6 +109,15 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	/**
+	 * Обновление подключений при изменении соседей (вызывается при установке
+	 * или удалении блоков рядом с трубой). Два шага:
+	 * 1. Удаление подключений к блокам, с которыми теперь соединена ДРУГАЯ труба
+	 *    (проверяются все типы сетей через PipeNetworks) — чтобы труба не
+	 *    "смотрела" сквозь соседнюю трубу на ёмкость за ней.
+	 * 2. Авто-подключение к вновь появившимся ёмкостям (как в Modern Industrialization):
+	 *    если по направлению ещё нет подключения и рядом есть ёмкость — создаём его.
+	 */
 	@Override
 	public void updateConnections(Level world, BlockPos pos) {
 		// Remove the connection to the outside world if a connection to another pipe is made.
@@ -100,6 +140,9 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Возвращает массив типов концов трубы для рендера: PIPE — соединение с трубой
+	// (из менеджера сети), BLOCK_IN/BLOCK_IN_OUT/BLOCK_OUT — соединение с ёмкостью
+	// и её режимом (нужно для отрисовки стрелок/режима в GUI и модели).
 	@Override
 	public @Nullable PipeEndpointType[] getConnections(BlockPos pos) {
 		PipeEndpointType[] connections = new PipeEndpointType[6];
@@ -112,16 +155,21 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		return connections;
 	}
 
+	// Проверка: есть ли по направлению соседняя ёмкость, к которой можно подключиться.
 	private boolean canConnect(Level world, BlockPos pos, Direction direction) {
 		return FluidStorage.SIDED.find(world, pos.relative(direction), direction.getOpposite()) != null;
 	}
 
+	// Удаляет подключение по направлению (например, игрок отсоединил трубу инструментом).
 	@Override
 	public void removeConnection(Level world, BlockPos pos, Direction direction) {
 		// Remove if it exists
 		connections.removeIf(connection -> connection.direction == direction);
 	}
 
+	// Переключение режима подключения игроком (правый клик инструментом):
+	// цикл IN (только вставка) -> IN_OUT (оба направления) -> OUT (только
+	// извлечение) -> IN. Возвращает false, если подключения по направлению нет.
 	@Override
 	public boolean cycleConnectionMode(Level world, BlockPos pos, Direction direction) {
 		// Cycle import -> import/export -> export -> import
@@ -140,6 +188,8 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		return false;
 	}
 
+	// Ручное подключение игроком: если подключения ещё нет и рядом есть ёмкость —
+	// создаём подключение по умолчанию (IN_OUT, приоритет 0).
 	@Override
 	public void addConnection(PipeBlockEntity pipe, Player player, Level world, BlockPos pos, Direction direction) {
 		// Refuse if it already exists
@@ -154,6 +204,9 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Сериализация узла: запас жидкости (amount) и все подключения — каждое
+	// как CompoundTag с закодированным типом (0/1/2) и приоритетом,
+	// сохранённый под ключом-направлением ("north", "south", ...).
 	@Override
 	public void save(ValueOutput output) {
 		output.putLong("amount", amount);
@@ -165,6 +218,8 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Десериализация: восстанавливает запас жидкости и список подключений
+	// из сохранённых данных (направление из ключа, тип и приоритет из тега).
 	@Override
 	public void read(ValueInput input) {
 		amount = input.getLongOr("amount", 0);
@@ -178,14 +233,18 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Декодирование числа в режим подключения: 0 = IN, 1 = IN_OUT, 2 = OUT.
 	private static PipeEndpointType decodeConnectionType(int i) {
 		return i == 0 ? BLOCK_IN : i == 1 ? BLOCK_IN_OUT : BLOCK_OUT;
 	}
 
+	// Кодирование режима подключения в число: IN = 0, IN_OUT = 1, OUT = 2.
 	private static int encodeConnectionType(PipeEndpointType connection) {
 		return connection == BLOCK_IN ? 0 : connection == BLOCK_IN_OUT ? 1 : 2;
 	}
 
+	// Синхронизация клиенту: записывает текущую жидкость сети в NBT-тег
+	// (используется при передаче данных узла на клиент для отрисовки жидкости).
 	@Override
 	public CompoundTag writeCustomData(HolderLookup.Provider registries) {
 		CompoundTag tag = new CompoundTag();
@@ -193,6 +252,9 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		return tag;
 	}
 
+	// Вызывается сетью после каждого тика: если жидкость сети изменилась,
+	// помечает блок как изменённый (эквивалент sync()) — клиент перерисует
+	// трубу с новой жидкостью внутри.
 	public void afterTick(ServerLevel world, BlockPos pos) {
 		FluidVariant networkFluid = ((FluidNetworkData) network.data).fluid();
 		if (!networkFluid.equals(cachedFluid)) {
@@ -202,9 +264,17 @@ public class FluidNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	/**
+	 * Одно подключение трубы к соседнему блоку: направление, режим
+	 * (IN = вставка в трубу, OUT = извлечение из трубы, IN_OUT = оба) и приоритет
+	 * (чем больше — тем раньше эта цель получит/отдаст жидкость).
+	 */
 	private class FluidConnection {
+		// Направление, в котором находится подключённый блок.
 		private final Direction direction;
+		// Режим подключения (IN / IN_OUT / OUT).
 		private PipeEndpointType type;
+		// Приоритет передачи (сортировка целей при передаче).
 		private int priority;
 
 		private FluidConnection(Direction direction, PipeEndpointType type, int priority) {
@@ -213,10 +283,12 @@ public class FluidNetworkNode extends PipeNetworkNode {
 			this.priority = priority;
 		}
 
+		// Разрешена ли вставка жидкости в трубу через это подключение (IN/IN_OUT).
 		private boolean canInsert() {
 			return type == BLOCK_IN || type == BLOCK_IN_OUT;
 		}
 
+		// Разрешено ли извлечение жидкости из трубы через это подключение (OUT/IN_OUT).
 		private boolean canExtract() {
 			return type == BLOCK_OUT || type == BLOCK_IN_OUT;
 		}

@@ -11,6 +11,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
+ * Миксин на {@link ClientPacketListener}: при получении пакета данных
+ * блок-сущности трубы принудительно помечает секцию чанка как изменённую,
+ * чтобы рендер пересобрался. Без этого обновлённые соединения труб
+ * продолжали бы отображаться в старом (пустом) виде, пока секцию не
+ * пересоберёт какое-либо постороннее событие, и трубы выглядели бы
+ * прозрачными.
+ */
+/**
  * In 26.2, handleBlockEntityData does not invalidate the render of the section
  * when a block entity update arrives. Pipes rely on those updates to know their
  * connections, so without this the section would keep rendering the stale
@@ -20,6 +28,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
+	/**
+	 * После обработки пакета данных блок-сущности проверяет, является ли
+	 * обновлённая сущность трубой, и если да — пересобирает рендер секции чанка,
+	 * в которой она находится (вместе с соседями).
+	 */
 	@Inject(method = "handleBlockEntityData(Lnet/minecraft/network/protocol/game/ClientboundBlockEntityDataPacket;)V", at = @At("RETURN"))
 	private void fabrica_rerenderPipeSection(ClientboundBlockEntityDataPacket packet, CallbackInfo ci) {
 		ClientPacketListener self = (ClientPacketListener) (Object) this;

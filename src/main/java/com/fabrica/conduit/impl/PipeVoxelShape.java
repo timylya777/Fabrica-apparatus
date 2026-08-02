@@ -6,6 +6,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Отвечает за связку «форма части трубы + её смысл»: хранит VoxelShape,
+ * тип трубы (PipeNetworkType), направление коннектора (null — центр) и
+ * признак того, что клик по этой части открывает GUI. Используется для
+ * обработки кликов (PipeBlock.getHitPart) и для пересборки коллизионной формы.
+ */
+/**
  * A voxel shape and the part of the pipe it represents.
  */
 public class PipeVoxelShape {

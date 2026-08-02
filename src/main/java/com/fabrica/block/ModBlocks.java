@@ -21,8 +21,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.function.Function;
 
+// Реестр блоков мода: регистрирует блок, его предмет и добавляет в креативную вкладку.
 public class ModBlocks {
 
+    // Общий путь регистрации: блок + BlockItem + креативная вкладка.
     private static Block register(
         String id,
         BlockBehaviour.Properties properties,
@@ -47,6 +49,7 @@ public class ModBlocks {
         return block;
     }
 
+    // Регистрация генератора с его параметрами энергии (ёмкость, тир, производство).
     private static GeneratorBlock registerGenerator(
         String id,
         BlockBehaviour.Properties properties,
@@ -74,6 +77,7 @@ public class ModBlocks {
         return block;
     }
 
+    // Регистрация электропечи с параметрами энергии (ёмкость, тир, потребление).
     private static ElectricFurnaceBlock registerElectricFurnace(
         String id,
         BlockBehaviour.Properties properties,
@@ -101,6 +105,7 @@ public class ModBlocks {
         return block;
     }
 
+    // Регистрация блока без параметров энергии: конструктор задаётся фабрикой.
     private static <T extends Block> T registerBlock(
         String id,
         BlockBehaviour.Properties properties,
@@ -126,6 +131,7 @@ public class ModBlocks {
         return block;
     }
 
+    // Декоративный корпус машины.
     public static final Block MACHINE_CASING = register(
         "machine_casing",
         BlockBehaviour.Properties.of()
@@ -137,6 +143,7 @@ public class ModBlocks {
         )
     );
 
+    // Генератор: ёмкость 4000 FE, тир LV, производство 100 FE/тик.
     public static final GeneratorBlock GENERATOR = registerGenerator(
         "generator",
         BlockBehaviour.Properties.of()
@@ -151,6 +158,7 @@ public class ModBlocks {
         100
     );
 
+    // Электропечь: ёмкость 2000 FE, тир LV, потребление 20 FE/тик.
     public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerElectricFurnace(
         "electric_furnace",
         BlockBehaviour.Properties.of()
@@ -165,6 +173,7 @@ public class ModBlocks {
         20
     );
 
+    // Дисковод ME: хранилище дисков.
     public static final MeDriveBlock ME_DRIVE = registerBlock(
         "me_drive",
         BlockBehaviour.Properties.of()
@@ -177,6 +186,7 @@ public class ModBlocks {
         MeDriveBlock::new
     );
 
+    // ME-сетка: точка доступа к MeNetwork.
     public static final MeGridBlock ME_GRID = registerBlock(
         "me_grid",
         BlockBehaviour.Properties.of()
@@ -189,6 +199,7 @@ public class ModBlocks {
         MeGridBlock::new
     );
 
+    // Заглушка: регистрация происходит при статической инициализации класса.
     public static void register() {
     }
 }

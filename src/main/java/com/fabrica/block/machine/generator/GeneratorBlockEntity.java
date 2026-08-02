@@ -13,8 +13,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.block.state.BlockState;
 
+// Сущность генератора: превращает топливо в энергию; GUI показывает состояние сгорания.
 public class GeneratorBlockEntity extends AbstractFuelGeneratorBlockEntity implements MenuProvider {
 
+    // Конструктор без параметров (для CODEC): настройки берутся из блока.
     public GeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.GENERATOR, pos, state, 0, EnergyTier.LV, 0);
         if (state.getBlock() instanceof GeneratorBlock block) {
@@ -39,6 +41,7 @@ public class GeneratorBlockEntity extends AbstractFuelGeneratorBlockEntity imple
     }
 
     @Override
+    // Данные для GUI: энергия, ёмкость, текущее и полное время горения.
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return new GeneratorMenu(containerId, inventory, this, new ContainerData() {
             @Override

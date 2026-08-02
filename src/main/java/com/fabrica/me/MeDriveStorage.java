@@ -7,13 +7,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Хранилище ME-привода: агрегирует все диски, лежащие в контейнере привода,
+ * в единое MeStorage. Операции распределяются по дискам по очереди,
+ * результаты объединяются (например, getEntries сливает записи всех дисков).
+ */
 public class MeDriveStorage implements MeStorage {
+    /** Контейнер слотов привода, в которых лежат диски. */
     private final SimpleContainer disks;
 
     public MeDriveStorage(SimpleContainer disks) {
         this.disks = disks;
     }
 
+    /** Вставить предметы, раскладывая их по дискам по очереди. */
     @Override
     public long insert(Item item, long count) {
         long remaining = count;
@@ -23,6 +30,7 @@ public class MeDriveStorage implements MeStorage {
         return count - remaining;
     }
 
+    /** Извлечь предметы, забирая их с дисков по очереди. */
     @Override
     public long extract(Item item, long count) {
         long remaining = count;
@@ -32,6 +40,7 @@ public class MeDriveStorage implements MeStorage {
         return count - remaining;
     }
 
+    /** Сумма количества предмета по всем дискам привода. */
     @Override
     public long countOf(Item item) {
         long total = 0;
@@ -41,6 +50,7 @@ public class MeDriveStorage implements MeStorage {
         return total;
     }
 
+    /** Суммарное количество всех предметов на всех дисках привода. */
     @Override
     public long getItemCount() {
         long total = 0;
@@ -50,6 +60,7 @@ public class MeDriveStorage implements MeStorage {
         return total;
     }
 
+    /** Суммарная ёмкость всех дисков привода. */
     @Override
     public long getCapacity() {
         long total = 0;
@@ -59,6 +70,7 @@ public class MeDriveStorage implements MeStorage {
         return total;
     }
 
+    /** Записи со всех дисков, слитые по предметам и отсортированные. */
     @Override
     public List<MeItemStack> getEntries() {
         Map<Item, Long> merged = new LinkedHashMap<>();

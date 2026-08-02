@@ -6,6 +6,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 
+// Реестр типов меню (контейнеров) мода. MenuType создаётся из фабрики
+// конструктора меню, которая вызывается при открытии на клиенте.
 public final class ModMenus {
 
     public static final MenuType<GeneratorMenu> GENERATOR = Registry.register(
@@ -38,6 +40,7 @@ public final class ModMenus {
         new MenuType<>(ItemPipeSettingsMenu::new, FeatureFlags.VANILLA_SET)
     );
 
+    // Регистрация выполнена статическими полями; метод нужен лишь как точка вызова при старте мода.
     public static void register() {
     }
 

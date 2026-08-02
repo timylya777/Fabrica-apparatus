@@ -23,10 +23,31 @@ import org.jetbrains.annotations.Nullable;
 import static com.fabrica.conduit.api.PipeEndpointType.BLOCK;
 import static com.fabrica.conduit.api.PipeEndpointType.PIPE;
 
+/**
+ * Узел электрической сети — один блок кабеля, входящий в сеть. Отвечает за:
+ * - список соединений (connections): по каким направлениям кабель подключён
+ *   к машинам/хранилищам энергии (EnergyContainer) — подключение к другим
+ *   трубам хранит менеджер сети, а не узел;
+ * - поиск соседних хранилищ через EnergyApiLookup с учётом стороны блока;
+ * - запас энергии (eu): каждый узел хранит свою долю энергии сети
+ *   (равномерно распределяемую сетью каждый тик);
+ * - авто-подключение к машинам при установке (buildInitialConnections),
+ *   отслеживание появления/исчезновения машин (updateConnections),
+ *   ручное подключение игроком (addConnection) и сохранение/чтение состояния.
+ */
 public class ElectricityNetworkNode extends PipeNetworkNode {
+	// Список направлений, по которым кабель подключён к машинам/хранилищам.
 	private List<Direction> connections = new ArrayList<>();
+	// Запас энергии данного узла (доля сети, EU). Перезаписывается сетью каждый тик.
 	long eu = 0;
 
+	/**
+	 * Собирает все подключённые хранилища энергии в общий список сети.
+	 * Для каждого направления из connections ищет EnergyContainer соседнего
+	 * блока (со стороны, обращённой к кабелю) и, если он совместим с тиром
+	 * кабеля, добавляет его в список storages — из него сеть будет
+	 * извлекать/вставлять энергию в этом тике.
+	 */
 	public void appendAttributes(ServerLevel world, BlockPos pos, CableTier cableTier, List<EnergyContainer> storages) {
 		for (Direction direction : connections) {
 			EnergyContainer storage = EnergyApiLookup.CONTAINER.find(world, pos.relative(direction), direction.getOpposite());
@@ -37,6 +58,8 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Первичное авто-подключение при установке трубы: подключаемся ко всем
+	// сторонам, где рядом есть подходящее хранилище энергии.
 	@Override
 	public void buildInitialConnections(Level world, BlockPos pos) {
 		for (Direction direction : Direction.values()) {
@@ -46,6 +69,12 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	/**
+	 * Обновление соединений при изменении соседей (установке/удалении блоков).
+	 * Кабель НЕ подключается к машинам автоматически позже (в отличие от
+	 * жидкостных/предметных труб), поэтому здесь только удаляются соединения,
+	 * ставшие недоступными (машина убрана или хранилище исчезло).
+	 */
 	@Override
 	public void updateConnections(Level world, BlockPos pos) {
 		// We don't connect by default, so we just have to remove connections that have
@@ -59,6 +88,8 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Возвращает массив типов концов трубы для рендера моделей: PIPE — соединение
+	// с соседней трубой (из менеджера сети), BLOCK — соединение с машиной/хранилищем.
 	@Override
 	public @Nullable PipeEndpointType[] getConnections(BlockPos pos) {
 		PipeEndpointType[] connections = new PipeEndpointType[6];
@@ -71,6 +102,8 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		return connections;
 	}
 
+	// Удаляет соединение по направлению (например, когда игрок сломал машину
+	// или отсоединил кабель инструментом). Если соединения нет — просто ничего не делает.
 	@Override
 	public void removeConnection(Level world, BlockPos pos, Direction direction) {
 		// Remove if it exists
@@ -82,6 +115,8 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Ручное подключение игроком: если соединения ещё нет и рядом есть подходящее
+	// хранилище — добавляем направление в список.
 	@Override
 	public void addConnection(PipeBlockEntity pipe, Player player, Level world, BlockPos pos, Direction direction) {
 		// Refuse if it already exists
@@ -96,6 +131,8 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Сериализация: сохраняет список соединений в виде битовой маски
+	// (бит 0-5 = направления) и запас энергии eu.
 	@Override
 	public void save(ValueOutput output) {
 		int mask = 0;
@@ -106,6 +143,7 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		output.putLong("eu", eu);
 	}
 
+	// Десериализация: восстанавливает соединения из битовой маски и запас eu.
 	@Override
 	public void read(ValueInput input) {
 		connections = new ArrayList<>();
@@ -118,11 +156,14 @@ public class ElectricityNetworkNode extends PipeNetworkNode {
 		eu = input.getLongOr("eu", 0);
 	}
 
+	// Проверка: есть ли рядом по направлению подходящее хранилище энергии,
+	// совместимое с тиром кабеля данной сети.
 	private boolean canConnect(Level world, BlockPos pos, Direction direction) {
 		var storage = EnergyApiLookup.CONTAINER.find(world, pos.relative(direction), direction.getOpposite());
 		return storage != null && ElectricityNetwork.canConnect(((ElectricityNetwork) network).tier, storage);
 	}
 
+	// Максимальная скорость передачи кабеля (EU/тик) — берётся из тира сети.
 	public long getMaxTransfer() {
 		return ((ElectricityNetwork) network).tier.maxTransfer();
 	}

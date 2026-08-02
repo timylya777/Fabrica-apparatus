@@ -16,6 +16,12 @@ import java.util.List;
 import static net.minecraft.core.Direction.*;
 
 /**
+ * Построитель геометрии трубы (порт PipeMeshBuilder из мода MI): напрямую
+ * эмитит квады в FRAPI QuadEmitter. Отвечает за вычисление координат вершин
+ * граней, развёртку UV, боковые грани (с прямой и изгибами), торцевые
+ * заглушки и узор центрального соединителя по битовой маске направлений.
+ */
+/**
  * Builds the pipe geometry (a port of MI's PipeMeshBuilder) directly into a
  * FRAPI QuadEmitter.
  */
@@ -39,6 +45,11 @@ public class PipeMeshBuilder extends PipePartBuilder {
 
 	private static final float CULL_FACE_EPSILON = 0.00001f;
 
+	/**
+	 * Вычисляет четыре угла грани единичного куба в пространстве 0..1
+	 * для заданной номинальной грани. Та же математика, что у MI's
+	 * ModelHelper.square.
+	 */
 	/**
 	 * Compute the four corners of a face of a unit cube, in 0..1 space. Same math
 	 * as MI's ModelHelper.square.
@@ -87,6 +98,11 @@ public class PipeMeshBuilder extends PipePartBuilder {
 		}
 	}
 
+	/**
+	 * Добавляет квад грани по параметрам (слева, снизу, справа, сверху, глубина):
+	 * при необходимости также захватывает слегка смещённый внутрь квад
+	 * для отрисовки жидкости.
+	 */
 	private void quad(Direction direction, float left, float bottom, float right, float top, float depth) {
 		// Already emit the fluid quad, the UV will be baked when rendering so it's not needed here.
 		if (innerQuads != null) {
@@ -96,6 +112,11 @@ public class PipeMeshBuilder extends PipePartBuilder {
 		square(direction, left, bottom, right, top, depth);
 	}
 
+	/**
+	 * Добавляет квад по четырём вершинам с нормалью (вектором facing) и
+	 * привязывает к ним UV из переданного массива; затем эмитит квад.
+	 * Важно: вершины 1 и 4 должны быть противоположными углами.
+	 */
 	/**
 	 * Add a quad with four corners and the facing direction. It is important that 1
 	 * and 4 be opposite corners! UVs are actually (u, v, whatever), relative to

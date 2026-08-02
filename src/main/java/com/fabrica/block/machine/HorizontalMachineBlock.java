@@ -11,6 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
+// База горизонтальных машин: состояние FACING (куда направлена машина)
+// и приём энергии со всех сторон.
 public abstract class HorizontalMachineBlock extends HorizontalDirectionalBlock implements IEnergyConnectable {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 
@@ -19,6 +21,7 @@ public abstract class HorizontalMachineBlock extends HorizontalDirectionalBlock 
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
+    // При установке машина поворачивается лицевой стороной к игроку.
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
@@ -29,6 +32,7 @@ public abstract class HorizontalMachineBlock extends HorizontalDirectionalBlock 
         builder.add(FACING);
     }
 
+    // Горизонтальные машины принимают энергию с любой стороны.
     @Override
     public boolean canConnectEnergy(BlockPos pos, BlockState state, Direction fromNeighborToUs) {
         return true;

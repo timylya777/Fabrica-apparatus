@@ -13,8 +13,15 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Хранилище одного ME-диска: реализация MeStorage для конкретного слота
+ * контейнера привода (disks). Все операции вставки/извлечения работают
+ * напрямую с NBT-данными стака диска, изменяя список записей "Items".
+ */
 public class MeDiskStorage implements MeStorage {
+    /** Контейнер приводов (слоты с дисками). */
     private final SimpleContainer disks;
+    /** Номер слота, в котором лежит целевой диск. */
     private final int slot;
 
     public MeDiskStorage(SimpleContainer disks, int slot) {
@@ -22,14 +29,17 @@ public class MeDiskStorage implements MeStorage {
         this.slot = slot;
     }
 
+    /** Стак диска в слоте привода. */
     public ItemStack getDiskStack() {
         return disks.getItem(slot);
     }
 
+    /** Есть ли в слоте ME-диск. */
     public boolean hasDisk() {
         return getDiskStack().getItem() instanceof MeStorageDiskItem;
     }
 
+    /** Ёмкость диска в слоте (0, если диска нет). */
     @Override
     public long getCapacity() {
         if (getDiskStack().getItem() instanceof MeStorageDiskItem diskItem) {
@@ -38,11 +48,13 @@ public class MeDiskStorage implements MeStorage {
         return 0;
     }
 
+    /** Записи диска из его NBT. */
     @Override
     public List<MeItemStack> getEntries() {
         return hasDisk() ? MeStorageDiskItem.readEntries(getDiskStack()) : List.of();
     }
 
+    /** Сколько штук конкретного предмета лежит на диске. */
     @Override
     public long countOf(Item item) {
         long total = 0;
@@ -54,6 +66,7 @@ public class MeDiskStorage implements MeStorage {
         return total;
     }
 
+    /** Всего занятых штук на диске. */
     @Override
     public long getItemCount() {
         long total = 0;
@@ -63,6 +76,7 @@ public class MeDiskStorage implements MeStorage {
         return total;
     }
 
+    /** Вставить предметы на диск с учётом свободного места; результат сохраняется в NBT. */
     @Override
     public long insert(Item item, long count) {
         if (!hasDisk() || count <= 0) {
@@ -84,8 +98,10 @@ public class MeDiskStorage implements MeStorage {
             }
         }
         if (target != null) {
+            // Запись уже есть — просто увеличиваем счётчик.
             target.put("count", LongTag.valueOf(target.getLongOr("count", 0) + toInsert));
         } else {
+            // Новый предмет — добавляем запись {id, count}.
             CompoundTag entry = new CompoundTag();
             entry.put("id", StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString()));
             entry.put("count", LongTag.valueOf(toInsert));
@@ -95,6 +111,7 @@ public class MeDiskStorage implements MeStorage {
         return toInsert;
     }
 
+    /** Извлечь предметы с диска; пустые записи удаляются из списка. */
     @Override
     public long extract(Item item, long count) {
         if (!hasDisk() || count <= 0) {
@@ -123,6 +140,7 @@ public class MeDiskStorage implements MeStorage {
         return toExtract;
     }
 
+    /** Совпадает ли NBT-запись с указанным предметом (сравнение по registry id). */
     private static boolean matches(CompoundTag entry, Item item) {
         String id = entry.getStringOr("id", "");
         if (id.isEmpty()) {
@@ -132,6 +150,7 @@ public class MeDiskStorage implements MeStorage {
         return identifier != null && BuiltInRegistries.ITEM.getValue(identifier) == item;
     }
 
+    /** Записать изменённый список обратно в NBT стака и вернуть диск в слот. */
     private void save(ListTag list) {
         MeStorageDiskItem.writeEntries(getDiskStack(), list);
         disks.setItem(slot, getDiskStack());

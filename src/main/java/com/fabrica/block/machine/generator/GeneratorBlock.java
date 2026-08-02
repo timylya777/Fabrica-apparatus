@@ -15,9 +15,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
+// Генератор: сжигает топливо и вырабатывает энергию для сети.
 public class GeneratorBlock extends MachineBlock {
     public static final MapCodec<GeneratorBlock> CODEC = simpleCodec(GeneratorBlock::new);
 
+    // Параметры генератора из реестра: ёмкость, тир, производство (FE/тик).
     private final long capacity;
     private final EnergyTier tier;
     private final long productionRate;
@@ -42,11 +44,13 @@ public class GeneratorBlock extends MachineBlock {
     public EnergyTier getTier() { return tier; }
     public long getProductionRate() { return productionRate; }
 
+    // Генератор отдаёт энергию в любом направлении.
     @Override
     public boolean canConnectEnergy(BlockPos pos, BlockState state, Direction fromNeighborToUs) {
         return true;
     }
 
+    // Клик по генератору открывает его GUI (только на сервере).
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {
@@ -66,6 +70,7 @@ public class GeneratorBlock extends MachineBlock {
         return super.getMenuProvider(state, level, pos);
     }
 
+    // Передаём параметры энергии в сущность генератора.
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

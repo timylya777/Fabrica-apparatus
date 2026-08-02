@@ -29,11 +29,18 @@ import static com.fabrica.conduit.api.PipeEndpointType.BLOCK_IN_OUT;
 import static com.fabrica.conduit.api.PipeEndpointType.BLOCK_OUT;
 import static com.fabrica.conduit.api.PipeEndpointType.PIPE;
 
+// Узел предметной трубы: хранит по одному ItemConnection на каждую сторону
+// блока — режим, whitelist-фильтры, приоритеты и слоты-фильтры.
 public class ItemNetworkNode extends PipeNetworkNode {
+	// Число слотов фильтра в одном соединении (4 призрачных слота).
 	public static final int SLOTS = 4;
+	// Соединения по сторонам блока (до 6, по одному на направление).
 	final List<ItemConnection> connections = new ArrayList<>();
+	// Обратный отсчёт до следующего переноса предметов этим узлом.
 	int inactiveTicks = 0;
 
+	// При установке трубы подключаемся ко всем соседям-хранилищам: режим
+	// ввод/вывод, приоритеты по умолчанию (вставка 0, извлечение -10).
 	@Override
 	public void buildInitialConnections(Level world, BlockPos pos) {
 		for (Direction direction : Direction.values()) {
@@ -43,6 +50,8 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Пересчёт при изменении соседей: убираем соединение, если на этой стороне
+	// появилась связь с другой трубой, и автоподключаем новые хранилища.
 	@Override
 	public void updateConnections(Level world, BlockPos pos) {
 		// Remove the connection to the outside world if a connection to another pipe is made.
@@ -65,11 +74,14 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Есть ли у соседнего блока по стороне хранилище предметов (Fabric transfer API).
 	private boolean canConnect(Level world, BlockPos pos, Direction direction) {
 		BlockPos adjPos = pos.relative(direction);
 		return ItemStorage.SIDED.find(world, adjPos, direction.getOpposite()) != null;
 	}
 
+	// Отдаёт типы соединений всех шести сторон: PIPE — связь с другой трубой,
+	// остальные — подключения к блокам (ввод/вывод).
 	@Override
 	public @Nullable PipeEndpointType[] getConnections(BlockPos pos) {
 		PipeEndpointType[] connections = new PipeEndpointType[6];
@@ -177,6 +189,7 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		}
 	}
 
+	// Сохраняет соединения (режим, whitelist, приоритеты, слоты фильтров) в NBT.
 	@Override
 	public void save(ValueOutput output) {
 		for (ItemConnection connection : connections) {
@@ -193,6 +206,7 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		output.putInt("inactiveTicks", inactiveTicks);
 	}
 
+	// Восстанавливает соединения из NBT при загрузке мира.
 	@Override
 	public void read(ValueInput input) {
 		var keySet = input.keySet();
@@ -214,6 +228,7 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		inactiveTicks = input.getIntOr("inactiveTicks", 0);
 	}
 
+	// Сериализация режима соединения: 0/1/2 <-> BLOCK_IN / BLOCK_IN_OUT / BLOCK_OUT.
 	public static PipeEndpointType decodeConnectionType(int i) {
 		return i == 0 ? BLOCK_IN : i == 1 ? BLOCK_IN_OUT : BLOCK_OUT;
 	}
@@ -222,12 +237,18 @@ public class ItemNetworkNode extends PipeNetworkNode {
 		return connection == BLOCK_IN ? 0 : connection == BLOCK_IN_OUT ? 1 : 2;
 	}
 
+	// Соединение трубы с соседним блоком: направление, режим ввода/вывода,
+	// whitelist, приоритеты и до SLOTS слотов-фильтров.
 	class ItemConnection {
 		final Direction direction;
 		private PipeEndpointType type;
+		// true — проходят только предметы из фильтров, false — все, кроме них.
 		boolean whitelist = false;
+		// Приоритеты вставки/извлечения (у новых соединений 0 и -10): меньше — раньше.
 		int insertPriority, extractPriority;
+		// Слоты-фильтры (призрачные): задают критерии фильтрации, а не хранят предметы.
 		final ItemVariant[] stacks = new ItemVariant[SLOTS];
+		// Кэш «предмет -> варианты из слотов фильтров» для быстрого поиска по фильтру.
 		final Map<Item, List<ItemVariant>> stacksCache = new IdentityHashMap<>();
 
 		private ItemConnection(Direction direction, PipeEndpointType type, int insertPriority, int extractPriority) {
@@ -270,10 +291,12 @@ public class ItemNetworkNode extends PipeNetworkNode {
 			return type == BLOCK_OUT || type == BLOCK_IN_OUT;
 		}
 
+		// Проверка фильтра: предмет проходит, если (присутствует в кэше) == whitelist.
 		boolean canMoveThrough(ItemVariant resource) {
 			return isInCache(resource) == whitelist;
 		}
 
+		// Сколько предметов за один перенос может пропустить соединение (16).
 		int getMoves() {
 			return ItemNetwork.BASE_ITEM_PIPE_TRANSFER;
 		}

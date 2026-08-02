@@ -20,6 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Отвечает за все сети труб одного измерения (SavedData, сохраняется вместе
+ * с миром): хранит менеджеры сетей (по одному PipeNetworkManager на тип трубы),
+ * откладывает загрузку узлов в выгруженных чанках (loadPipesByChunk) и каждый
+ * тик сервера загружает узлы в активных чанках и тикает все сети.
+ * Сам граф сетей не сериализуется — он перестраивается из узлов, сохранённых
+ * в каждом PipeBlockEntity.
+ */
 public class PipeNetworks extends SavedData {
 	private static final Codec<PipeNetworks> CODEC = MapCodec.unitCodec(() -> new PipeNetworks(new HashMap<>()));
 	private static final SavedDataType<PipeNetworks> TYPE = new SavedDataType<>(
@@ -40,6 +48,7 @@ public class PipeNetworks extends SavedData {
 		}
 	}
 
+	// Возвращает менеджер сетей для типа трубы, создавая его при первом запросе.
 	public PipeNetworkManager getManager(PipeNetworkType type) {
 		return managers.computeIfAbsent(type, PipeNetworkManager::new);
 	}
@@ -49,10 +58,14 @@ public class PipeNetworks extends SavedData {
 		return managers.get(type);
 	}
 
+	// Достаёт (или создаёт) компонент сетей для серверного измерения.
 	public static PipeNetworks get(ServerLevel world) {
 		return world.getDataStorage().computeIfAbsent(TYPE);
 	}
 
+	// Откладывает загрузку узлов трубы до конца тика: узлы загружаются только
+	// в тикающихся (активных) чанках, чтобы избежать проблем с генерацией чанков.
+	// Вызывается из PipeBlockEntity.clearRemoved().
 	public static void scheduleLoadPipe(Level world, PipeBlockEntity pipe) {
 		if (world instanceof ServerLevel sw) {
 			if (!sw.getServer().isSameThread()) {
@@ -67,6 +80,8 @@ public class PipeNetworks extends SavedData {
 	// The network graph is not serialized; it is rebuilt from the pipes saved in
 	// each PipeBlockEntity.
 
+	// Регистрирует обработчик конца тика уровня: 1) загружает отложенные узлы
+	// в активных чанках, 2) тикает все менеджеры сетей.
 	public static void init() {
 		ServerTickEvents.END_LEVEL_TICK.register(serverWorld -> {
 			PipeNetworks networks = PipeNetworks.get(serverWorld);

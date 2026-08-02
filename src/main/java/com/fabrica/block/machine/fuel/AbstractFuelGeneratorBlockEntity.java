@@ -16,12 +16,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+// Топливный генератор: сжигает топливо из инвентаря, производит энергию
+// и раздаёт её подключённым соседям.
 public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBlockEntity implements EnergyProducer {
 
+    // Слот топлива (0).
     protected final SimpleContainer fuelInventory;
     protected long productionRate;
     protected EnergyTier produceTier;
 
+    // Текущее и полное время горения (в тиках) — второе нужно для индикатора в GUI.
     protected int burnTime = 0;
     protected int totalBurnTime = 0;
 
@@ -40,6 +44,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
         };
     }
 
+    // Шаг генерации: если топливо прогорело, поджигаем новое; затем начисляем энергию.
     @Override
     public long produceEnergy() {
         if (energyStorage.isFull()) {
@@ -52,6 +57,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
                 int fuelBurnTime = getFuelBurnTime(fuel);
                 if (fuelBurnTime > 0) {
                     fuel.shrink(1);
+                    // Одна единица топлива горит fuelBurnTime тиков.
                     burnTime = fuelBurnTime;
                     totalBurnTime = fuelBurnTime;
                 }
@@ -60,6 +66,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
 
         if (burnTime > 0) {
             burnTime--;
+            // Не вливаем больше, чем свободно в хранилище.
             long produced = Math.min(productionRate, energyStorage.getCapacity() - energyStorage.getEnergy());
             if (produced > 0) {
                 energyStorage.addEnergy(produced);
@@ -70,6 +77,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
         return 0;
     }
 
+    // Время горения берётся из ванильных данных топлива Minecraft.
     protected int getFuelBurnTime(ItemStack fuel) {
         if (level == null) return 0;
         return level.fuelValues().burnDuration(fuel);
@@ -101,12 +109,14 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
         return this;
     }
 
+    // Каждый серверный тик: генерируем энергию и раздаём её соседям.
     @Override
     public void serverTick() {
         produceEnergy();
         pushToNeighbors();
     }
 
+    // Раздаёт энергию соседним потребителям, ограничивая передачу лимитом медного кабеля.
     private void pushToNeighbors() {
         if (level == null || level.isClientSide()) return;
         long available = energyStorage.getEnergy();
@@ -121,6 +131,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
             if (consumer == null) continue;
             long demand = consumer.getEnergyDemand();
             if (demand <= 0) continue;
+            // Передача за тик ограничена лимитом кабеля и запросом потребителя.
             long toSend = Math.min(available, Math.min(CableTier.COPPER_LV.maxTransfer(), demand));
             if (toSend <= 0) continue;
             consumer.receiveEnergy(toSend);
@@ -129,6 +140,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
         }
     }
 
+    // Сохраняем время горения, чтобы генератор продолжил работу после перезагрузки мира.
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
@@ -136,6 +148,7 @@ public abstract class AbstractFuelGeneratorBlockEntity extends EnergyMachineBloc
         output.putInt("totalBurnTime", totalBurnTime);
     }
 
+    // Восстанавливаем время горения из NBT.
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);

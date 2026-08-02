@@ -31,12 +31,15 @@ public class FabricaMod implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		// Регистрация предметов, блоков и их блок-сущностей.
 		ModItems.register();
 		ModBlocks.register();
 		ModBlockEntities.register();
+		// Энергосистема, трубы и серверная обработка трубных сетей.
 		FabricaEnergy.register();
 		FabricaPipes.register();
 		PipeNetworks.init();
+		// Меню (контейнеры) и сетевые пакеты: настройки труб и ME-сети.
 		ModMenus.register();
 		PipeSettingsPackets.register();
 		MePackets.register();
@@ -44,6 +47,7 @@ public class FabricaMod implements ModInitializer {
 		LOGGER.info("We are alive!");
 	}
 
+	// Создаёт Identifier мода по короткому пути, например id("generator").
 	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}

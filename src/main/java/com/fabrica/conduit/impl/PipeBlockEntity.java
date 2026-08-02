@@ -48,6 +48,15 @@ import java.util.TreeSet;
 import static net.minecraft.core.Direction.NORTH;
 
 /**
+ * Отвечает за BlockEntity трубы: хранит до трёх узлов сетей (PipeNetworkNode —
+ * по одному на тип трубы), загружает/выгружает их из менеджера сетей
+ * (PipeNetworks/PipeNetworkManager), управляет соединениями (труба-труба,
+ * труба-машина, режимы ввода/вывода), сериализует данные труб и синхронизирует
+ * их с клиентом для рендера, а также строит видимые части трубы (PipeVoxelShape)
+ * и объединённую коллизионную форму. Ключевые поля: pipes — узлы (сервер),
+ * connections — соединения для рендера/клиента, customData — доп. данные рендера.
+ */
+/**
  * The BlockEntity for a pipe.
  */
 public class PipeBlockEntity extends BlockEntity {
@@ -85,6 +94,9 @@ public class PipeBlockEntity extends BlockEntity {
 		super(FabricaPipes.BLOCK_ENTITY_TYPE, pos, state);
 	}
 
+	// Загружает узлы, отложенные при чтении NBT (тогда мир ещё недоступен):
+	// регистрирует их в менеджере сетей, добавляет в набор pipes и только потом
+	// пересчитывает соединения (отложено, чтобы избежать вложенного вызова).
 	public void loadPipes() {
 		if (level.isClientSide() || unloadedPipes.size() == 0)
 			return;
@@ -100,6 +112,8 @@ public class PipeBlockEntity extends BlockEntity {
 		updateConnections();
 	}
 
+	// Пересчитывает соединения всех узлов (труба-труба и труба-машина)
+	// и обновляет кэш соединений/форму/клиента.
 	void updateConnections() {
 		loadPipes();
 		for (PipeNetworkNode pipe : pipes) {
@@ -135,6 +149,8 @@ public class PipeBlockEntity extends BlockEntity {
 	 * @param type The type to add.
 	 * @return True if the pipe can be added, false otherwise.
 	 */
+	// Проверка возможности добавить тип трубы в этот блок: максимум MAX_PIPES
+	// типов и никаких дублей (на клиенте проверка по rendered connections).
 	public boolean canAddPipe(PipeNetworkType type) {
 		loadPipes();
 		if (level.isClientSide()) {
@@ -155,6 +171,9 @@ public class PipeBlockEntity extends BlockEntity {
 	 *
 	 * @param type The type to add.
 	 */
+	// Добавляет тип трубы: создаёт узел, регистрирует его в менеджере сетей
+	// (addNode) и добавляет ссылки (addLink) во все стороны, строит начальные
+	// соединения и пересчитывает всё.
 	public void addPipe(PipeNetworkType type, PipeNetworkData data) {
 		if (!canAddPipe(type))
 			return;
@@ -175,6 +194,9 @@ public class PipeBlockEntity extends BlockEntity {
 	 *
 	 * @param type The type to remove.
 	 */
+	// Удаляет тип трубы из блока: узел вынимается из менеджера сетей
+	// (removeNode), а содержимое узла (например, предметы фильтров) выбрасывается
+	// в мир в виде ItemEntity.
 	public void removePipeAndDropContainedItems(PipeNetworkType type) {
 		loadPipes();
 		PipeNetworkNode removedPipe = null;
@@ -202,6 +224,8 @@ public class PipeBlockEntity extends BlockEntity {
 	/**
 	 * Remove a pipe connection.
 	 */
+	// Удаляет соединение на стороне direction: узел снимает связь, менеджер
+	// убирает линк (может разбить сеть на две), затем обновление кэша.
 	public void removeConnection(PipeNetworkType type, Direction direction) {
 		for (PipeNetworkNode pipe : pipes) {
 			if (pipe.getType() == type) {
@@ -216,6 +240,9 @@ public class PipeBlockEntity extends BlockEntity {
 	/**
 	 * Add a pipe connection.
 	 */
+	// Добавляет соединение на стороне direction: узел решает, что именно
+	// подключать (машину или трубу), менеджер добавляет линк (может слить
+	// две сети в одну).
 	public void addConnection(Player player, PipeNetworkType type, Direction direction) {
 		for (PipeNetworkNode pipe : pipes) {
 			if (pipe.getType() == type) {
@@ -234,6 +261,8 @@ public class PipeBlockEntity extends BlockEntity {
 	 * a machine and no connection yet, disconnect otherwise. Never touches pipe
 	 * links.
 	 */
+	// Переключает соединение с машиной на стороне direction: подключает, если
+	// есть машина и соединения нет, иначе отключает. Линки труба-труба не трогает.
 	public void toggleMachineConnection(Player player, PipeNetworkType type, Direction direction) {
 		for (PipeNetworkNode pipe : pipes) {
 			if (pipe.getType() == type) {
@@ -261,6 +290,8 @@ public class PipeBlockEntity extends BlockEntity {
 	 * Cycle the import/export mode of a machine connection. Returns true if the
 	 * mode was changed.
 	 */
+	// Циклически переключает режим ввода/вывода соединения с машиной
+	// (только предметные/жидкостные трубы); возвращает true, если режим изменился.
 	public boolean cycleConnectionMode(PipeNetworkType type, Direction direction) {
 		for (PipeNetworkNode pipe : pipes) {
 			if (pipe.getType() == type) {
@@ -278,6 +309,8 @@ public class PipeBlockEntity extends BlockEntity {
 	 * Open the connection settings menu (white/black list and filter slots) for
 	 * the item pipe connection on the given side. Only works for item pipes.
 	 */
+	// Открывает игроку меню настроек соединения предметной трубы
+	// (белый/чёрный список и слоты фильтров). Только сервер, только ItemNetworkNode.
 	public void openConnectionSettings(Player player, PipeNetworkType type, Direction direction) {
 		if (level.isClientSide()) {
 			return;
@@ -296,6 +329,8 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 	}
 
+	// Передаёт пользовательский клик узлу нужного типа трубы
+	// (например, клик по коннектору электрокабеля для разъединения).
 	public boolean customUse(PipeVoxelShape shape, Player player, net.minecraft.world.InteractionHand hand) {
 		for (var node : pipes) {
 			if (node.getType() == shape.type) {
@@ -305,6 +340,10 @@ public class PipeBlockEntity extends BlockEntity {
 		return false;
 	}
 
+	// Различает реальное удаление блока и выгрузку чанка: при удалении узлы
+	// вынимаются из менеджера (removeNode) и соседние трубы обновляются, при
+	// выгрузке узлы лишь помечаются unloaded (nodeUnloaded), чтобы сеть
+	// восстановилась при повторной загрузке.
 	@Override
 	public void setRemoved() {
 		// A real removal replaces the pipe block, while a chunk unload keeps it.
@@ -343,6 +382,8 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 	}
 
+	// Сохраняет каждый узел в NBT (тип + данные узла), включая ещё не
+	// загруженные (UnloadedPipe).
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
@@ -359,6 +400,9 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 	}
 
+	// Читает узлы из NBT. В старом формате узлы складываются в unloadedPipes
+	// (мир ещё недоступен — загрузка откладывается до loadPipes), в новом
+	// формате с ключом "pipes" читаются соединения и custom data клиента.
 	@Override
 	public void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
@@ -390,6 +434,7 @@ public class PipeBlockEntity extends BlockEntity {
 		}
 	}
 
+	// Декодирует байтовый массив в массив типов соединений на 6 сторон.
 	private static PipeEndpointType[] decodeConnections(byte[] bytes) {
 		PipeEndpointType[] connections = new PipeEndpointType[6];
 		for (int i = 0; i < 6; i++) {
@@ -398,6 +443,8 @@ public class PipeBlockEntity extends BlockEntity {
 		return connections;
 	}
 
+	// Кодирует массив соединений в байты (127 = отсутствие соединения)
+	// для синхронизации с клиентом.
 	private static byte[] encodeConnections(@Nullable PipeEndpointType[] connections) {
 		byte[] bytes = new byte[6];
 		if (connections != null) {
@@ -415,6 +462,9 @@ public class PipeBlockEntity extends BlockEntity {
 		PipeNetworks.scheduleLoadPipe(level, this);
 	}
 
+	// Вызывается, когда изменяются соединения: обновляет кэш connections
+	// (нужен для коллизионной формы на сервере), при реальном изменении
+	// пересобирает форму и шлёт обновление клиенту, помечает блок изменённым.
 	public void onConnectionsChanged() {
 		// Update connections on the server side, we need them for the bounding box.
 		Map<PipeNetworkType, @Nullable PipeEndpointType[]> oldRendererConnections = connections;
@@ -430,6 +480,8 @@ public class PipeBlockEntity extends BlockEntity {
 		setChanged();
 	}
 
+	// Сериализация для клиента (update tag): для каждого узла пишутся custom
+	// данные (например, содержимое жидкости) и закодированные соединения.
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(this.problemPath(), LOGGER)) {
@@ -451,6 +503,8 @@ public class PipeBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
+	// Рассылает пакет обновления всем игрокам в радиусе 64 блоков
+	// (только сервер).
 	public void sync() {
 		if (level == null || level.isClientSide() || !(level instanceof ServerLevel serverLevel)) return;
 		Packet<ClientGamePacketListener> packet = getUpdatePacket();
@@ -466,6 +520,9 @@ public class PipeBlockEntity extends BlockEntity {
 	/**
 	 * Get the currently visible shapes.
 	 */
+	// Строит список видимых частей трубы: центральный коннектор на каждый
+	// тип и боковые коннекторы по типу соединения (см. PipePartBuilder.getRenderType).
+	// Каждая часть несёт тип трубы, направление и признак открытия GUI.
 	public Collection<PipeVoxelShape> getPartShapes() {
 		Collection<PipeVoxelShape> shapes = new ArrayList<>();
 
@@ -495,11 +552,16 @@ public class PipeBlockEntity extends BlockEntity {
 		return shapes;
 	}
 
+	// Пересобирает объединённую коллизионную форму из всех частей труб.
 	private void rebuildCollisionShape() {
 		currentCollisionShape = getPartShapes().stream().map(vs -> vs.shape).reduce(Shapes.empty(), Shapes::or);
 		currentCollisionShape = currentCollisionShape.optimize();
 	}
 
+	// Статический кэш форм: для каждого слота (0..2), направления и типа
+	// соединения заранее строится VoxelShape через PipeShapeBuilder.
+	// Тип 0 — центральный коннектор, 1 — прямая линия, 2/3 — короткие
+	// повороты, 4 — длинный поворот.
 	static {
 		// Note: the centor connector are at connectionType 0.
 		SHAPE_CACHE = new VoxelShape[3][6][5];

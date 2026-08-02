@@ -12,13 +12,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Storage для Fabric transfer API, оборачивающий контейнер слотов ME-привода.
+ * Позволяет внешним системам (трубы, другие моды) вставлять/извлекать
+ * предметы в диски привода через стандартный API передачи.
+ * Поддерживает транзакции: при отмене (ABORTED) слоты возвращаются к снимку.
+ */
 public class MeDriveContainerStorage implements Storage<ItemVariant> {
+    /** Контейнер слотов привода с дисками. */
     private final SimpleContainer container;
 
     public MeDriveContainerStorage(SimpleContainer container) {
         this.container = container;
     }
 
+    /** Вставить предметы в слоты привода, заполняя стаки по maxStackSize. */
     @Override
     public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource.isBlank() || maxAmount <= 0) {
@@ -31,10 +39,12 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         for (int i = 0; i < container.getContainerSize() && inserted < maxAmount; i++) {
             ItemStack existing = container.getItem(i);
             if (existing.isEmpty()) {
+                // Пустой слот — кладём новый стак.
                 int count = (int) Math.min(maxAmount - inserted, maxStack);
                 container.setItem(i, template.copyWithCount(count));
                 inserted += count;
             } else if (ItemStack.isSameItemSameComponents(existing, template) && existing.getCount() < maxStack) {
+                // Слот с тем же предметом — увеличиваем существующий стак.
                 int count = (int) Math.min(maxAmount - inserted, maxStack - existing.getCount());
                 existing.grow(count);
                 container.setItem(i, existing);
@@ -47,6 +57,7 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         return inserted;
     }
 
+    /** Извлечь предметы из слотов привода, убирая их из стаков. */
     @Override
     public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource.isBlank() || maxAmount <= 0) {
@@ -71,6 +82,7 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         return extracted;
     }
 
+    /** Представление занятых слотов как StorageView для итерации. */
     @Override
     public Iterator<StorageView<ItemVariant>> iterator() {
         List<StorageView<ItemVariant>> views = new ArrayList<>();
@@ -82,6 +94,7 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         return views.iterator();
     }
 
+    /** Снимок всех слотов (копии стаков) для отката транзакции. */
     private List<ItemStack> capture() {
         List<ItemStack> snapshot = new ArrayList<>(container.getContainerSize());
         for (int i = 0; i < container.getContainerSize(); i++) {
@@ -90,6 +103,7 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         return snapshot;
     }
 
+    /** При отмене транзакции вернуть слоты к снимку. */
     private void rollbackOnAbort(TransactionContext transaction, List<ItemStack> snapshot) {
         transaction.addCloseCallback((tx, result) -> {
             if (result == Result.ABORTED) {
@@ -100,6 +114,7 @@ public class MeDriveContainerStorage implements Storage<ItemVariant> {
         });
     }
 
+    /** Представление одного слота привода для Fabric transfer API. */
     private class SlotView implements StorageView<ItemVariant> {
         private final int slot;
 

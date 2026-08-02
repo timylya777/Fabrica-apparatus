@@ -15,6 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Отвечает за все сети одного типа труб в измерении: ведёт реестр сетей и
+ * соответствие «позиция блока -> сеть», хранит ссылки между узлами (links),
+ * добавляет/удаляет узлы и связи, сливает сети при соединении (addLink) и
+ * разбивает их при разрыве (removeLink, поиск в глубину), следит за
+ * загруженными чанками (spannedChunks/tickingChunks) и тикает сети каждый тик.
+ * Не сериализуется — строится заново из узлов.
+ */
 public class PipeNetworkManager {
 	private final Map<BlockPos, PipeNetwork> networkByBlock = new HashMap<>();
 	private final Map<BlockPos, Set<Direction>> links = new HashMap<>();
@@ -36,6 +44,8 @@ public class PipeNetworkManager {
 	/**
 	 * Tick networks
 	 */
+	// Тикает все сети: сначала обновляет список активных чанков, затем тикает
+	// каждую сеть и помечает затронутые чанки как изменённые (для сохранения).
 	public void tickNetworks(ServerLevel world) {
 		updateTickingChunks(world);
 
@@ -59,6 +69,8 @@ public class PipeNetworkManager {
 		return networkByBlock.containsKey(pos);
 	}
 
+	// Пересчитывает, какие из затронутых чанков сейчас тикаются, и
+	// инвалидирует кэш тикающихся узлов у сетей в этих чанках.
 	private void updateTickingChunks(ServerLevel world) {
 		tickingChunks.clear();
 		for (long chunk : spannedChunks.keySet()) {
@@ -77,6 +89,7 @@ public class PipeNetworkManager {
 		return world.getChunkSource().isPositionTicking(chunkPos);
 	}
 
+	// Помечает кэш тикающихся узлов у сетей в заданном чанке как устаревший.
 	private void notifyTickingChanged(Set<BlockPos> positionsInChunk) {
 		if (positionsInChunk != null) {
 			for (BlockPos pos : positionsInChunk) {
@@ -92,6 +105,10 @@ public class PipeNetworkManager {
 	 * Add a network link and merge networks if necessary. Both the node at pos and
 	 * the node at pos + direction must exist in the network.
 	 */
+	// Добавляет связь между узлом в pos и узлом в pos+direction; если они
+	// находятся в разных сетях — сливает сети в одну (с предварительным
+	// merge данных при разрешении). При force=true связь создаётся даже при
+	// несовпадении данных, если сети разрешают слияние.
 	public void addLink(BlockPos pos, Direction direction, boolean force) {
 		if (hasLink(pos, direction))
 			return;
@@ -131,6 +148,9 @@ public class PipeNetworkManager {
 	 * Remove a network link and split networks if necessary. Both the node at pos
 	 * and the node at pos + direction must exist in the network.
 	 */
+	// Убирает связь между узлами; если после этого сеть распадается на две
+	// компоненты связности — создаёт новую сеть для отрезанной части
+	// (обход в глубину от pos по оставшимся связям).
 	public void removeLink(BlockPos pos, Direction direction) {
 		if (!hasLink(pos, direction))
 			return;
@@ -178,6 +198,8 @@ public class PipeNetworkManager {
 		return nodeLinks != null && nodeLinks.contains(direction);
 	}
 
+	// Можно ли провести связь: в соседней позиции есть сеть, и её данные
+	// совпадают (или force и merge разрешает объединение).
 	public boolean canLink(BlockPos pos, Direction direction, boolean forceLink) {
 		BlockPos otherPos = pos.relative(direction);
 		PipeNetwork network = networkByBlock.get(pos);
@@ -188,6 +210,10 @@ public class PipeNetworkManager {
 	/**
 	 * Add a node and create a new network for it.
 	 */
+	// Добавляет узел: создаёт для него новую сеть с клонированными данными,
+	// регистрирует позицию в spannedChunks и готовит пустой набор ссылок.
+	// Если на позиции остался «устаревший» узел от неправильного удаления —
+	// сначала убирает его.
 	public void addNode(PipeNetworkNode node, BlockPos pos, PipeNetworkData data) {
 		if (networkByBlock.containsKey(pos)) {
 			// A stale entry can remain if a previous pipe at this position was
@@ -210,6 +236,8 @@ public class PipeNetworkManager {
 	/**
 	 * Remove a node and its network. Will remove all remaining links.
 	 */
+	// Удаляет узел и его сеть: снимает все связи (при этом сеть может
+	// распасться), вынимает сеть из реестра и вызывает onRemove().
 	public void removeNode(BlockPos pos) {
 		for (Direction direction : Direction.values()) {
 			removeLink(pos, direction);
@@ -225,6 +253,10 @@ public class PipeNetworkManager {
 	/**
 	 * Should be called when a node is loaded, it will link the node to its network.
 	 */
+	// Вызывается при загрузке чанка с узлом: если сеть на этой позиции ещё
+	// существует (например, соседний узел не выгружался) — узел просто
+	// подключается к ней; иначе создаётся новая сеть с данными по умолчанию
+	// и все шесть связей пересоздаются.
 	public void nodeLoaded(PipeNetworkNode node, BlockPos pos) {
 		PipeNetwork network = networkByBlock.get(pos);
 		if (network == null) {
@@ -244,12 +276,17 @@ public class PipeNetworkManager {
 	/**
 	 * Should be called when a node is unloaded, it will unlink the node from its network.
 	 */
+	// Вызывается при выгрузке чанка: узел помечается null в карте сети
+	// (позиция остаётся, чтобы сеть не разваливалась), чанк убирается из
+	// spannedChunks, кэш тикающихся узлов инвалидируется.
 	public void nodeUnloaded(PipeNetworkNode node, BlockPos pos) {
 		node.network.setNode(pos, null);
 		node.network.tickingCacheValid = false;
 		decrementSpanned(pos);
 	}
 
+	// Создаёт сеть нужного типа через фабрику типа трубы, назначает менеджер,
+	// выдаёт следующий id и регистрирует в наборе сетей.
 	private PipeNetwork createNetwork(PipeNetworkData data) {
 		PipeNetwork network = type.getNetworkCtor().apply(nextNetworkId, data);
 		network.manager = this;
@@ -258,10 +295,13 @@ public class PipeNetworkManager {
 		return network;
 	}
 
+	// Учёт позиций по чанкам: прибавляет позицию к списку «затронутых» чанков
+	// (нужно для определения тикающихся чанков).
 	private void incrementSpanned(BlockPos pos) {
 		spannedChunks.computeIfAbsent(ChunkPos.pack(pos), p -> new HashSet<>()).add(pos.immutable());
 	}
 
+	// Убирает позицию из списка затронутых чанков (пустой чанк удаляется).
 	private void decrementSpanned(BlockPos pos) {
 		long chunkPos = ChunkPos.pack(pos);
 		Set<BlockPos> set = spannedChunks.get(chunkPos);

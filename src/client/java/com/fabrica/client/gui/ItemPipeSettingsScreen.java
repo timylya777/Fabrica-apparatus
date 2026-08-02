@@ -13,6 +13,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
+ * Экран настроек соединения предметной трубы: четыре слота фильтра и кнопка
+ * переключения режима "белый/чёрный список". Режим показывается цветом кнопки
+ * (зелёная — белый список, красная — чёрный) и меняется нажатием, после чего
+ * на сервер отправляется пакет {@link ItemPipeWhitelistPayload}.
+ */
+/**
  * The connection settings screen of an item pipe: four filter slots and a
  * white/black list toggle.
  */
@@ -29,6 +35,7 @@ public class ItemPipeSettingsScreen extends AbstractContainerScreen<ItemPipeSett
         super(menu, inventory, title);
     }
 
+    /** Рисует подложку экрана и серые подложки четырёх слотов фильтра. */
     @Override
     public void extractBackground(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(extractor, mouseX, mouseY, partialTick);
@@ -41,6 +48,10 @@ public class ItemPipeSettingsScreen extends AbstractContainerScreen<ItemPipeSett
         }
     }
 
+    /**
+     * Рисует кнопку режима: заливает её цветом в зависимости от текущего
+     * состояния (белый/чёрный список) и выводит текст подписи по центру кнопки.
+     */
     @Override
     public void extractContents(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         super.extractContents(extractor, mouseX, mouseY, partialTick);
@@ -54,6 +65,10 @@ public class ItemPipeSettingsScreen extends AbstractContainerScreen<ItemPipeSett
         extractor.text(font, label, x + (BUTTON_W - font.width(label)) / 2, y + 4, 0xFFFFFF);
     }
 
+    /**
+     * Клик по кнопке переключает режим: отправляет на сервер пакет с новым
+     * значением (инверсия текущего состояния белого/чёрного списка).
+     */
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int x = leftPos + BUTTON_X;

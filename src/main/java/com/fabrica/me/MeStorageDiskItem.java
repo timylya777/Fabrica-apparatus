@@ -15,9 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Предмет "ME-диск" — носитель данных сети.
+ * Вся информация о содержимом хранится в NBT (CUSTOM_DATA) самого стака:
+ * список записей {id: идентификатор предмета, count: количество}.
+ * Класс отвечает за чтение/запись этих NBT-данных и показ подсказки в инвентаре.
+ */
 public class MeStorageDiskItem extends Item {
+    /** Ключ NBT-списка с записями предметов на диске. */
     public static final String KEY_ITEMS = "Items";
 
+    /** Тип (тир) данного диска, задаётся при создании предмета. */
     private final MeStorageDiskTier tier;
 
     public MeStorageDiskItem(Item.Properties properties, MeStorageDiskTier tier) {
@@ -25,10 +33,12 @@ public class MeStorageDiskItem extends Item {
         this.tier = tier;
     }
 
+    /** Тир диска (от него зависит ёмкость). */
     public MeStorageDiskTier getTier() {
         return tier;
     }
 
+    /** Дополнительная строка подсказки: ёмкость и занятый объём диска. */
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay,
                                 Consumer<Component> consumer, TooltipFlag flag) {
@@ -37,6 +47,7 @@ public class MeStorageDiskItem extends Item {
         consumer.accept(Component.translatable("tooltip.fabrica_apparatus.me_disk_used", getUsed(stack)));
     }
 
+    /** Прочитать записи из NBT стака диска в список MeItemStack. */
     public static List<MeItemStack> readEntries(ItemStack diskStack) {
         List<MeItemStack> entries = new ArrayList<>();
         for (Tag raw : getItemsTag(diskStack)) {
@@ -59,12 +70,14 @@ public class MeStorageDiskItem extends Item {
         return entries;
     }
 
+    /** Записать список записей (ListTag) в NBT стака диска. */
     public static void writeEntries(ItemStack diskStack, ListTag list) {
         CompoundTag tag = new CompoundTag();
         tag.put(KEY_ITEMS, list);
         CustomData.set(DataComponents.CUSTOM_DATA, diskStack, tag);
     }
 
+    /** Сумма всех count — сколько штук всего занято на диске. */
     public static long getUsed(ItemStack diskStack) {
         long used = 0;
         for (Tag raw : getItemsTag(diskStack)) {
@@ -75,6 +88,7 @@ public class MeStorageDiskItem extends Item {
         return used;
     }
 
+    /** Достать NBT-список "Items" из стака диска (пустой, если данных нет). */
     public static ListTag getItemsTag(ItemStack diskStack) {
         CustomData data = diskStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         if (data.isEmpty()) {

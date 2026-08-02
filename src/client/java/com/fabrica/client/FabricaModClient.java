@@ -26,7 +26,17 @@ import net.minecraft.world.entity.player.Player;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Клиентская точка входа мода (сторона клиента).
+ * Отвечает за регистрацию всех экранов (GUI), связывая их с меню,
+ * регистрацию кастомной unbaked-модели трубы, обработку сетевых пакетов
+ * синхронизации ME-сетки и создание рендереров труб для каждого типа сети.
+ */
 public class FabricaModClient implements ClientModInitializer {
+	/**
+	 * Вызывается при инициализации клиента Fabric: регистрирует экраны,
+	 * модель трубы, обработчик сброса кэшей и приёмник сетевых пакетов.
+	 */
 	@Override
 	public void onInitializeClient() {
 		MenuScreens.register(ModMenus.GENERATOR, GeneratorScreen::new);
@@ -37,10 +47,13 @@ public class FabricaModClient implements ClientModInitializer {
 		CustomUnbakedBlockStateModel.register(PipeUnbakedModel.TYPE_ID, PipeUnbakedModel.CODEC);
 		InvalidateRenderStateCallback.EVENT.register(PipeMeshCache::clearAll);
 		registerSyncReceiver();
-		registerPipeRenderers();
+		// registerPipeRenderers();
 	}
 
 	private static void registerSyncReceiver() {
+		// Регистрирует глобальный приёмник пакета синхронизации ME-сетки:
+		// применяет полученные данные (записи, занятость, ёмкость) к открытому меню
+		// ME-сетки с совпадающим идентификатором контейнера.
 		ClientPlayNetworking.registerGlobalReceiver(MePackets.MeGridSyncPayload.TYPE, (payload, context) -> {
 			context.client().execute(() -> {
 				Player player = Minecraft.getInstance().player;
@@ -57,6 +70,9 @@ public class FabricaModClient implements ClientModInitializer {
 	 * The sprites are indexed by pipe endpoint type id.
 	 */
 	private static void registerPipeRenderers() {
+		// Регистрирует фабрику рендерера для каждого типа труб: item, fluid и
+		// electricity. Каждая фабрика получает набор спрайтов (по индексу типа
+		// конечной точки) и флаг отрисовки внутренних квадов (для жидкостей).
 		FabricaPipes.register();
 		PipeRenderer.Factory itemRenderer = makeRenderer(Arrays.asList("item", "item_item", "item_in", "item_in_out", "item_out"), false);
 		PipeRenderer.Factory fluidRenderer = makeRenderer(Arrays.asList("fluid", "fluid_item", "fluid_in", "fluid_in_out", "fluid_out"), true);
@@ -75,6 +91,8 @@ public class FabricaModClient implements ClientModInitializer {
 	}
 
 	private static PipeRenderer.Factory makeRenderer(List<String> sprites, boolean innerQuads) {
+		// Создаёт фабрику, которая превращает список имён спрайтов в массив
+		// материалов и возвращает новый PipeMeshCache — кэш мешей для труб.
 		return modelBaker -> {
 			Material[] materials = sprites.stream()
 					.map(name -> new Material(Identifier.fromNamespaceAndPath("fabrica_apparatus", "block/pipes/" + name)))

@@ -26,12 +26,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
+// Предметная сеть: раз в TICK_RATE серверных тиков собирает источники
+// извлечения (ExtractionSource) и раскладывает предметы по приёмникам.
 public class ItemNetwork extends PipeNetwork {
+	// Период переноса: сеть двигает предметы раз в 20 серверных тиков (~1 сек).
 	public static final int TICK_RATE = 20;
+	// Пропускная способность трубы: 16 предметов за один перенос (~16 шт/сек).
 	static final int BASE_ITEM_PIPE_TRANSFER = 16;
 
+	// Обратный отсчёт до следующего переноса (декремент каждый серверный тик).
 	int inactiveTicks = 0;
 	long lastMovedItems = 0;
+	// Текущий источник извлечения: по нему запрещается вставка предметов
+	// обратно в источник (защита от самовставки).
 	@Nullable
 	ExtractionSource currentExtractionSource;
 
@@ -39,6 +46,8 @@ public class ItemNetwork extends PipeNetwork {
 		super(id, data);
 	}
 
+	// Серверный тик сети: перенос выполняется раз в TICK_RATE тиков,
+	// остальные тики лишь уменьшают счётчик.
 	@Override
 	public void tick(ServerLevel world) {
 		// Only tick once
@@ -49,6 +58,8 @@ public class ItemNetwork extends PipeNetwork {
 		--inactiveTicks;
 	}
 
+	// Собирает все источники извлечения по узлам, сортирует их по приоритету
+	// извлечения (меньший — раньше) и переносит предметы в приёмники.
 	private void doNetworkTransfer(ServerLevel world) {
 		List<ExtractionSource> extractionSources = new ArrayList<>();
 		for (var entry : iterateTickingNodes()) {
@@ -109,6 +120,8 @@ public class ItemNetwork extends PipeNetwork {
 	/**
 	 * Move items from a storage into a combined insertion handler.
 	 */
+	// Переносит до amount предметов из хранилища в приёмники во вложенной
+	// транзакции: извлечение сперва симулируется, затем выполняется реально.
 	private static long move(Storage<ItemVariant> from, CombinedInsertionHandler<ItemVariant> to, java.util.function.Predicate<ItemVariant> filter,
 			int amount, @Nullable TransactionContext transaction) {
 		if (from == null || amount == 0) return 0;
@@ -146,6 +159,9 @@ public class ItemNetwork extends PipeNetwork {
 	/**
 	 * Find all connections in which to insert that are loaded.
 	 */
+	// Ищет загруженные приёмники (стороны в режиме ввода), группирует их по
+	// приоритету вставки и типу фильтра; приоритеты обрабатываются от большего
+	// к меньшему, внутри группы порядок перемешивается для равномерности.
 	private List<Aggregate> getAggregatedInsertTargets(ServerLevel world) {
 		Map<Integer, PriorityBucket> priorityBuckets = new java.util.HashMap<>();
 
@@ -264,6 +280,8 @@ public class ItemNetwork extends PipeNetwork {
 		}
 	}
 
+	// Раскладывает предмет по целям по очереди; пропускает соединение-источник,
+	// из которого предметы только что были извлечены (запрет самовставки).
 	private long insertTargets(List<InsertTarget> targets, ItemVariant resource, long amount, TransactionContext transaction) {
 		long inserted = 0;
 		for (var target : targets) {

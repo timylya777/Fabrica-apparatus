@@ -14,9 +14,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
+// Электропечь: потребляет энергию для переплавки предметов.
 public class ElectricFurnaceBlock extends MachineBlock {
     public static final MapCodec<ElectricFurnaceBlock> CODEC = simpleCodec(ElectricFurnaceBlock::new);
 
+    // Параметры печи из реестра: ёмкость, тир, потребление (FE/тик).
     private final long capacity;
     private final EnergyTier tier;
     private final long consumptionRate;
@@ -41,6 +43,7 @@ public class ElectricFurnaceBlock extends MachineBlock {
     public EnergyTier getTier() { return tier; }
     public long getConsumptionRate() { return consumptionRate; }
 
+    // Клик по печи открывает её GUI (только на сервере).
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {
@@ -60,6 +63,7 @@ public class ElectricFurnaceBlock extends MachineBlock {
         return super.getMenuProvider(state, level, pos);
     }
 
+    // Передаём параметры энергии в сущность печи.
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

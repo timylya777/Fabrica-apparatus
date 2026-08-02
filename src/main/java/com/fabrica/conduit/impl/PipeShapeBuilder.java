@@ -6,6 +6,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
+ * Отвечает за превращение «маршрутов» PipePartBuilder в готовые VoxelShape:
+ * переопределяет drawPipe, собирая из каждого сегмента прямоугольную коробку
+ * (через две угловые точки) и объединяя её с общей формой. Используется в
+ * статическом кэше форм PipeBlockEntity.
+ */
+/**
  * Reusing the PipePartBuilder to generate shapes for the pipe parts.
  */
 public class PipeShapeBuilder extends PipePartBuilder {
@@ -16,6 +22,9 @@ public class PipeShapeBuilder extends PipePartBuilder {
 		shape = Shapes.empty();
 	}
 
+	// Рисует один сегмент трубы: прямоугольник от нижнего ближнего угла
+	// (pos минус половина ширины по up и right) до верхнего дальнего
+	// (плюс длина по facing).
 	@Override
 	protected void drawPipe(float length, Intent intent, boolean end) {
 		Vec3 up = up();
@@ -26,6 +35,7 @@ public class PipeShapeBuilder extends PipePartBuilder {
 	/**
 	 * Add a shape to the current shape using two corners.
 	 */
+	// Объединяет коробку, заданную двумя углами, с накопленной формой.
 	private void addShape(Vec3 c1, Vec3 c2) {
 		double x = Math.min(c1.x, c2.x), y = Math.min(c1.y, c2.y), z = Math.min(c1.z, c2.z);
 		double X = Math.max(c1.x, c2.x), Y = Math.max(c1.y, c2.y), Z = Math.max(c1.z, c2.z);
@@ -42,6 +52,8 @@ public class PipeShapeBuilder extends PipePartBuilder {
 	/**
 	 * Draw the center connector (starting from whatever direction).
 	 */
+	// Центральный коннектор: короткий сегмент в середине блока, который
+	// соединяет все трубы этого типа.
 	public void centerConnector() {
 		moveForward(-SIDE);
 		drawPipe(SIDE, null);

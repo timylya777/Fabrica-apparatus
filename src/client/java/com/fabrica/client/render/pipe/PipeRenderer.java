@@ -9,18 +9,34 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Интерфейс рендера соединений одного логического слота трубы.
+ * Реализация получает emitter FRAPI и рисует в него геометрию соединений
+ * для заданного слота. Один экземпляр рендерера создаётся на фабрику
+ * типа трубы (см. {@link Factory}).
+ */
+/**
  * Renders the connections of a single logical pipe slot.
  * One renderer instance is created per pipe type factory.
  */
 public interface PipeRenderer {
+	/** Регистрирует фабрику рендерера для данного типа сети труб. */
 	static void register(PipeNetworkType type, PipeRenderer.Factory factory) {
 		type.renderer = factory;
 	}
 
+	/** Возвращает зарегистрированную фабрику рендерера для типа сети. */
 	static PipeRenderer.Factory get(PipeNetworkType type) {
 		return (Factory) type.renderer;
 	}
 
+	/**
+	 * Рисует соединения логического слота трубы в emitter.
+	 *
+	 * @param logicalSlot Логический слот: 0 — центр, 1 — нижний, 2 — верхний.
+	 * @param connections Для каждого логического слота и направления — тип
+	 *                    соединения либо null, если соединения нет.
+	 * @param color       Цвет тонировки (ARGB).
+	 */
 	/**
 	 * Draw the connections for a logical slot.
 	 *
@@ -36,6 +52,7 @@ public interface PipeRenderer {
 			int logicalSlot, PipeEndpointType[][] connections,
 			int color, @Nullable Object customData);
 
+	/** Фабрика рендереров: создаёт экземпляр рендерера, используя ModelBaker. */
 	@FunctionalInterface
 	interface Factory {
 		PipeRenderer create(ModelBaker modelBaker);

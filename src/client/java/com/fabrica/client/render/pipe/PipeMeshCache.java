@@ -28,25 +28,37 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /**
+ * Кэш готовых (baked) FRAPI-мешей для соединений труб и центральных
+ * соединителей. Меши строятся лениво по ключам и переиспользуются при
+ * повторной отрисовке одинаковых конфигураций; ключи устроены как в
+ * PipeMeshCache из мода MI. Также отвечает за повторную эмиссию внутренних
+ * квадов с жидкостью (спрайт и цвет жидкости) внутри заполненных труб.
+ */
+/**
  * Caches baked FRAPI meshes for the pipe connections and center connectors,
  * keyed like MI's PipeMeshCache.
  */
 public class PipeMeshCache implements PipeRenderer {
 
+	/** Ключ меша соединения: тип конечной точки, слот, направление, тип рендера и цвет. */
 	private record ConnectionMeshKey(int endpointType, int logicalSlot, int directionId, int renderType, int color) {
 	}
 
+	/** Ключ меша центра: слот, битовая маска направлений соединений и цвет. */
 	private record CenterMeshKey(int logicalSlot, int bitmask, int color) {
 	}
 
+	/** Готовый меш и захваченные внутренние квады (для отрисовки жидкости). */
 	private record MeshData(Mesh pipeMesh, List<InnerQuad> innerQuads) {
 	}
 
+	/** Квад слегка внутри трубы: переизлучается со спрайтом и цветом жидкости, когда труба заполнена. */
 	/**
 	 * A quad slightly inside the pipe, re-emitted with the fluid sprite and color
 	 * when the pipe contains a fluid, like MI does.
 	 */
 	record InnerQuad(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3, Direction direction) {
+		/** Возвращает вершину квада по индексу (0..3). */
 		Vec3 position(int i) {
 			return switch (i) {
 				case 0 -> p0;
@@ -84,6 +96,13 @@ public class PipeMeshCache implements PipeRenderer {
 	 * endpoint type id (see {@link PipeEndpointType#getId()}).
 	 *
 	 * @param innerQuads Whether to add inner quads, e.g. for fluid rendering.
+	 */
+	/**
+	 * Конструктор: сохраняет зависимости и регистрирует кэш в общем множестве
+	 * {@link #ALL_CACHES}, затем настраивает ленивые построители мешей:
+	 * для соединений — по типу рендера (прямая, короткий/дальний/длинный изгиб,
+	 * со сниженной детализацией для конфликтных направлений) и для центра —
+	 * по битовой маске направлений без соединений.
 	 */
 	public PipeMeshCache(MaterialBaker materialBaker, Material[] materials, boolean innerQuads) {
 		this.materialBaker = materialBaker;
@@ -136,6 +155,7 @@ public class PipeMeshCache implements PipeRenderer {
 		};
 	}
 
+	/** Очищает все кэши мешей; вызывается при инвалидации состояния рендера (например, перезагрузке текстур). */
 	public static void clearAll() {
 		for (PipeMeshCache cache : ALL_CACHES) {
 			cache.connectionMeshes.clear();
@@ -143,6 +163,12 @@ public class PipeMeshCache implements PipeRenderer {
 		}
 	}
 
+	/**
+	 * Главная точка отрисовки: вычисляет тип рендера и начальное направление
+	 * для каждого соединения, разрешает спрайт/цвет жидкости (если труба
+	 * заполнена), берёт готовые меши из кэша (с учётом конфликтов направлений)
+	 * и выводит их в emitter, а также рисует центральный соединитель.
+	 */
 	@Override
 	public void draw(
 			QuadEmitter emitter,
@@ -203,6 +229,7 @@ public class PipeMeshCache implements PipeRenderer {
 		centerMesh.pipeMesh().outputTo(emitter);
 	}
 
+	/** Эмитит внутренние квады трубы со спрайтом жидкости и её цветом (полупрозрачный слой). */
 	private void emitInnerQuads(QuadEmitter emitter, List<InnerQuad> innerQuads, Material.Baked material, int color) {
 		for (InnerQuad quad : innerQuads) {
 			Direction direction = quad.direction();
@@ -224,6 +251,7 @@ public class PipeMeshCache implements PipeRenderer {
 		}
 	}
 
+	/** Переводит мировые координаты вершины в UV-координаты текстуры (0..1) для заданной грани. */
 	private static Vector2f lockUvs(Vec3 pos, Direction face) {
 		return switch (face) {
 			case EAST -> new Vector2f(1 - (float) pos.z(), 1 - (float) pos.y());

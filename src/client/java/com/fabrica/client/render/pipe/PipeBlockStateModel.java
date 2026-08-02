@@ -21,12 +21,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 
+// Клиентская модель блока труб: рисует все типы труб, установленные в
+// PipeBlockEntity, используя кешированные меши из PipeMeshCache.
 /**
  * The block model of the pipe block: renders every pipe type present in the
  * PipeBlockEntity using the meshes from the per-type PipeMeshCache.
  */
 public class PipeBlockStateModel implements BlockStateModel, FabricBlockStateModel {
 
+	// Материал частиц (при разрушении блока) и рендереры всех типов труб.
 	private final Material.Baked particleMaterial;
 	private final Map<PipeRenderer.Factory, PipeRenderer> renderers;
 
@@ -35,6 +38,8 @@ public class PipeBlockStateModel implements BlockStateModel, FabricBlockStateMod
 		this.renderers = renderers;
 	}
 
+	// Генерация квадов блока: для каждого установленного типа трубы рендерер
+	// рисует в emitter меши соединений на основе данных из BlockEntity.
 	@Override
 	public void emitQuads(QuadEmitter emitter, BlockAndTintGetter level, BlockPos pos, BlockState state,
 			RandomSource random, Predicate<Direction> cullTest) {
@@ -46,6 +51,8 @@ public class PipeBlockStateModel implements BlockStateModel, FabricBlockStateMod
 		int size = connections.size();
 		PipeEndpointType[][] renderedConnections = new PipeEndpointType[size][];
 		PipeNetworkType[] types = new PipeNetworkType[size];
+		// Мапа отсортирована по типу трубы: переносим соединения в массивы,
+		// чтобы рендерер мог обращаться к любому слоту за O(1).
 		int slot = 0;
 		for (Map.Entry<PipeNetworkType, PipeEndpointType[]> entry : connections.entrySet()) {
 			renderedConnections[slot] = entry.getValue();
@@ -54,12 +61,15 @@ public class PipeBlockStateModel implements BlockStateModel, FabricBlockStateMod
 		}
 		for (slot = 0; slot < size; slot++) {
 			PipeRenderer renderer = renderers.get(PipeRenderer.get(types[slot]));
+			// slot — логический слот трубы в блоке: 0 — центр, 1 — низ, 2 — верх.
 			if (renderer != null) {
 				renderer.draw(emitter, level, pos, slot, renderedConnections, types[slot].getColor(), be.getCustomData());
 			}
 		}
 	}
 
+	// Ключ кеша геометрии: зависит только от соединений BlockEntity, поэтому
+	// одинаковые наборы соединений переиспользуют один и тот же меш.
 	@Override
 	public Object createGeometryKey(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random) {
 		PipeBlockEntity be = getBlockEntity(level, pos);

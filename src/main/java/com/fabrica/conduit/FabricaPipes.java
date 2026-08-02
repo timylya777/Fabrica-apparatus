@@ -34,24 +34,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Registration of the pipe block, its block entity and all pipe types
- * (seven cable tiers, fluid pipes and item pipes).
+ * Реестр всех труб и кабелей мода. Отвечает за регистрацию:
+ * - блока трубы (PipeBlock) и его типа блок-сущности (BlockEntityType<PipeBlockEntity>);
+ * - двух типов труб (жидкостная и предметная) и семи уровней кабелей (медь -> сверхпроводник);
+ * - предметов-труб (PipeItem) для творческой вкладки и выдачи игроку;
+ * - значений "по умолчанию" (PipeNetworkData) для каждого типа сети.
+ * Регистрация происходит один раз в статическом инициализаторе, метод register()
+ * лишь защищает от повторного вызова.
  */
 public final class FabricaPipes {
 
+	// Ключ творческой вкладки, в которую добавляются все предметы-трубы.
 	private static final ResourceKey<CreativeModeTab> TAB = ResourceKey.create(
 		Registries.CREATIVE_MODE_TAB,
 		Identifier.withDefaultNamespace("ingredients")
 	);
 
+	// Данные сети по умолчанию для каждого типа трубы (используются при создании новой сети).
 	private static final Map<PipeNetworkType, PipeNetworkData> DEFAULT_DATA = new HashMap<>();
+	// Предмет-труба для каждого типа трубы (нужен для выдачи предмета игроку).
 	private static final Map<PipeNetworkType, PipeItem> PIPE_ITEMS = new HashMap<>();
+	// Флаг: true после первого вызова register(), защищает от повторной регистрации.
 	private static boolean registered = false;
 
+	// Публичные "хендлы" типов сетей: используются игровым кодом как ссылки на
+	// конкретный тип трубы/кабеля (например, для поиска сети в мире).
 	public static final PipeNetworkType FLUID_PIPE;
 	public static final PipeNetworkType ITEM_PIPE;
 
+	// Семь уровней электрических кабелей: чем выше тир, тем больше EU/тик.
 	public static final PipeNetworkType COPPER_CABLE;
+
 	public static final PipeNetworkType ALUMINUM_CABLE;
 	public static final PipeNetworkType GOLD_CABLE;
 	public static final PipeNetworkType ALUMINUM_EV_CABLE;
@@ -64,6 +77,8 @@ public final class FabricaPipes {
 	public static final BlockEntityType<PipeBlockEntity> BLOCK_ENTITY_TYPE;
 
 	static {
+		// Сначала регистрируем сам блок трубы и его блок-сущность,
+		// т.к. они общие для всех типов труб.
 		PIPE_BLOCK = registerPipeBlock();
 		BLOCK_ENTITY_TYPE = Registry.register(
 			BuiltInRegistries.BLOCK_ENTITY_TYPE,
@@ -71,9 +86,11 @@ public final class FabricaPipes {
 			new BlockEntityType<>(PipeBlockEntity::new, java.util.Set.of(PIPE_BLOCK))
 		);
 
+		// Затем — типы сетей: жидкостные, предметные и электрические кабели.
 		FLUID_PIPE = registerFluidPipe();
 		ITEM_PIPE = registerItemPipe();
 
+		// Каждый кабель регистрируется со своим тиром (CableTier), цветом и английским названием.
 		COPPER_CABLE = registerCable("Copper Cable", "copper_lv_cable", 0xB87333, CableTier.COPPER_LV);
 		ALUMINUM_CABLE = registerCable("Aluminum Cable", "aluminum_mv_cable", 0xC0C0C0, CableTier.ALUMINUM_MV);
 		GOLD_CABLE = registerCable("Gold Cable", "gold_hv_cable", 0xFFD700, CableTier.GOLD_HV);
@@ -83,6 +100,8 @@ public final class FabricaPipes {
 		SUPERCONDUCTOR_CABLE = registerCable("Superconductor Cable", "superconductor_cable", 0x00E5FF, CableTier.SUPERCONDUCTOR);
 	}
 
+	// Регистрирует тип жидкостной сети: фабрику FluidNetwork (с ёмкостью узла = 1 ведро),
+	// codec данных, фабрику узлов FluidNetworkNode и цвет трубы.
 	private static PipeNetworkType registerFluidPipe() {
 		PipeNetworkType type = PipeNetworkType.register(
 			FabricaMod.id("fluid_pipe"),
@@ -95,6 +114,7 @@ public final class FabricaPipes {
 		return type;
 	}
 
+	// Регистрирует тип предметной сети: фабрику ItemNetwork, codec данных и узел ItemNetworkNode.
 	private static PipeNetworkType registerItemPipe() {
 		PipeNetworkType type = PipeNetworkType.register(
 			FabricaMod.id("item_pipe"),
@@ -107,6 +127,8 @@ public final class FabricaPipes {
 		return type;
 	}
 
+	// Регистрирует электрический кабель с заданным тиром: сеть ElectricityNetwork,
+	// узел ElectricityNetworkNode, codec данных и цвет (металлический оттенок кабеля).
 	private static PipeNetworkType registerCable(String englishName, String id, int color, CableTier tier) {
 		PipeNetworkType type = PipeNetworkType.register(
 			FabricaMod.id(id),
@@ -119,6 +141,8 @@ public final class FabricaPipes {
 		return type;
 	}
 
+	// Создаёт предмет-трубу (PipeItem) для типа, регистрирует его в реестре предметов,
+	// кладёт в карты DEFAULT_DATA / PIPE_ITEMS и добавляет в творческую вкладку.
 	private static void registerItem(PipeNetworkType type, String englishName, String id, PipeNetworkData defaultData) {
 		Identifier identifier = FabricaMod.id(id);
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, identifier);
@@ -133,6 +157,7 @@ public final class FabricaPipes {
 			.register(output -> output.accept(item));
 	}
 
+	// Создаёт и регистрирует единый блок трубы (металлический, прочность 1.0).
 	private static PipeBlock registerPipeBlock() {
 		Identifier identifier = FabricaMod.id("pipe");
 		ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, identifier);
@@ -147,6 +172,8 @@ public final class FabricaPipes {
 		return block;
 	}
 
+	// Возвращает копию данных сети по умолчанию для заданного типа трубы.
+	// Возвращается КЛОН, чтобы сети не делили между собой одни и те же данные.
 	public static PipeNetworkData getDefaultData(PipeNetworkType type) {
 		PipeNetworkData data = DEFAULT_DATA.get(type);
 		if (data == null) {
@@ -155,6 +182,7 @@ public final class FabricaPipes {
 		return data.clone();
 	}
 
+	// Возвращает предмет-трубу для заданного типа (например, для выдачи игроку).
 	public static PipeItem getPipeItem(PipeNetworkType type) {
 		PipeItem item = PIPE_ITEMS.get(type);
 		if (item == null) {
@@ -163,6 +191,8 @@ public final class FabricaPipes {
 		return item;
 	}
 
+	// Точка входа регистрации: вся работа уже выполнена в статическом инициализаторе,
+	// этот метод только помечает класс зарегистрированным (защита от двойного вызова).
 	public static void register() {
 		// All registration happens in the static initializer above.
 		if (registered) {
@@ -171,6 +201,7 @@ public final class FabricaPipes {
 		registered = true;
 	}
 
+	// Запрещаем создание экземпляров: класс чисто статический.
 	private FabricaPipes() {
 	}
 }

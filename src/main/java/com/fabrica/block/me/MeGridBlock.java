@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
+// Блок ME-сетки: окно доступа к общей MeNetwork; собственного хранилища не имеет.
 public class MeGridBlock extends Block implements EntityBlock {
     public static final MapCodec<MeGridBlock> CODEC = simpleCodec(MeGridBlock::new);
 
@@ -26,6 +27,7 @@ public class MeGridBlock extends Block implements EntityBlock {
         return CODEC;
     }
 
+    // Клик по сетке открывает её GUI (только на сервере).
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {
