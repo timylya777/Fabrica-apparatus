@@ -1,0 +1,12 @@
+{
+    "type": "fabrica_apparatus:anvil",
+    "ingredients": [
+        "fabrica_apparatus:zinc_ingot"
+    ],
+    "result": {
+        "id": "fabrica_apparatus:zinc_plate",
+        "count": 1
+    },
+    "time": 200,
+    "damage": 1
+}

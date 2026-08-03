@@ -38,33 +38,35 @@ public class ModItems {
         return item;
     }
 
-    public static final Item IRON_FIGURE = register(
+    // «Человечки» для наковальни. Чем ценнее материал, тем больше прочность:
+    // глина 50, кирпич 100, медь 150, терракота 200, железо 300.
+    public static final FigureItem IRON_FIGURE = register(
         "iron_figure",
-        properties -> new Item(properties.stacksTo(1)),
+        properties -> new FigureItem(properties, 5, 300),
         CreativeTabs.MAIN_TAB
     );
 
-    public static final Item BRICK_FIGURE = register(
+    public static final FigureItem BRICK_FIGURE = register(
         "brick_figure",
-        properties -> new Item(properties.stacksTo(1)),
+        properties -> new FigureItem(properties, 2, 100),
         CreativeTabs.MAIN_TAB
     );
 
-    public static final Item CLAY_FIGURE = register(
+    public static final FigureItem CLAY_FIGURE = register(
         "clay_figure",
-        properties -> new Item(properties.stacksTo(1)),
+        properties -> new FigureItem(properties, 1, 50),
         CreativeTabs.MAIN_TAB
     );
 
-    public static final Item COPPER_FIGURE = register(
+    public static final FigureItem COPPER_FIGURE = register(
         "copper_figure",
-        properties -> new Item(properties.stacksTo(1)),
+        properties -> new FigureItem(properties, 3, 150),
         CreativeTabs.MAIN_TAB
     );
 
-    public static final Item TERRACOTTA_FIGURE = register(
+    public static final FigureItem TERRACOTTA_FIGURE = register(
         "terracotta_figure",
-        properties -> new Item(properties.stacksTo(1)),
+        properties -> new FigureItem(properties, 4, 200),
         CreativeTabs.MAIN_TAB
     );
 

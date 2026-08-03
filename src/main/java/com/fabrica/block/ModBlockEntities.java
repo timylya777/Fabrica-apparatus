@@ -1,6 +1,7 @@
 package com.fabrica.block;
 
 import com.fabrica.FabricaMod;
+import com.fabrica.block.machine.anvil.AnvilBlockEntity;
 import com.fabrica.block.machine.furnace.ElectricFurnaceBlockEntity;
 import com.fabrica.block.machine.generator.GeneratorBlockEntity;
 import com.fabrica.block.machine.macerator.MaceratorBlockEntity;
@@ -34,6 +35,13 @@ public final class ModBlockEntities {
         BuiltInRegistries.BLOCK_ENTITY_TYPE,
         FabricaMod.id("macerator"),
         new BlockEntityType<>(MaceratorBlockEntity::new, Set.of(ModBlocks.MACERATOR))
+    );
+
+    // Наковальня: куёт пластины с помощью «человечков».
+    public static final BlockEntityType<AnvilBlockEntity> ANVIL = Registry.register(
+        BuiltInRegistries.BLOCK_ENTITY_TYPE,
+        FabricaMod.id("anvil"),
+        new BlockEntityType<>(AnvilBlockEntity::new, Set.of(ModBlocks.ANVIL))
     );
 
     // Дисковод ME: хранит диски и предоставляет MeStorage.

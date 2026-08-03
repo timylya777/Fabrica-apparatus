@@ -4,6 +4,7 @@ import com.fabrica.CreativeTabs;
 import com.fabrica.FabricaMod;
 import com.fabrica.api.energy.EnergyTier;
 import com.fabrica.block.machine.furnace.ElectricFurnaceBlock;
+import com.fabrica.block.machine.anvil.AnvilBlock;
 import com.fabrica.block.machine.generator.GeneratorBlock;
 import com.fabrica.block.machine.macerator.MaceratorBlock;
 import com.fabrica.block.me.MeDriveBlock;
@@ -207,6 +208,16 @@ public class ModBlocks {
         2000,
         EnergyTier.LV,
         8
+    );
+
+    // Наковальня: куёт пластины с помощью «человечков» (фигурок-рабочих).
+    public static final AnvilBlock ANVIL = registerBlock(
+        "anvil",
+        BlockBehaviour.Properties.of()
+                .strength(5.0F)
+                .sound(SoundType.METAL),
+        CreativeTabs.MAIN_TAB,
+        AnvilBlock::new
     );
 
     // Дисковод ME: хранилище дисков.

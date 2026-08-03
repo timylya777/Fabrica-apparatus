@@ -40,6 +40,12 @@ public final class ModMenus {
         new MenuType<>(MeGridMenu::new, FeatureFlags.VANILLA_SET)
     );
 
+    public static final MenuType<AnvilMenu> ANVIL = Registry.register(
+        BuiltInRegistries.MENU,
+        FabricaMod.id("anvil"),
+        new MenuType<>(AnvilMenu::new, FeatureFlags.VANILLA_SET)
+    );
+
     public static final MenuType<ItemPipeSettingsMenu> ITEM_PIPE_SETTINGS = Registry.register(
         BuiltInRegistries.MENU,
         FabricaMod.id("item_pipe_settings"),

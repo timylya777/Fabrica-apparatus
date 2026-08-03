@@ -1,0 +1,4 @@
+{
+    "textures": { "all": "fabrica_apparatus:block/anvil" },
+    "parent": "minecraft:block/cube_all"
+}

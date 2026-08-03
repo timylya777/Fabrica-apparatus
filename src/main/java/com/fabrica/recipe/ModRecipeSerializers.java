@@ -22,6 +22,12 @@ public final class ModRecipeSerializers {
                     ByteBufCodecs.fromCodecWithRegistries(AlloyingRecipe.CODEC.codec()))
     );
 
+    public static final RecipeSerializer<AnvilRecipe> ANVIL = register(
+            "anvil",
+            new RecipeSerializer<>(AnvilRecipe.CODEC,
+                    ByteBufCodecs.fromCodecWithRegistries(AnvilRecipe.CODEC.codec()))
+    );
+
     private static <T extends Recipe<?>> RecipeSerializer<T> register(String id, RecipeSerializer<T> serializer) {
         return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, FabricaMod.id(id), serializer);
     }

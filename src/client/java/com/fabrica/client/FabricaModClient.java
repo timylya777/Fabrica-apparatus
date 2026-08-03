@@ -1,5 +1,6 @@
 package com.fabrica.client;
 
+import com.fabrica.client.gui.AnvilScreen;
 import com.fabrica.client.gui.ElectricFurnaceScreen;
 import com.fabrica.client.gui.GeneratorScreen;
 import com.fabrica.client.gui.ItemPipeSettingsScreen;
@@ -45,6 +46,7 @@ public class FabricaModClient implements ClientModInitializer {
 		MenuScreens.register(ModMenus.MACERATOR, MaceratorScreen::new);
 		MenuScreens.register(ModMenus.ME_DRIVE, MeDriveScreen::new);
 		MenuScreens.register(ModMenus.ME_GRID, MeGridScreen::new);
+		MenuScreens.register(ModMenus.ANVIL, AnvilScreen::new);
 		MenuScreens.register(ModMenus.ITEM_PIPE_SETTINGS, ItemPipeSettingsScreen::new);
 		CustomUnbakedBlockStateModel.register(PipeUnbakedModel.TYPE_ID, PipeUnbakedModel.CODEC);
 		InvalidateRenderStateCallback.EVENT.register(PipeMeshCache::clearAll);

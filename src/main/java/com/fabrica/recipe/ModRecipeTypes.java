@@ -12,6 +12,7 @@ public final class ModRecipeTypes {
 
     public static final RecipeType<MaceratingRecipe> MACERATING = register("macerating");
     public static final RecipeType<AlloyingRecipe> ALLOYING = register("alloying");
+    public static final RecipeType<AnvilRecipe> ANVIL = register("anvil");
 
     // Категория для книги рецептов (машины не используют книгу, но тип обязателен).
     public static final RecipeBookCategory MACHINE_CATEGORY = Registry.register(
