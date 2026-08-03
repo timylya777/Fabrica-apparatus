@@ -1,0 +1,111 @@
+Now I have a complete picture. Here's the **coding plan** for Fabrica-apparatus, noting what's already implemented:
+
+---
+
+## ✅ Already Implemented
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| **Energy System** | ✅ Core done | `FabricaEnergy`, 8 tiers (LV→UV), cables (Cu/Al/Au/Pt/W/Super) |
+| **Pipes/Conduits** | ✅ Full network | Fluid, Item, ME, Electricity — BFS networks, shaped models, whitelist/blacklist |
+| **Industrial Machines** | ✅ 3 machines | Generator (4000/LV/100), Electric Furnace (2000/LV/20), Macerator (2000/LV/8) |
+| **Processing Chains** | ✅ Base | Macerating (ore→2×dust), Smelting (dust→ingot), Alloying (Cu+Sn→4×Bronze) |
+| **Ore Generation** | ✅ GT-style veins | 7 vein configs (Cu/Sn/Pb/Al/Ni/Ag/Zn), Y-ranges, ellipse shape, stone/deepslate replaceables |
+| **Materials** | ✅ 8 metals | Cu, Sn, Pb, Al, Ni, Ag, Zn, Bronze — ingots/dusts/plates (24 items) |
+| **ME Storage** | ✅ Core | Drives (8 slots), Grids (terminal), 3 disk tiers (64k/256k/1024k), NBT-based |
+| **Custom Recipes** | ✅ Types/serializers | `macerating`, `alloying` + JSON format, recipe book category |
+| **Creative Tab** | ✅ | Custom tab with all items/blocks |
+| **Worldgen Data** | ✅ | Loot tables, recipes, vein configured/placed features |
+
+---
+
+## 📋 Planned Features — Implementation Plan
+
+### Phase 1: Machine Expansion (Industrial Machines)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Compressor** | High | Plate crafting (4 ingots→plate) + compressed blocks; 2000/LV/15 |
+| **Extractor** | High | Fluid extraction (e.g., latex, oil); needs fluid API |
+| **Chemical Reactor** | Medium | Multi-fluid recipes; gas support later |
+| **Assembler** | Medium | Multi-slot crafting (circuits, components) |
+| **Rolling Mill** | Medium | Ingot→Plate more efficiently; byproducts (nuggets) |
+| **Wire Mill** | Medium | Plate→Wire (cable component); requires wire item |
+| **Bending Machine** | Low | Wire→Coil/Component for higher-tier machines |
+
+### Phase 2: Energy System Depth (⚡)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Transformers (LV→MV→HV…)** | High | Up/down transform blocks; 2×/4× voltage; loss % |
+| **Battery Box / Energy Storage** | High | Multi-block or single-block; tiered capacity |
+| **Solar Panel (LV)** | Medium | Daylight detector + output; weather/tick based |
+| **Steam Turbine (MV+)** | Medium | Boiler + turbine multiblock; fluid→EU |
+| **Nuclear Reactor (HV+)** | Low | IC2/GT-style; fuel rods, heat, coolant |
+
+### Phase 3: Mechanical Components (🔩)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Gears (Wood/Iron/Steel/Titanium)** | High | Crafting components; durability/tier |
+| **Plates (already have) → Sheets / Foils** | Medium | Thinner variants for circuits |
+| **Wires (Copper/Tin/Gold/Silver/Superconductor)** | High | Cable sub-components; insulation tiers |
+| **Circuits (Basic/Advanced/Elite/Ultimate)** | High | Multi-tier; used in machine recipes |
+| **Machine Casings (Bronze/Steel/Titanium/Chrome)** | Medium | Tiered machine frames; blast resistance |
+
+### Phase 4: Automation & Logistics (🚂)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Item Pipe Filters: NBT/Tag/Regex** | High | Current whitelist/blacklist → add tag (`#forge:ingots`) & NBT match |
+| **Fluid Pipe: Gas support** | Medium | Separate gas network or unified |
+| **Universal Pipe (Item+Fluid+Energy)** | Medium | Single block, 3 channels; expensive |
+| **Auto-crafting Table (ME-linked)** | High | ME Grid → pattern → crafting → output |
+| **Logistics Bus (Import/Export/Interface)** | Medium | Connect chests/inventories to ME |
+| **Wireless Transmitter (Energy/Items)** | Low | Ender-based; chunkloaded |
+
+### Phase 5: Storage Solutions (📦)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Mass Storage Drive (1M/10M/100M)** | High | Larger disk tiers; creative disk |
+| **ME Chest / Interface Block** | Medium | Direct inventory access without terminal |
+| **Fluid Storage (Tank + ME Fluid Disk)** | Medium | Fluid→ME integration |
+| **Quantum Chest (cross-dim)** | Low | Linked storage pairs |
+
+### Phase 6: Processing Chains Expansion (🧪)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Ore Washing Plant** | High | Crushed ore → purified + byproducts (tiny dusts) |
+| **Thermal Centrifuge** | High | Purified ore → dusts + rare byproducts (gold, platinum) |
+| **Electrolyzer** | Medium | Dust → elements (H, O, Cl, etc.); fluid output |
+| **Chemical Bath** | Medium | Leaching, pickling recipes |
+| **Distillation Tower** | Medium | Multi-fluid separation (oil→fuel+gas+residue) |
+
+### Phase 7: Multiblocks & Late Game (🏭)
+| Task | Priority | Notes |
+|------|----------|-------|
+| **Large Steam Boiler (3×3×4+)** | High | Multi-block; water→steam; fuel slots |
+| **Industrial Blast Furnace (3×3×4)** | High | Steel, alloys; requires heat + carbon |
+| **EBF / Vacuum Freezer (GT-style)** | Medium | Special alloys, cooled circuits |
+| **Fusion Reactor (endgame)** | Low | D-T fuel; plasma; magnetic containment |
+
+### Phase 8: Quality of Life & Polish
+| Task | Priority | Notes |
+|------|----------|-------|
+| **JEI Integration (all recipe types)** | High | `RecipeCategory` + `RecipeWrapper` for macerating/alloying |
+| **Tool Tips: EU/t, capacity, tier** | Medium | `appendHoverText` on machines/items |
+| **Config File (disable features, tweak numbers)** | Medium | Forge config or Cloth Config |
+| **Advancement Tree** | Low | Progression guide |
+| **Sound Events (machines, pipes)** | Low | Custom `.ogg` + sound definitions |
+
+---
+
+## ❓ Clarifying Questions
+
+1. **Scope per Phase** — Do you want to tackle Phase 1 (more machines) next, or Phase 2 (transformers/batteries) first? Transformers unblock higher-tier machines.
+
+2. **GregTech vs MI Balance** — You chose MI-safe voltage (no explosions). Keep that for transformers too (just downgrade on overvoltage), or add GT-style explosions as config option?
+
+3. **Fluid System** — Extractor/Chemical Reactor need fluid registry. Use Fabric's `FluidVariant` API or add custom fluid JSONs? Current `FluidNetwork` uses `FluidConstants.BUCKET` — extendable.
+
+4. **Multiblock Framework** — Build a generic `MultiblockController` + pattern JSON (like GTCEu), or hand-code each? Generic = more upfront work, faster later.
+
+5. **JEI** — Add now (helps testing) or batch later?
+
+6. **Config** — Want a `fabrica_apparatus-common.toml` (Forge config) or Cloth Config (client + server)?
