@@ -1,25 +1,15 @@
-﻿{
+{
     "config":  {
                    "veins":  [
-                                 {
-                                     "weight":  5,
-                                     "id":  "copper_vein",
-                                     "primary":  "copper_ore",
-                                     "max_y":  60,
-                                     "around":  "silver_ore",
-                                     "secondary":  "tin_ore",
-                                     "radius":  13,
-                                     "min_y":  10
-                                 },
-                                 {
-                                     "id":  "tin_vein",
-                                     "max_y":  55,
-                                     "radius":  12,
-                                     "min_y":  10,
-                                     "secondary":  "copper_ore",
-                                     "weight":  4,
-                                     "primary":  "tin_ore"
-                                 },
+                                  {
+                                       "id":  "tin_vein",
+                                       "max_y":  55,
+                                       "radius":  12,
+                                       "min_y":  10,
+                                       "secondary":  "",
+                                       "weight":  3,
+                                       "primary":  "tin_ore"
+                                   },
                                  {
                                      "weight":  3,
                                      "id":  "lead_vein",
@@ -31,24 +21,24 @@
                                      "min_y":  0
                                  },
                                  {
-                                     "weight":  4,
-                                     "id":  "aluminum_vein",
-                                     "primary":  "aluminum_ore",
-                                     "max_y":  70,
-                                     "around":  "tin_ore",
-                                     "secondary":  "zinc_ore",
-                                     "radius":  12,
-                                     "min_y":  20
-                                 },
+                                      "weight":  6,
+                                      "id":  "aluminum_vein",
+                                      "primary":  "aluminum_ore",
+                                      "max_y":  55,
+                                      "around":  "tin_ore",
+                                      "secondary":  "zinc_ore",
+                                      "radius":  12,
+                                      "min_y":  10
+                                  },
                                  {
-                                     "id":  "nickel_vein",
-                                     "max_y":  32,
-                                     "radius":  10,
-                                     "min_y":  0,
-                                     "secondary":  "lead_ore",
-                                     "weight":  2,
-                                     "primary":  "nickel_ore"
-                                 },
+                                      "id":  "nickel_vein",
+                                      "max_y":  40,
+                                      "radius":  12,
+                                      "min_y":  0,
+                                      "secondary":  "lead_ore",
+                                      "weight":  6,
+                                      "primary":  "nickel_ore"
+                                  },
                                  {
                                      "weight":  2,
                                      "id":  "silver_vein",

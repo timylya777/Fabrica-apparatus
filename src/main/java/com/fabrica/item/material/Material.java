@@ -4,7 +4,9 @@ package com.fabrica.item.material;
 // hasOre — существует ли блок руды этого материала,
 // color — базовый цвет (ARGB) для текстур и иконок.
 public enum Material {
-    COPPER("copper", true, 0xC8783C),
+    // Медь — false: руда уже есть в ванильном Minecraft (copper_ore).
+    // Мод использует ванильную медную руду для своих предметов.
+    COPPER("copper", false, 0xC8783C),
     TIN("tin", true, 0xCFCFCF),
     LEAD("lead", true, 0x5F5FA8),
     ALUMINUM("aluminum", true, 0xC8C8D0),
