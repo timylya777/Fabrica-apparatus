@@ -4,6 +4,7 @@ import com.fabrica.block.FabricaBlockEntity;
 import com.fabrica.block.ModBlockEntities;
 import com.fabrica.gui.MeGridMenu;
 import com.fabrica.me.MeNetwork;
+import com.fabrica.me.MeNetworkConnector;
 import com.fabrica.me.MeNetworkNode;
 import com.fabrica.me.MeNetworkStorage;
 import com.fabrica.me.MePackets;
@@ -19,7 +20,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 // Сущность ME-сетки: подключается к глобальной MeNetwork по своей позиции.
-public class MeGridBlockEntity extends FabricaBlockEntity implements MenuProvider, MeNetworkNode {
+// Помечена как коннектор: во время обхода сети её хранилище не опрашивается,
+// чтобы два соседних монитора не вызывали рекурсию друг через друга.
+public class MeGridBlockEntity extends FabricaBlockEntity implements MenuProvider, MeNetworkNode, MeNetworkConnector {
 
     public MeGridBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ME_GRID, pos, state);

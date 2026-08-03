@@ -40,7 +40,31 @@ public class ModItems {
 
     public static final Item IRON_FIGURE = register(
         "iron_figure",
-        Item::new,
+        properties -> new Item(properties.stacksTo(1)),
+        CreativeTabs.MAIN_TAB
+    );
+
+    public static final Item BRICK_FIGURE = register(
+        "brick_figure",
+        properties -> new Item(properties.stacksTo(1)),
+        CreativeTabs.MAIN_TAB
+    );
+
+    public static final Item CLAY_FIGURE = register(
+        "clay_figure",
+        properties -> new Item(properties.stacksTo(1)),
+        CreativeTabs.MAIN_TAB
+    );
+
+    public static final Item COPPER_FIGURE = register(
+        "copper_figure",
+        properties -> new Item(properties.stacksTo(1)),
+        CreativeTabs.MAIN_TAB
+    );
+
+    public static final Item TERRACOTTA_FIGURE = register(
+        "terracotta_figure",
+        properties -> new Item(properties.stacksTo(1)),
         CreativeTabs.MAIN_TAB
     );
 
@@ -52,25 +76,25 @@ public class ModItems {
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_BASIC = register(
         "me_storage_disk_basic",
-        properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.BASIC),
+        properties -> new MeStorageDiskItem(properties.stacksTo(1), MeStorageDiskTier.BASIC),
         CreativeTabs.MAIN_TAB
     );
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_ADVANCED = register(
         "me_storage_disk_advanced",
-        properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.ADVANCED),
+        properties -> new MeStorageDiskItem(properties.stacksTo(1), MeStorageDiskTier.ADVANCED),
         CreativeTabs.MAIN_TAB
     );
 
     public static final MeStorageDiskItem ME_STORAGE_DISK_ELITE = register(
         "me_storage_disk_elite",
-        properties -> new MeStorageDiskItem(properties, MeStorageDiskTier.ELITE),
+        properties -> new MeStorageDiskItem(properties.stacksTo(1), MeStorageDiskTier.ELITE),
         CreativeTabs.MAIN_TAB
     );
 
     public static final KeyItem KEY = register(
         "key",
-        KeyItem::new,
+        properties -> new KeyItem(properties.stacksTo(1)),
         CreativeTabs.MAIN_TAB
     );
 
