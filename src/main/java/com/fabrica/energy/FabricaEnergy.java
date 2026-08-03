@@ -4,6 +4,7 @@ import com.fabrica.api.energy.EnergyApiLookup;
 import com.fabrica.block.ModBlockEntities;
 import com.fabrica.block.machine.furnace.ElectricFurnaceBlockEntity;
 import com.fabrica.block.machine.generator.GeneratorBlockEntity;
+import com.fabrica.block.machine.macerator.MaceratorBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -43,6 +44,16 @@ public final class FabricaEnergy {
             ModBlockEntities.ELECTRIC_FURNACE
         );
 
+        // Мацератор — потребитель энергии.
+        EnergyApiLookup.CONSUMER.registerForBlockEntity(
+            (be, dir) -> be.getEnergyConsumer(),
+            ModBlockEntities.MACERATOR
+        );
+        EnergyApiLookup.CONTAINER.registerForBlockEntity(
+            (be, dir) -> be.getEnergyContainer(),
+            ModBlockEntities.MACERATOR
+        );
+
         // Генератор: инвентарь топлива как ItemStorage.
         ItemStorage.SIDED.registerForBlockEntity(
             (GeneratorBlockEntity be, net.minecraft.core.Direction dir) -> ContainerStorage.of(be.getFuelInventory(), dir),
@@ -57,6 +68,16 @@ public final class FabricaEnergy {
                 return new CombinedStorage<>(List.of(input, output));
             },
             ModBlockEntities.ELECTRIC_FURNACE
+        );
+
+        // Мацератор: вход и выход как ItemStorage (для подачи руды трубами).
+        ItemStorage.SIDED.registerForBlockEntity(
+            (MaceratorBlockEntity be, net.minecraft.core.Direction dir) -> {
+                Storage<ItemVariant> input = ContainerStorage.of(be.getInputInventory(), dir);
+                Storage<ItemVariant> output = ContainerStorage.of(be.getOutputInventory(), dir);
+                return new CombinedStorage<>(List.of(input, output));
+            },
+            ModBlockEntities.MACERATOR
         );
     }
 

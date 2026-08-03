@@ -1,8 +1,10 @@
 ﻿{
     "time":  200,
     "ingredients":  [
-                        "fabrica_apparatus:silver_ore",
-                        "fabrica_apparatus:deepslate_silver_ore"
+                        [
+                            "fabrica_apparatus:silver_ore",
+                            "fabrica_apparatus:deepslate_silver_ore"
+                        ]
                     ],
     "result":  {
                    "id":  "fabrica_apparatus:silver_dust",
