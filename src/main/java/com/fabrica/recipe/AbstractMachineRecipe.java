@@ -54,7 +54,7 @@ public abstract class AbstractMachineRecipe implements Recipe<ProcessingInput> {
 
     @Override
     public PlacementInfo placementInfo() {
-        return PlacementInfo.NOT_PLACEABLE;
+        return PlacementInfo.create(ingredients);
     }
 
     public List<Ingredient> getIngredientsList() {
